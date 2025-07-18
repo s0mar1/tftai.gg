@@ -5,10 +5,53 @@
 import { buildVariableMap, formatValuesByStar } from '../../../shared/src/tooltipParser';
 
 // ==========================================================
+//                        타입 정의
+// ==========================================================
+
+interface AbilityVariable {
+  name: string;
+  value: number[];
+}
+
+interface ChampionAbility {
+  name: string;
+  desc: string;
+  icon: string;
+  variables: AbilityVariable[];
+}
+
+interface ChampionStats {
+  mana: number;
+  initialMana: number;
+  damage: number;
+  health: number;
+  armor: number;
+  magicResist: number;
+  attackSpeed: number;
+  range: number;
+}
+
+interface ChampionData {
+  apiName: string;
+  ability: ChampionAbility;
+  stats: ChampionStats;
+}
+
+interface TooltipResult {
+  name: string;
+  mana: string;
+  description: string;
+  values: Array<{
+    label: string;
+    value: string;
+  }>;
+}
+
+// ==========================================================
 //                        헬퍼 함수
 // ==========================================================
 
-function createFormattedValue(varMap: Map<string, any>, key: string, prefix: string = '', isPercent: boolean = true): string | null {
+function createFormattedValue(varMap: Map<string, AbilityVariable>, key: string, prefix: string = '', isPercent: boolean = true): string | null {
     const lowerKey = key.toLowerCase();
     if (!varMap.has(lowerKey)) return null;
     const values = varMap.get(lowerKey).value;
@@ -20,7 +63,7 @@ function createFormattedValue(varMap: Map<string, any>, key: string, prefix: str
 //                      기본 템플릿
 // ==========================================================
 
-function defaultTemplate(championData) {
+function defaultTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
 
     // 💡 안전장치 추가: ability 또는 ability.desc가 없을 경우를 대비
@@ -50,7 +93,7 @@ function defaultTemplate(championData) {
 //                 챔피언별 커스텀 템플릿 목록
 // ==========================================================
 
-function seraphineTemplate(championData) {
+function seraphineTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -61,7 +104,7 @@ function seraphineTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function zedTemplate(championData) {
+function zedTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -72,7 +115,7 @@ function zedTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function kindredTemplate(championData) {
+function kindredTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -87,7 +130,7 @@ function kindredTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values };
 }
 
-function nidaleeTemplate(championData) {
+function nidaleeTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -103,7 +146,7 @@ function nidaleeTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function morganaTemplate(championData) {
+function morganaTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -113,7 +156,7 @@ function morganaTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function drMundoTemplate(championData) {
+function drMundoTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -128,7 +171,7 @@ function drMundoTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values };
 }
 
-function viTemplate(championData) {
+function viTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -142,7 +185,7 @@ function viTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function poppyTemplate(championData) {
+function poppyTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -158,7 +201,7 @@ function poppyTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function sylasTemplate(championData) {
+function sylasTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -171,7 +214,7 @@ function sylasTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function shacoTemplate(championData) {
+function shacoTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -185,7 +228,7 @@ function shacoTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function alistarTemplate(championData) {
+function alistarTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -213,7 +256,7 @@ function alistarTemplate(championData) {
 /**
  * 자이라(Zyra)를 위한 커스텀 템플릿
  */
-function zyraTemplate(championData) {
+function zyraTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -241,7 +284,7 @@ function zyraTemplate(championData) {
 /**
  * 잭스(Jax)를 위한 커스텀 템플릿
  */
-function jaxTemplate(championData) {
+function jaxTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -269,7 +312,7 @@ function jaxTemplate(championData) {
 /**
  * 코그모(KogMaw)를 위한 커스텀 템플릿
  */
-function kogmawTemplate(championData) {
+function kogmawTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -300,7 +343,7 @@ function kogmawTemplate(championData) {
 /**
  * 그레이브즈(Graves)를 위한 커스텀 템플릿
  */
-function gravesTemplate(championData) {
+function gravesTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -327,7 +370,7 @@ function gravesTemplate(championData) {
 /**
  * 나피리(Naafiri)를 위한 커스텀 템플릿
  */
-function naafiriTemplate(championData) {
+function naafiriTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -350,7 +393,7 @@ function naafiriTemplate(championData) {
 /**
  * 다리우스(Darius)를 위한 커스텀 템플릿
  */
-function dariusTemplate(championData) {
+function dariusTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -377,7 +420,7 @@ function dariusTemplate(championData) {
 /**
  * 라아스트(Rhaast)를 위한 커스텀 템플릿
  */
-function rhaastTemplate(championData) {
+function rhaastTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -397,7 +440,7 @@ function rhaastTemplate(championData) {
 /**
  * 르블랑(LeBlanc)를 위한 커스텀 템플릿
  */
-function leblancTemplate(championData) {
+function leblancTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -414,7 +457,7 @@ function leblancTemplate(championData) {
 /**
  * 베이가(Veigar)를 위한 커스텀 템플릿
  */
-function veigarTemplate(championData) {
+function veigarTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -433,7 +476,7 @@ function veigarTemplate(championData) {
 /**
  * 베인(Vayne)를 위한 커스텀 템플릿
  */
-function vayneTemplate(championData) {
+function vayneTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -449,7 +492,7 @@ function vayneTemplate(championData) {
     
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
-function shyvanaTemplate(championData) {
+function shyvanaTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -473,7 +516,7 @@ function shyvanaTemplate(championData) {
 /**
  * 스카너(Skarner)를 위한 커스텀 템플릿
  */
-function skarnerTemplate(championData) {
+function skarnerTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -494,7 +537,7 @@ function skarnerTemplate(championData) {
 /**
  * 에코(Ekko)를 위한 커스텀 템플릿
  */
-function ekkoTemplate(championData) {
+function ekkoTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -510,7 +553,7 @@ function ekkoTemplate(championData) {
 /**
  * 일라오이(Illaoi)를 위한 커스텀 템플릿
  */
-function illaoiTemplate(championData) {
+function illaoiTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -528,7 +571,7 @@ function illaoiTemplate(championData) {
 /**
  * 진(Jhin)를 위한 커스텀 템플릿
  */
-function jhinTemplate(championData) {
+function jhinTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -548,7 +591,7 @@ function jhinTemplate(championData) {
 /**
  * 트위스티드 페이트(Twisted Fate)를 위한 커스텀 템플릿
  */
-function twistedFateTemplate(championData) {
+function twistedFateTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -565,7 +608,7 @@ function twistedFateTemplate(championData) {
 /**
  * 갈리오(Galio)를 위한 커스텀 템플릿
  */
-function galioTemplate(championData) {
+function galioTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -584,7 +627,7 @@ function galioTemplate(championData) {
 /**
  * 그라가스(Gragas)를 위한 커스텀 템플릿
  */
-function gragasTemplate(championData) {
+function gragasTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -599,7 +642,7 @@ function gragasTemplate(championData) {
 
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
-function dravenTemplate(championData) {
+function dravenTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -611,7 +654,7 @@ function dravenTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function rengarTemplate(championData) {
+function rengarTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -624,7 +667,7 @@ function rengarTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function mordekaiserTemplate(championData) {
+function mordekaiserTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -636,7 +679,7 @@ function mordekaiserTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function varusTemplate(championData) {
+function varusTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -648,7 +691,7 @@ function varusTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function braumTemplate(championData) {
+function braumTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -667,7 +710,7 @@ function braumTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function sennaTemplate(championData) {
+function sennaTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -679,7 +722,7 @@ function sennaTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function eliseTemplate(championData) {
+function eliseTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -692,7 +735,7 @@ function eliseTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function yuumiTemplate(championData) {
+function yuumiTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -704,7 +747,7 @@ function yuumiTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function jarvanTemplate(championData) {
+function jarvanTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -719,7 +762,7 @@ function jarvanTemplate(championData) {
     values.push({ label: '방어력 감소', value: createFormattedValue(varMap, 'FlatArmorReduction', '', false) });
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
-function jinxTemplate(championData) {
+function jinxTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -731,7 +774,7 @@ function jinxTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function fiddlesticksTemplate(championData) {
+function fiddlesticksTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -744,7 +787,7 @@ function fiddlesticksTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function neekoTemplate(championData) {
+function neekoTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -758,7 +801,7 @@ function neekoTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function leonaTemplate(championData) {
+function leonaTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -772,7 +815,7 @@ function leonaTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function missFortuneTemplate(championData) {
+function missFortuneTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -787,7 +830,7 @@ function missFortuneTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function vexTemplate(championData) {
+function vexTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -800,7 +843,7 @@ function vexTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function brandTemplate(championData) {
+function brandTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -812,7 +855,7 @@ function brandTemplate(championData) {
     values.push({ label: '2차 피해량', value: createFormattedValue(varMap, 'SecondaryAPDamage', '주문력의') });
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
-function sejuaniTemplate(championData) {
+function sejuaniTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -824,7 +867,7 @@ function sejuaniTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function apheliosTemplate(championData) {
+function apheliosTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -836,7 +879,7 @@ function apheliosTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function annieTemplate(championData) {
+function annieTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -851,7 +894,7 @@ function annieTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function xayahTemplate(championData) {
+function xayahTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -864,7 +907,7 @@ function xayahTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function zeriTemplate(championData) {
+function zeriTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -877,7 +920,7 @@ function zeriTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function ziggsTemplate(championData) {
+function ziggsTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -888,7 +931,7 @@ function ziggsTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function chogathTemplate(championData) {
+function chogathTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -901,7 +944,7 @@ function chogathTemplate(championData) {
     values.push({ label: '체력', value: `${healthAp} + ${healthHp}` });
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
-function garenTemplate(championData) {
+function garenTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -915,7 +958,7 @@ function garenTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function renektonTemplate(championData) {
+function renektonTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -929,7 +972,7 @@ function renektonTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function viegoTemplate(championData) {
+function viegoTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -940,7 +983,7 @@ function viegoTemplate(championData) {
     return { name: ability.name, mana: `${stats.initialMana}/${stats.mana}`, description, values: values.filter(v => v.value) };
 }
 
-function samiraTemplate(championData) {
+function samiraTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -956,7 +999,7 @@ function samiraTemplate(championData) {
 /**
  * 자크(Zac)를 위한 커스텀 템플릿
  */
-function zacTemplate(championData) {
+function zacTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -993,7 +1036,7 @@ function zacTemplate(championData) {
 /**
  * 우르곳(Urgot)을 위한 커스텀 템플릿
  */
-function urgotTemplate(championData) {
+function urgotTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -1018,7 +1061,7 @@ function urgotTemplate(championData) {
 /**
  * 코부코(Kobuko)를 위한 커스텀 템플릿
  */
-function kobukoTemplate(championData) {
+function kobukoTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -1041,7 +1084,7 @@ function kobukoTemplate(championData) {
 /**
  * 오로라(Aurora)를 위한 커스텀 템플릿
  */
-function auroraTemplate(championData) {
+function auroraTemplate(championData: ChampionData): TooltipResult {
     const { ability, stats } = championData;
     const varMap = buildVariableMap(ability.variables);
     const values = [];
@@ -1057,7 +1100,7 @@ function auroraTemplate(championData) {
 // ==========================================================
 //                 템플릿 등록
 // ==========================================================
-const templates = {
+const templates: Record<string, (championData: ChampionData) => TooltipResult> = {
     'TFT14_Jinx': jinxTemplate,
     'TFT14_Fiddlesticks': fiddlesticksTemplate,
     'TFT14_Neeko': neekoTemplate,
@@ -1123,9 +1166,9 @@ const templates = {
 // ==========================================================
 //                 메인 함수
 // ==========================================================
-export function generateTooltip(championData) {
+export function generateTooltip(championData: ChampionData): TooltipResult {
     if (!championData || !championData.apiName) {
-        return { name: '알 수 없는 챔피언', description: '챔피언 데이터가 올바르지 않습니다.', values: [] };
+        return { name: '알 수 없는 챔피언', mana: '0/0', description: '챔피언 데이터가 올바르지 않습니다.', values: [] };
     }
     const template = templates[championData.apiName] || defaultTemplate;
     try {

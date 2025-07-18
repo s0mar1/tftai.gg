@@ -1,6 +1,9 @@
 /**
  * 서버 초기화 설정
  * 서버 시작 시 각 단계별 타임아웃, 재시도 횟수 등을 설정합니다.
+ * 
+ * 역할: 초기화 프로세스의 상수와 설정값 정의
+ * 사용: initialization/coreModules.ts에서 초기화 프로세스 제어 시 사용
  */
 
 export const INITIALIZATION_CONFIG = {

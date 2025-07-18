@@ -94,7 +94,9 @@ export const useMatchHistory = (region: string, puuid: string, options: UseQuery
   return useQuery<MatchHistoryApiResponse>({
     queryKey: ['matches', region, puuid],
     queryFn: async () => {
-      console.log('useMatchHistory: API 호출 시작:', { region, puuid });
+      if (import.meta.env.DEV) {
+        console.log('useMatchHistory: API 호출 시작:', { region });
+      }
       
       try {
         // 백엔드는 { matches: [...], pagination: {...}, filters: {...} } 구조로 응답
@@ -104,30 +106,34 @@ export const useMatchHistory = (region: string, puuid: string, options: UseQuery
           filters: any;
         }>(`/api/matches?region=${region}&puuid=${puuid}`);
         
-        console.log('useMatchHistory: API 응답 받음:', {
-          response,
-          type: typeof response,
-          hasMatches: response && typeof response === 'object' && 'matches' in response,
-          matchesType: response?.matches ? typeof response.matches : 'undefined',
-          isMatchesArray: Array.isArray(response?.matches),
-          matchesLength: Array.isArray(response?.matches) ? response.matches.length : 'not an array'
-        });
+        if (import.meta.env.DEV) {
+          console.log('useMatchHistory: API 응답 받음:', {
+            hasMatches: response && typeof response === 'object' && 'matches' in response,
+            matchesLength: Array.isArray(response?.matches) ? response.matches.length : 'not an array'
+          });
+        }
         
         // 응답 데이터 구조 검증
         if (!response || typeof response !== 'object') {
-          console.error('useMatchHistory: API 응답이 객체가 아님:', response);
+          if (import.meta.env.DEV) {
+            console.error('useMatchHistory: API 응답이 객체가 아님:', typeof response);
+          }
           return { data: [] };
         }
         
         if (!('matches' in response) || !Array.isArray(response.matches)) {
-          console.error('useMatchHistory: API 응답에 matches 배열이 없음:', response);
+          if (import.meta.env.DEV) {
+            console.error('useMatchHistory: API 응답에 matches 배열이 없음');
+          }
           return { data: [] };
         }
         
         console.log('useMatchHistory: 성공적으로 매치 데이터 추출:', response.matches.length);
         return { data: response.matches };
       } catch (error) {
-        console.error('useMatchHistory: API 호출 실패:', error);
+        if (import.meta.env.DEV) {
+          console.error('useMatchHistory: API 호출 실패:', error instanceof Error ? error.message : 'Unknown error');
+        }
         // 에러 시에도 구조화된 응답 반환
         return { data: [] };
       }

@@ -4,7 +4,7 @@ import Match from '../models/Match';
 import logger from '../config/logger';
 import { CACHE_TTL } from '../config/cacheTTL';
 import cacheManager from './cacheManager';
-import { monitorAggregateQuery } from '../utils/queryPerformanceMonitor';
+import { monitorAggregateQuery } from '../utils/queryPerformance';
 interface AggregationResult {
   _id: string;
   count: number;

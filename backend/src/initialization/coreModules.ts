@@ -4,6 +4,8 @@
  */
 
 import logger from '../config/logger';
+import { startScheduler } from '../services/scheduler';
+import connectDB from '../config/db';
 
 interface ModuleInitResult {
   module: string;
@@ -28,6 +30,44 @@ export const initializeCoreModules = async (): Promise<CoreModulesStatus> => {
     status: 'initialized',
     message: 'Basic core modules initialized'
   }];
+  
+  // MongoDB 연결 초기화
+  try {
+    logger.info('🔄 Connecting to MongoDB...');
+    await connectDB();
+    results.push({
+      module: 'MongoDB',
+      status: 'initialized',
+      message: 'MongoDB connected successfully'
+    });
+  } catch (error) {
+    logger.error('❌ MongoDB connection failed:', error);
+    results.push({
+      module: 'MongoDB',
+      status: 'failed',
+      message: 'MongoDB connection failed',
+      error
+    });
+  }
+  
+  // 스케줄러 초기화
+  try {
+    logger.info('🔄 Starting scheduler...');
+    await startScheduler();
+    results.push({
+      module: 'Scheduler',
+      status: 'initialized',
+      message: 'Scheduler started successfully'
+    });
+  } catch (error) {
+    logger.error('❌ Scheduler initialization failed:', error);
+    results.push({
+      module: 'Scheduler',
+      status: 'failed',
+      message: 'Scheduler initialization failed',
+      error
+    });
+  }
   
   return {
     allInitialized: true,

@@ -97,7 +97,7 @@ export class QnAService {
       
       return {
         success: false,
-        _error: _error.message,
+        error: _error.message,
         history: [
           ...history,
           { role: 'user', content: question },

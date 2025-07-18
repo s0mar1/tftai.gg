@@ -2,8 +2,7 @@
 import { Schema } from 'mongoose';
 
 export function addOptimizedMatchIndexes(schema: Schema): void {
-  // 🚀 기존 인덱스 (유지)
-  schema.index({ 'metadata.match_id': 1 });
+  // 🚀 기존 인덱스 (유지) - metadata.match_id는 unique: true로 이미 인덱스 생성됨
   schema.index({ 'info.game_datetime': -1 });
   schema.index({ createdAt: -1 });
   
@@ -35,9 +34,8 @@ export function addOptimizedMatchIndexes(schema: Schema): void {
     }
   });
   
-  // 3. AI 피드백 분석 최적화
+  // 3. AI 피드백 분석 최적화 (metadata.match_id는 unique로 이미 인덱스됨)
   schema.index({
-    'metadata.match_id': 1,
     'aiFeedback.analyzedAt': -1,
     'aiFeedback.userPuuid': 1
   }, {
@@ -49,8 +47,7 @@ export function addOptimizedMatchIndexes(schema: Schema): void {
   // 4. 매치 검색 및 필터링 최적화
   schema.index({
     'info.game_datetime': -1,
-    'info.participants.placement': 1,
-    'metadata.match_id': 1
+    'info.participants.placement': 1
   }, {
     name: 'match_search_filter',
     background: true

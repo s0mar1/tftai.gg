@@ -18,15 +18,21 @@ const DraggableUnit: React.FC<DraggableUnitProps> = ({ champion }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.UNIT,
     item: () => {
-      console.log('드래그 시작:', champion.name, champion.apiName);
+      if (import.meta.env.DEV) {
+        console.log('드래그 시작:', champion.name, champion.apiName);
+      }
       return { championApiName: champion.apiName };
     },
     collect: (monitor) => ({ isDragging: monitor.isDragging() }),
     end: (item, monitor) => {
       if (monitor.didDrop()) {
-        console.log('드롭 성공:', champion.name);
+        if (import.meta.env.DEV) {
+          console.log('드롭 성공:', champion.name);
+        }
       } else {
-        console.log('드롭 실패:', champion.name);
+        if (import.meta.env.DEV) {
+          console.log('드롭 실패:', champion.name);
+        }
       }
     }
   }), [champion]);

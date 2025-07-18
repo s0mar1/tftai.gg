@@ -3,8 +3,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import logger from '../config/logger';
 import cacheManager from '../services/cacheManager';
-// import aiQueue from '../middlewares/rateLimiter';
-import metaCacheService from '../services/metaCacheService';
+// import aiQueue from '../middlewares/rateLimiters';
+import { metaCacheService } from '../services/metaDataService';
 import metricsCollector from '../utils/metrics';
 import { getTFTDataWithLanguage } from '../services/tftData';
 import { ENV_INFO, AI_CONFIG, DATABASE_CONFIG, API_CONFIG } from '../config/env';
@@ -43,7 +43,7 @@ async function checkDatabase(): Promise<HealthCheckResult> {
   try {
     if (mongoose.connection.readyState === 1) {
       // 간단한 쿼리로 실제 연결 테스트
-      await mongoose.connection.db.admin().ping();
+      await mongoose.connection.db!.admin().ping();
       return { status: 'connected', responseTime: Date.now() };
     }
     return { status: 'disconnected', error: 'MongoDB not connected' };
@@ -78,7 +78,6 @@ async function checkCache(): Promise<HealthCheckResult> {
 
 // 외부 API 상태 확인 (보안 강화된 버전)
 async function checkExternalApis(): Promise<ExternalApisResult> {
-  const isProduction = process.env.NODE_ENV === 'production';
   
   const results: ExternalApisResult = {
     riotApi: API_CONFIG.RIOT_API_KEY 

@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "pnpm dev:win",
+    "dev": "pnpm dev:unix",
     "dev:win": "npx vite",
-    "dev:unix": "../../node_modules/.bin/vite",
+    "dev:unix": "npx vite",
     "build": "npx vite build",
     "build:analyze": "npx vite build && echo '📊 Bundle analysis saved to dist/stats.html' && echo '📈 Opening bundle analyzer...' && node scripts/bundle-analyzer.js",
     "lint": "eslint . --ext ts,tsx,js,jsx --report-unused-disable-directives --max-warnings 0",

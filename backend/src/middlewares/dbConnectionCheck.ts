@@ -134,6 +134,13 @@ export const checkDBConnection = async (req: Request, res: Response, next: NextF
   connectionStats.totalChecks++;
   
   try {
+    // 개발 모드에서는 DB 연결 체크를 건너뛰고 바로 다음 미들웨어로 진행
+    if (process.env.DEVELOPMENT_MODE === 'true') {
+      logger.info(`[${req.method} ${req.originalUrl}] 개발 모드: DB 연결 체크를 건너뛰고 Mock 데이터를 사용합니다.`);
+      next();
+      return;
+    }
+    
     // 향상된 연결 상태 확인
     const isHealthy = await checkConnectionHealth();
     

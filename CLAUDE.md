@@ -21,6 +21,23 @@
 컨텍스트 제한을 초과할 수 있는 대규모 코드베이스나 여러 파일을 분석할 때는 대규모 기능을 갖춘 Gemini CLI를 사용하세요.
 컨텍스트 창. Google Gemini의 대용량 컨텍스트 기능을 활용하려면 `gemini -p`를 사용하세요.
 
+## ✅ Gemini CLI 설정 완료
+
+**이 프로젝트에서 Gemini CLI가 사용 가능합니다:**
+- 📍 **설치 위치**: `/home/jiseo/.nvm/versions/node/v22.17.0/bin/gemini`
+- 🔑 **API 키 설정**: `GEMINI_API_KEY` 환경 변수 설정 완료 (번역용 API 키 겸용)
+- 🎯 **프로젝트 경로**: `/home/jiseo/tft-meta-analyzer/`
+- ✅ **테스트 완료**: 전체 프로젝트 분석 성공
+
+**사용 방법:**
+```bash
+# 환경 변수 설정 후 사용
+export GEMINI_API_KEY=AIzaSyAN0DVYJEes8D0CORSs8sjAt1hQhreO0WE
+
+# 또는 직접 사용 (환경 변수가 .env에 이미 설정됨)
+gemini -p "분석 요청"
+```
+
 ## 파일 및 디렉터리 포함 구문
 
 Gemini 프롬프트에 파일과 디렉터리를 포함하려면 `@` 구문을 사용하세요. 경로는 실행 위치를 기준으로 해야 합니다.
@@ -45,6 +62,48 @@ gemini -p "@./ 이 프로젝트 전체에 대한 개요를 알려주세요"
 
 # 또는 --all_files 플래그를 사용하세요:
 gemini --all_files -p "프로젝트 구조 및 종속성 분석"
+
+## 🎯 TFT Meta Analyzer 전용 Gemini 명령어
+
+**프로젝트 전체 분석:**
+```bash
+gemini --all_files -p "TFT Meta Analyzer 프로젝트의 전체 구조와 아키텍처를 분석해주세요"
+```
+
+**백엔드 시스템 분석:**
+```bash
+gemini -p "@backend/src/ 백엔드 아키텍처와 데이터 플로우를 분석해주세요"
+```
+
+**스케줄러 시스템 분석:**
+```bash
+gemini -p "@backend/src/services/scheduler.ts @backend/src/jobs/ 스케줄러 구조와 데이터 수집 파이프라인을 분석해주세요"
+```
+
+**API 엔드포인트 분석:**
+```bash
+gemini -p "@backend/src/routes/ @backend/src/controllers/ API 구조와 엔드포인트를 분석해주세요"
+```
+
+**데이터베이스 모델 분석:**
+```bash
+gemini -p "@backend/src/models/ MongoDB 스키마와 데이터 구조를 분석해주세요"
+```
+
+**프론트엔드 구조 분석:**
+```bash
+gemini -p "@frontend/src/ React 프론트엔드 구조와 컴포넌트를 분석해주세요"
+```
+
+**성능 최적화 분석:**
+```bash
+gemini --all_files -p "성능 병목점과 최적화 방안을 제안해주세요"
+```
+
+**보안 검토:**
+```bash
+gemini -p "@backend/src/middlewares/ @backend/src/config/ 보안 설정과 미들웨어를 검토해주세요"
+```
 
 구현 검증 예
 

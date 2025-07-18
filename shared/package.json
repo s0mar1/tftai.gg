@@ -6,9 +6,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "npx tsc",
-    "dev": "pnpm dev:win",
+    "dev": "pnpm dev:unix",
     "dev:win": "npx tsc --watch",
-    "dev:unix": "../../node_modules/.bin/tsc --watch",
+    "dev:unix": "npx tsc --watch",
     "type-check": "npx tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",

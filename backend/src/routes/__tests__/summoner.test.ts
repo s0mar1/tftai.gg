@@ -3,7 +3,9 @@ import request from 'supertest';
 import express from 'express';
 
 // Mock dependencies
-jest.mock('../../controllers/summonerController');
+jest.mock('../../services/riotApi');
+jest.mock('../../services/tftData');
+jest.mock('../../services/cacheManager');
 jest.mock('../../middlewares/validation');
 jest.mock('../../config/logger');
 
@@ -16,17 +18,20 @@ describe('Summoner Routes', () => {
     app.use(express.json());
   });
 
-  describe('GET /summoner/:riotId', () => {
-    it('should get summoner data', async () => {
-      expect(true).toBe(true);
+  describe('GET /summoner', () => {
+    it('should require region parameter', async () => {
+      const response = await request(app).get('/summoner');
+      expect(response.status).toBe(400);
     });
 
-    it('should validate riot ID format', async () => {
-      expect(true).toBe(true);
+    it('should require gameName parameter', async () => {
+      const response = await request(app).get('/summoner?region=kr');
+      expect(response.status).toBe(400);
     });
 
-    it('should handle rate limiting', async () => {
-      expect(true).toBe(true);
+    it('should require tagLine parameter', async () => {
+      const response = await request(app).get('/summoner?region=kr&gameName=TestPlayer');
+      expect(response.status).toBe(400);
     });
   });
 

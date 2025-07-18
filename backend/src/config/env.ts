@@ -1,6 +1,9 @@
 /**
  * 중앙화된 환경 변수 접근 모듈
  * 모든 서비스에서 이 모듈을 통해 환경 변수에 접근해야 합니다.
+ * 
+ * 역할: 서비스 레이어에서 환경 변수에 접근하는 통일된 인터페이스 제공
+ * 사용: 서비스 파일들에서 env.server.port, env.external.riotApiKey 등으로 접근
  */
 
 import { getEnvConfig, getEnvAccessors } from '../initialization/envLoader';

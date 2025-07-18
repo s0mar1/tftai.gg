@@ -69,7 +69,7 @@ const MatchDetailPage: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/match/${matchId}`);
+        const response = await fetch(`/api/match/${matchId}`);
         const result = await response.json();
         if (!response.ok) {
           throw new Error(result.error || '매치 정보를 불러오는데 실패했습니다.');

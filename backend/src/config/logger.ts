@@ -23,8 +23,8 @@ const customFormat = printf(({ level, message, timestamp, stack, ...meta }) => {
 // 개발/운영 환경에 따른 로그 레벨 설정
 const getLogLevel = (): string => {
   const env = process.env.NODE_ENV || 'development';
-  // 개발 환경에서도 warn 레벨로 설정하여 불필요한 로그 줄이기
-  return env === 'development' ? 'warn' : 'info';
+  // 개발 환경에서는 info 레벨로 설정하여 서버 시작 로그 확인 가능
+  return env === 'development' ? 'info' : 'info';
 };
 
 // Morgan을 위한 stream 인터페이스 (winston.Logger와 분리)

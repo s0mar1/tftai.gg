@@ -26,7 +26,7 @@ const RankerSchema = new Schema<IRanker>({
     type: String,
     required: true,
     unique: true,
-    index: true,
+    // index: true, // unique: true가 이미 인덱스를 생성하므로 제거
   },
   summonerId: {
     type: String,
@@ -73,7 +73,7 @@ const RankerSchema = new Schema<IRanker>({
 });
 
 // 성능 최적화를 위한 인덱스 추가
-RankerSchema.index({ puuid: 1 }); // PUUID 검색용 (이미 unique이지만 명시적 추가)
+// puuid는 unique: true로 이미 인덱스가 생성되므로 중복 제거
 RankerSchema.index({ leaguePoints: -1 }); // LP 기준 내림차순 정렬용 (기존)
 RankerSchema.index({ gameName: 1, tagLine: 1 }); // 게임명+태그라인 검색용
 RankerSchema.index({ tier: 1, rank: 1 }); // 티어+랭크별 조회용

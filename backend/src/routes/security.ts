@@ -29,7 +29,7 @@ router.get('/status', (_req: Request, _res: Response) => {
     sendSuccess(_res, securityStatus, '보안 상태가 조회되었습니다.', 200);
   } catch (error) {
     logger.error('보안 상태 조회 오류:', error);
-    sendError(_res, '보안 상태 조회에 실패했습니다.', 500);
+    sendError(_res, '보안 상태 조회에 실패했습니다.', '500');
   }
 });
 
@@ -64,16 +64,16 @@ router.post('/csp-report', (req: Request, res: Response): void => {
  */
 router.post('/reset-metrics', (req: Request, res: Response) => {
   if (process.env.NODE_ENV !== 'development') {
-    return sendError(res, '이 기능은 개발 환경에서만 사용할 수 있습니다.', 403);
+    return sendError(res, '이 기능은 개발 환경에서만 사용할 수 있습니다.', '403');
   }
 
   try {
     securityMetrics.reset();
     logger.info('보안 메트릭스가 리셋되었습니다.');
-    sendSuccess(res, null, '보안 메트릭스가 리셋되었습니다.', 200);
+    return sendSuccess(res, null, '보안 메트릭스가 리셋되었습니다.', 200);
   } catch (error) {
     logger.error('메트릭스 리셋 오류:', error);
-    sendError(res, '메트릭스 리셋에 실패했습니다.', 500);
+    return sendError(res, '메트릭스 리셋에 실패했습니다.', '500');
   }
 });
 
@@ -113,7 +113,7 @@ router.get('/test-headers', (req: Request, res: Response) => {
 
   } catch (error) {
     logger.error('보안 헤더 테스트 오류:', error);
-    sendError(res, '보안 헤더 테스트에 실패했습니다.', 500);
+    sendError(res, '보안 헤더 테스트에 실패했습니다.', '500');
   }
 });
 

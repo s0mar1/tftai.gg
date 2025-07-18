@@ -14,6 +14,9 @@ const tracer = trace.getTracer('tft-meta-analyzer', '1.0.0');
 /**
  * 텔레메트리가 강화된 캐시 관리자
  * 기존 CacheManager를 확장하여 OpenTelemetry 추적 기능 추가
+ * 
+ * 사용법: 모니터링이 필요할 때 cacheManager 대신 이 클래스를 사용
+ * 예: import { telemetryEnhancedCacheManager } from './telemetry-enhanced-cache';
  */
 export class TelemetryEnhancedCacheManager {
   private l1Cache: NodeCache;

@@ -138,11 +138,15 @@ const RankingPage: React.FC = () => {
       setError(null);
       try {
         const data = await api.get(`/api/ranking?page=${currentPage}`);
-        console.log('RankingPage: API 응답:', data);
+        if (import.meta.env.DEV) {
+          console.log('RankingPage: API 응답:', data);
+        }
         setRankers(data.rankers || []);
         setTotalPages(data.totalPages || 1);
       } catch (err: any) {
-        console.error('RankingPage: API 에러:', err);
+        if (import.meta.env.DEV) {
+          console.error('RankingPage: API 에러:', err);
+        }
         setError(err.message || '랭킹 정보를 불러오는 데 실패했습니다');
       } finally {
         setLoading(false);

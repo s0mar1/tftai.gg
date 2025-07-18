@@ -7,7 +7,7 @@ import {
 
 // Guide 모델 임포트 (필요하다면 경로 수정)
 import DeckGuide from '../models/DeckGuide'; 
-import logger from '../config/logger';
+import asyncHandler from '../utils/asyncHandler';
 import { MiddlewareHandler } from '../types/express';
 
 const router = express.Router();
@@ -35,19 +35,14 @@ router.route('/')
 // 특정 공략 조회 라우트
 router.route('/:id')
   .get(getDeckGuide)
-  .delete(isAdmin, async (_req, _res) => { // DELETE 엔드포인트 추가
-    try {
-      const { id } = _req.params;
-      const deletedGuide = await DeckGuide.findByIdAndDelete(id);
+  .delete(isAdmin, asyncHandler(async (_req, _res) => { // DELETE 엔드포인트 추가
+    const { id } = _req.params;
+    const deletedGuide = await DeckGuide.findByIdAndDelete(id);
 
-      if (!deletedGuide) {
-        return _res.status(404).json({ message: '공략을 찾을 수 없습니다.' });
-      }
-      return _res.status(200).json({ message: '공략이 성공적으로 삭제되었습니다.' });
-    } catch (_error) {
-      logger.error('공략 삭제 중 오류 발생:', _error);
-      return _res.status(500).json({ message: '서버 오류로 공략 삭제에 실패했습니다.' });
+    if (!deletedGuide) {
+      return _res.status(404).json({ message: '공략을 찾을 수 없습니다.' });
     }
-  });
+    return _res.status(200).json({ message: '공략이 성공적으로 삭제되었습니다.' });
+  }));
 
 export default router;

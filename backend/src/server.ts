@@ -7,7 +7,8 @@ import dotenv from 'dotenv';
 import compression from 'compression';
 import logger from './config/logger';
 import { initializeCoreModules } from './initialization/coreModules';
-import healthRoutes from './routes/health';
+import { setupRoutes } from './initialization/routeSetup';
+import { loadAndValidateEnv } from './initialization/envLoader';
 import errorHandler from './middlewares/errorHandler';
 
 dotenv.config();
@@ -15,26 +16,20 @@ dotenv.config();
 const app = express();
 
 async function setupExpressServer(): Promise<void> {
-  app.use(compression());
+  // 1. 환경변수 로드 및 검증
+  const envResult = loadAndValidateEnv();
+  if (!envResult.isValid) {
+    throw new Error(`환경변수 검증 실패: ${envResult.errors.join(', ')}`);
+  }
   
-  // CORS 설정 - 프로덕션 환경에 맞게 구성
-  const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [
-    'http://localhost:5173',
-    'http://localhost:3000'
-  ];
+  // 2. 라우터와 미들웨어 설정
+  const routeSetupResult = setupRoutes(app);
   
-  app.use(cors({ 
-    origin: allowedOrigins,
-    credentials: true 
-  }));
+  if (!routeSetupResult.success) {
+    throw new Error(`라우터 설정 실패: ${routeSetupResult.message}`);
+  }
   
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-  
-  app.use('/health', healthRoutes);
-  app.get('/', (_req, _res) => _res.json({ message: 'TFT Meta Analyzer API is running.' }));
-  
-  app.use(errorHandler);
+  logger.info(`라우터 설정 완료 - 등록된 라우트: ${routeSetupResult.registeredRoutes.length}개`);
 }
 
 function setupGracefulShutdown(): void {
@@ -47,12 +42,12 @@ async function startServer() {
   try {
     logger.info('🚀 TFT Meta Analyzer Backend Server is starting...');
 
-    await initializeCoreModules();
     await setupExpressServer();
+    await initializeCoreModules();
     setupGracefulShutdown();
 
-    const port = process.env.PORT || 4001;
-    const server = app.listen(port, () => {
+    const port = parseInt(process.env.PORT || '4001', 10);
+    const server = app.listen(port, '0.0.0.0', () => {
       logger.info(`🎉 SERVER IS RUNNING ON PORT ${port}`);
     });
 

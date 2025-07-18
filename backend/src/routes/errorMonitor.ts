@@ -3,7 +3,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { errorMonitor, ErrorCategory, ErrorSeverity } from '../services/errorMonitor';
 import { checkDBConnection } from '../middlewares/dbConnectionCheck';
-import logger from '../config/logger';
+import asyncHandler from '../utils/asyncHandler';
 
 const router = express.Router();
 
@@ -12,67 +12,57 @@ const router = express.Router();
  */
 
 // 에러 통계 조회
-router.get('/stats', checkDBConnection, async (_req: Request, _res: Response, _next: NextFunction) => {
-  try {
-    const { hours = '24' } = _req.query;
-    
-    const timeRange = {
-      start: new Date(Date.now() - parseInt(hours as string) * 60 * 60 * 1000),
-      end: new Date()
-    };
+router.get('/stats', checkDBConnection, asyncHandler(async (_req: Request, _res: Response, _next: NextFunction) => {
+  const { hours = '24' } = _req.query;
+  
+  const timeRange = {
+    start: new Date(Date.now() - parseInt(hours as string) * 60 * 60 * 1000),
+    end: new Date()
+  };
 
-    const stats = errorMonitor.getErrorStats(timeRange);
-    
-    _res.json({
-      success: true,
-      data: stats,
-      meta: {
-        timeRange,
-        hours: parseInt(hours as string)
-      }
-    });
-  } catch (error) {
-    logger.error('에러 통계 조회 중 오류 발생:', error);
-    _next(error);
-  }
-});
+  const stats = errorMonitor.getErrorStats(timeRange);
+  
+  _res.json({
+    success: true,
+    data: stats,
+    meta: {
+      timeRange,
+      hours: parseInt(hours as string)
+    }
+  });
+}));
 
 // 최근 에러 목록 조회
-router.get('/recent', checkDBConnection, async (_req: Request, _res: Response, _next: NextFunction) => {
-  try {
-    const { limit = '50', category, severity, resolved } = _req.query;
-    
-    const filters: any = {};
-    
-    if (category && Object.values(ErrorCategory).includes(category as ErrorCategory)) {
-      filters.category = category as ErrorCategory;
-    }
-    
-    if (severity && Object.values(ErrorSeverity).includes(severity as ErrorSeverity)) {
-      filters.severity = severity as ErrorSeverity;
-    }
-    
-    if (resolved !== undefined) {
-      filters.resolved = resolved === 'true';
-    }
-
-    const errors = errorMonitor.filterErrors(filters);
-    const limitedErrors = errors.slice(0, parseInt(limit as string));
-    
-    _res.json({
-      success: true,
-      data: limitedErrors,
-      meta: {
-        total: errors.length,
-        limit: parseInt(limit as string),
-        filters
-      }
-    });
-  } catch (error) {
-    logger.error('최근 에러 조회 중 오류 발생:', error);
-    _next(error);
+router.get('/recent', checkDBConnection, asyncHandler(async (_req: Request, _res: Response, _next: NextFunction) => {
+  const { limit = '50', category, severity, resolved } = _req.query;
+  
+  const filters: any = {};
+  
+  if (category && Object.values(ErrorCategory).includes(category as ErrorCategory)) {
+    filters.category = category as ErrorCategory;
   }
-});
+  
+  if (severity && Object.values(ErrorSeverity).includes(severity as ErrorSeverity)) {
+    filters.severity = severity as ErrorSeverity;
+  }
+  
+  if (resolved !== undefined) {
+    filters.resolved = resolved === 'true';
+  }
+
+  const errors = errorMonitor.filterErrors(filters);
+  const limitedErrors = errors.slice(0, parseInt(limit as string));
+  
+  _res.json({
+    success: true,
+    data: limitedErrors,
+    meta: {
+      total: errors.length,
+      limit: parseInt(limit as string),
+      filters
+    }
+  });
+}));
 
 // 특정 에러 상세 정보 조회
 router.get('/error/:fingerprint', checkDBConnection, async (_req: Request, _res: Response, _next: NextFunction) => {
@@ -229,83 +219,50 @@ router.get('/search', checkDBConnection, async (_req: Request, _res: Response, _
 });
 
 // 에러 모니터링 건강상태 확인 (개선된 버전)
-router.get('/health', (_req: Request, _res: Response) => {
-  try {
-    const healthStatus = errorMonitor.getHealthStatus();
-    
-    _res.json({
-      success: true,
-      data: {
-        ...healthStatus,
-        timestamp: new Date().toISOString()
-      }
-    });
-  } catch (error) {
-    logger.error('에러 모니터링 건강상태 확인 중 오류 발생:', error);
-    _res.status(500).json({
-      success: false,
-      error: {
-        message: '건강상태 확인 중 오류가 발생했습니다.',
-        statusCode: 500
-      }
-    });
-  }
-});
+router.get('/health', asyncHandler(async (_req: Request, _res: Response) => {
+  const healthStatus = errorMonitor.getHealthStatus();
+  
+  _res.json({
+    success: true,
+    data: {
+      ...healthStatus,
+      timestamp: new Date().toISOString()
+    }
+  });
+}));
 
 // 에러 모니터링 성능 메트릭
-router.get('/performance', (_req: Request, _res: Response) => {
-  try {
-    const performanceMetrics = errorMonitor.getPerformanceMetrics();
-    
-    _res.json({
-      success: true,
-      data: performanceMetrics,
-      meta: {
-        timestamp: new Date().toISOString()
-      }
-    });
-  } catch (error) {
-    logger.error('성능 메트릭 조회 중 오류 발생:', error);
-    _res.status(500).json({
-      success: false,
-      error: {
-        message: '성능 메트릭 조회 중 오류가 발생했습니다.',
-        statusCode: 500
-      }
-    });
-  }
-});
+router.get('/performance', asyncHandler(async (_req: Request, _res: Response) => {
+  const performanceMetrics = errorMonitor.getPerformanceMetrics();
+  
+  _res.json({
+    success: true,
+    data: performanceMetrics,
+    meta: {
+      timestamp: new Date().toISOString()
+    }
+  });
+}));
 
 // 에러 모니터링 시스템 정리 실행
-router.post('/cleanup', async (_req: Request, _res: Response) => {
-  try {
-    const startTime = Date.now();
-    
-    // 정리 실행
-    errorMonitor.cleanup();
-    
-    const endTime = Date.now();
-    const duration = endTime - startTime;
-    
-    _res.json({
-      success: true,
-      message: '에러 모니터링 시스템 정리가 완료되었습니다.',
-      data: {
-        duration: `${duration}ms`,
-        timestamp: new Date().toISOString()
-      }
-    });
-  } catch (error) {
-    logger.error('에러 모니터링 시스템 정리 중 오류 발생:', error);
-    _res.status(500).json({
-      success: false,
-      error: {
-        message: '시스템 정리 중 오류가 발생했습니다.',
-        statusCode: 500
-      }
-    });
-  }
-});
+router.post('/cleanup', asyncHandler(async (_req: Request, _res: Response) => {
+  const startTime = Date.now();
+  
+  // 정리 실행
+  errorMonitor.cleanup();
+  
+  const endTime = Date.now();
+  const duration = endTime - startTime;
+  
+  _res.json({
+    success: true,
+    message: '에러 모니터링 시스템 정리가 완료되었습니다.',
+    data: {
+      duration: `${duration}ms`,
+      timestamp: new Date().toISOString()
+    }
+  });
+}));
 
 // 에러 메트릭스 (Prometheus 형식)
 router.get('/metrics', (_req: Request, _res: Response) => {

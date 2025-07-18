@@ -351,7 +351,7 @@ export class TelemetryEnhancedAIAnalysisService {
   private createErrorResult(matchId: string, userPuuid: string, errorMessage: string): FinalAnalysisResult {
     return {
       success: false,
-      error: errorMessage,
+      _error: errorMessage,
       analysis: this.getDefaultAnalysis(),
       metadata: {
         analyzedAt: new Date().toISOString(),

@@ -16,7 +16,7 @@ const SummonerDataSchema = new Schema<ISummonerData>({
     type: String,
     required: true,
     unique: true,
-    index: true,
+    // index: true, // unique: true가 이미 인덱스를 생성하므로 제거
   },
   gameName: {
     type: String,
@@ -40,7 +40,7 @@ const SummonerDataSchema = new Schema<ISummonerData>({
 });
 
 // 성능 최적화를 위한 인덱스 추가
-SummonerDataSchema.index({ puuid: 1 }); // PUUID 검색용 (이미 unique이지만 명시적 추가)
+// puuid는 unique: true로 이미 인덱스가 생성되므로 중복 제거
 SummonerDataSchema.index({ gameName: 1, tagLine: 1 }); // 게임명+태그라인 검색용
 SummonerDataSchema.index({ lastUpdated: -1 }); // 최근 업데이트순 정렬용
 SummonerDataSchema.index({ lastUpdated: 1 }, { expireAfterSeconds: 3600 }); // 1시간 후 자동 삭제 (TTL)

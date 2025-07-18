@@ -35,7 +35,6 @@ const SummonerPage: React.FC<SummonerPageProps> = ({ isDarkMode }) => {
     }
   }
   
-  // console.log('SummonerPage: URL 파라미터:', { region, summonerName, gameName, tagLine });
   
   usePerformanceMonitor('SummonerPage', {
     threshold: 50,
@@ -61,7 +60,6 @@ const SummonerPage: React.FC<SummonerPageProps> = ({ isDarkMode }) => {
   });
   const summonerData = summonerApiResponse?.data;
   
-  // console.log('SummonerPage: API 상태:', { summonerLoading, summonerError, summonerData, enabled: !!(region && gameName && tagLine) });
 
   const { 
     data: matchApiResponse, 

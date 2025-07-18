@@ -41,7 +41,7 @@ router.get('/', validatePuuid, validatePagination, async (_req: Request, _res: R
       trait,
       sortBy = 'datetime',
       sortOrder = 'desc'
-    } = _req.query as MatchQueryParams;
+    } = _req.query as unknown as MatchQueryParams;
 
     const pageNum = Math.max(1, parseInt(page));
     const limitNum = Math.min(100, Math.max(1, parseInt(limit))); // 최대 100개 제한

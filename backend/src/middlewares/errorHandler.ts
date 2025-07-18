@@ -23,8 +23,8 @@ const errorHandler: ErrorHandler = (_err, _req, _res, _next) => {
     requestId: (_req as any).requestId || errorId,
     endpoint: _req.originalUrl,
     method: _req.method,
-    userAgent: _req.get('User-Agent'),
-    ip: _req.ip,
+    userAgent: _req.get('User-Agent') || 'Unknown',
+    ip: _req.ip || 'Unknown',
     timestamp: new Date(),
     additionalData: {
       statusCode: normalizedError.statusCode,
@@ -45,11 +45,12 @@ const errorHandler: ErrorHandler = (_err, _req, _res, _next) => {
     userMessage: normalizedError.userMessage,
     url: _req.originalUrl,
     method: _req.method,
-    userAgent: _req.get('User-Agent'),
-    ip: _req.ip,
+    userAgent: _req.get('User-Agent') || 'Unknown',
+    ip: _req.ip || 'Unknown',
     stack: normalizedError.isOperational ? undefined : normalizedError.stack,
     details: sanitizedDetails,
-    errorId
+    errorId,
+    context: errorContext
   });
 
   // 표준화된 API 에러 응답 생성

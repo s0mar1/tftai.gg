@@ -622,6 +622,42 @@ export class AlertService extends EventEmitter {
   }
 
   /**
+   * 활성 알림 조회
+   */
+  getActiveAlerts(limit: number = 50): AlertMessage[] {
+    return this.alertHistory
+      .filter(alert => alert.status === 'pending' || alert.status === 'escalated')
+      .slice(0, limit);
+  }
+
+  /**
+   * 알림 해결 처리
+   */
+  resolveAlert(alertId: string): boolean {
+    const alert = this.alertHistory.find(a => a.id === alertId);
+    if (!alert) return false;
+    
+    alert.status = 'sent';
+    alert.error.resolved = true;
+    logger.info(`알림 해결 처리: ${alertId}`);
+    return true;
+  }
+
+  /**
+   * 알림 규칙 설정 조회
+   */
+  getAlertConfigs(): AlertRule[] {
+    return this.getRules();
+  }
+
+  /**
+   * 알림 규칙 설정 업데이트
+   */
+  updateAlertConfig(ruleId: string, config: Partial<AlertRule>): boolean {
+    return this.updateRule(ruleId, config);
+  }
+
+  /**
    * 메모리 정리
    */
   cleanup(): void {

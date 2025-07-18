@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rsync:*)",
+      "Bash(ls:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(pnpm:*)",
+      "Bash(pkill:*)",
+      "Bash(curl:*)",
+      "Bash(npx tsx:*)",
+      "Bash(sudo apt:*)",
+      "Bash(redis-cli set:*)",
+      "Bash(redis-cli get:*)",
+      "Bash(kill:*)",
+      "Bash(claude mcp:*)",
+      "Bash(npx:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(true)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(sudo fuser:*)",
+      "Bash(fuser:*)",
+      "Bash(mongosh:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(ss:*)",
+      "Bash(wget:*)",
+      "Bash(timeout:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)"
+    ],
+    "deny": []
+  }
+}

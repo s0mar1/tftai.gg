@@ -1,6 +1,9 @@
 /**
  * 환경 변수 로더 모듈
  * 서버 시작 시 가장 먼저 실행되어 모든 환경 변수를 로드하고 검증합니다.
+ * 
+ * 역할: .env 파일 로드, 환경 변수 검증, 전역 설정 객체 생성
+ * 사용: 서버 시작 시 initialization/coreModules.ts에서 호출
  */
 
 import dotenv from 'dotenv';

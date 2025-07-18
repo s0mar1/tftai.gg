@@ -26,7 +26,7 @@ jest.unstable_mockModule('../../services/cacheManager', () => ({
   }
 }));
 
-jest.unstable_mockModule('../../middlewares/rateLimiter.ts', () => ({
+jest.unstable_mockModule('../../middlewares/rateLimiters.ts', () => ({
   default: {
     getMemoryStats: jest.fn().mockReturnValue({
       totalIPs: 5,

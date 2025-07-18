@@ -6,17 +6,18 @@
     "npm": ">=8.0.0"
   },
   "scripts": {
-    "dev": "pnpm dev:win",
+    "dev": "pnpm dev:unix",
     "dev-debug": "nodemon --exec \"npx tsx --expose-gc src/server.ts\"",
     "dev:win": "nodemon src/server.ts",
-    "dev:unix": "nodemon --exec \"../../node_modules/.bin/tsx src/server.ts\"",
+    "dev:unix": "nodemon --exec \"npx tsx src/server.ts\"",
     "prebuild": "cd ../shared && npm install && npm run build",
-    "build": "npm run prebuild && ./node_modules/.bin/tsc",
+    "build": "npm run prebuild && npx tsc",
     "start": "node --expose-gc dist/server.js",
+    "start:prod": "NODE_ENV=production node --expose-gc dist/server.js",
     "start:dev": "npx tsx src/server.ts",
     "start:direct": "npx tsx src/server.ts",
     "start:tsx": "npx tsx --expose-gc src/server.ts",
-    "type-check": "./node_modules/.bin/tsc --noEmit",
+    "type-check": "npx tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -25,7 +26,8 @@
     "migrate:up": "npm run migrate up",
     "migrate:down": "npm run migrate down --force",
     "migrate:dry-run": "npm run migrate dry-run",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "npm run build"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

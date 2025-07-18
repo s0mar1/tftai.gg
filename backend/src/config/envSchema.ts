@@ -1,6 +1,9 @@
 /**
  * Zod 기반 환경 변수 스키마 정의
  * 타입 안전한 환경 변수 검증을 위한 스키마
+ * 
+ * 역할: 환경 변수의 타입, 기본값, 검증 규칙을 정의
+ * 사용: envLoader.ts에서 환경 변수 검증 시 사용
  */
 
 import { z } from 'zod';
@@ -131,9 +134,7 @@ export function safeValidateEnv(env: NodeJS.ProcessEnv): {
       warnings.push('GOOGLE_AI_TRANSLATION_API_KEY가 설정되지 않아 번역 기능을 사용할 수 없습니다.');
     }
     
-    if (!data.GEMINI_API_KEY) {
-      warnings.push('GEMINI_API_KEY가 설정되지 않아 Gemini AI 기능을 사용할 수 없습니다.');
-    }
+    // GEMINI_API_KEY는 선택사항이므로 경고하지 않음
     
     if (!data.UPSTASH_REDIS_URL && !data.REDIS_CLUSTER_URL) {
       warnings.push('Redis URL이 설정되지 않아 캐시 기능을 사용할 수 없습니다.');

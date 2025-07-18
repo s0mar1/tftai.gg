@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm install && pnpm --filter shared build && pnpm -r --parallel dev:win",
+    "dev": "pnpm install && pnpm --filter shared build && pnpm -r --parallel dev:unix",
     "dev:unix": "pnpm -r --parallel dev:unix",
-    "dev:backend": "pnpm --filter backend dev:win",
-    "dev:frontend": "pnpm --filter frontend dev:win",
+    "dev:backend": "pnpm --filter backend dev:unix",
+    "dev:frontend": "pnpm --filter frontend dev:unix",
     "build": "pnpm install && pnpm --filter shared build && pnpm --filter backend build",
     "start": "cd backend && npm start",
     "deploy:render": "pnpm build",

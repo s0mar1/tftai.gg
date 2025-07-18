@@ -93,9 +93,9 @@ const MatchSchema = new Schema<IMatch>({
 });
 
 // 🚀 성능 최적화를 위한 인덱스 추가 (최적화됨)
-MatchSchema.index({ 'metadata.match_id': 1 }); // 매치 ID 검색용
+// metadata.match_id는 unique: true로 이미 인덱스가 생성되므로 중복 제거
 MatchSchema.index({ 'info.game_datetime': -1 }); // 최신 게임순 정렬용
-MatchSchema.index({ 'metadata.match_id': 1, 'aiFeedback.userPuuid': 1 }); // 복합 인덱스 (AI 분석 조회용)
+MatchSchema.index({ 'aiFeedback.userPuuid': 1, 'aiFeedback.analyzedAt': -1 }); // AI 분석 조회용 (metadata.match_id는 unique로 이미 인덱스됨)
 MatchSchema.index({ createdAt: -1 }); // 생성일 기준 정렬용
 // 'info.participants.puuid' 단일 인덱스 제거 - 아래 복합 인덱스에서 커버됨
 
@@ -112,7 +112,7 @@ MatchSchema.index({
 });
 
 // 📊 AI 피드백 분석을 위한 추가 인덱스
-MatchSchema.index({ 'aiFeedback.userPuuid': 1, 'aiFeedback.analyzedAt': -1 }); // 사용자별 AI 분석 이력
+// aiFeedback.userPuuid + analyzedAt 인덱스는 위에서 이미 정의되었으므로 중복 제거
 MatchSchema.index({ 'aiFeedback.analyzedAt': -1 }); // 최근 AI 분석 순서
 
 // 🎯 매치 분석을 위한 성능 최적화 인덱스 (Phase 2 최적화)

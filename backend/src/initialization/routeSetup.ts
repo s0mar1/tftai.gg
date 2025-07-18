@@ -13,24 +13,29 @@ import logger from '../config/logger';
 import swaggerSpecs from '../config/swagger';
 import { getServerConfig } from './envLoader';
 
-// 라우트 imports
+// 라우트 imports - 필수 라우트들 import
+import tierlistRoutes from '../routes/tierlist';
+import healthRoutes from '../routes/health';
+import staticDataRoutes from '../routes/staticData';
+import rankingRoutes from '../routes/ranking';
+import guidesRoutes from '../routes/guides';
 import summonerRoutes from '../routes/summoner';
 import matchRoutes from '../routes/match';
 import aiRoutes from '../routes/ai';
-import tierlistRoutes from '../routes/tierlist';
-import rankingRoutes from '../routes/ranking';
-import guideRoutes from '../routes/guides';
+import cacheRoutes from '../routes/cache';
+import cacheMonitorRoutes from '../routes/cache-monitor';
+import dashboardRoutes from '../routes/dashboard';
 import deckBuilderRoutes from '../routes/deckBuilder';
-import staticDataRoutes from '../routes/staticData';
+import errorMonitorRoutes from '../routes/errorMonitor';
+import mcpRoutes from '../routes/mcp';
+import metaRoutes from '../routes/meta';
+import performanceRoutes from '../routes/performance';
+import securityRoutes from '../routes/security';
 import statsRoutes from '../routes/stats';
 import translationRoutes from '../routes/translation';
-import healthRoutes from '../routes/health';
-import cacheRoutes from '../routes/cache';
-import performanceRoutes from '../routes/performance';
 
 // 에러 핸들러
 import errorHandler from '../middlewares/errorHandler';
-import { errorMetricsMiddleware } from '../utils/metrics';
 
 interface RouteSetupResult {
   success: boolean;
@@ -85,17 +90,23 @@ const setupApiRoutes = (app: Application): string[] => {
     { path: '/api-docs', router: swaggerUi.serve, name: 'Swagger UI' },
     { path: '/health', router: healthRoutes, name: 'Health Check' },
     { path: '/api/static-data', router: staticDataRoutes, name: 'Static Data' },
-    { path: '/api/summoner', router: summonerRoutes, name: 'Summoner' },
-    { path: '/api/matches', router: matchRoutes, name: 'Matches' },
-    { path: '/api/ai', router: aiRoutes, name: 'AI Analysis' },
     { path: '/api/tierlist', router: tierlistRoutes, name: 'Tier List' },
     { path: '/api/ranking', router: rankingRoutes, name: 'Ranking' },
-    { path: '/api/guides', router: guideRoutes, name: 'Guides' },
+    { path: '/api/guides', router: guidesRoutes, name: 'Guides' },
+    { path: '/api/summoner', router: summonerRoutes, name: 'Summoner' },
+    { path: '/api/matches', router: matchRoutes, name: 'Match' },
+    { path: '/api/ai', router: aiRoutes, name: 'AI' },
+    { path: '/api/cache', router: cacheRoutes, name: 'Cache' },
+    { path: '/api/cache-monitor', router: cacheMonitorRoutes, name: 'Cache Monitor' },
+    { path: '/api/dashboard', router: dashboardRoutes, name: 'Dashboard' },
     { path: '/api/deck-builder', router: deckBuilderRoutes, name: 'Deck Builder' },
-    { path: '/api/stats', router: statsRoutes, name: 'Statistics' },
-    { path: '/api/translation', router: translationRoutes, name: 'Translation' },
-    { path: '/api/cache', router: cacheRoutes, name: 'Cache Management' },
-    { path: '/api/performance', router: performanceRoutes, name: 'Performance' }
+    { path: '/api/error-monitor', router: errorMonitorRoutes, name: 'Error Monitor' },
+    { path: '/api/mcp', router: mcpRoutes, name: 'MCP' },
+    { path: '/api/meta', router: metaRoutes, name: 'Meta' },
+    { path: '/api/performance', router: performanceRoutes, name: 'Performance' },
+    { path: '/api/security', router: securityRoutes, name: 'Security' },
+    { path: '/api/stats', router: statsRoutes, name: 'Stats' },
+    { path: '/api/translation', router: translationRoutes, name: 'Translation' }
   ];
   
   const registeredRoutes: string[] = [];
@@ -145,10 +156,6 @@ const setupApiRoutes = (app: Application): string[] => {
  */
 const setupErrorHandlers = (app: Application): void => {
   logger.info('[Route Setup] 에러 핸들러 설정 중...');
-  
-  // 메트릭스 미들웨어
-  app.use(errorMetricsMiddleware);
-  logger.info('  ✓ 에러 메트릭스 미들웨어 등록');
   
   // 전역 에러 핸들러
   app.use(errorHandler);

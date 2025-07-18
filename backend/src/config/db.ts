@@ -27,12 +27,8 @@ const connectDB = async (): Promise<void> => {
     throw new Error('MONGODB_URI is not defined in environment variables');
   }
 
-  // 개발 모드에서는 MongoDB 연결을 건너뛸 수 있음
-  if (developmentMode) {
-    logger.warn('⚠️ 개발 모드: MongoDB 연결을 건너뜁니다.');
-    logger.warn('DB 의존 기능들은 503 응답을 반환합니다.');
-    return;
-  }
+  // 개발 모드 설정 확인을 위한 로그
+  logger.info(`MongoDB 연결 설정 확인: DEVELOPMENT_MODE=${process.env.DEVELOPMENT_MODE}, developmentMode=${developmentMode}`);
 
   logger.info('[MongoDB] 연결을 시도합니다...');
   logger.info(`[MongoDB] 연결 시도 URL: ${mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}`); // 패스워드 마스킹

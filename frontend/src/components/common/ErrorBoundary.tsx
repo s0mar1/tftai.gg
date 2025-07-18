@@ -1,6 +1,7 @@
 import React, { ErrorInfo, ReactNode } from 'react';
 import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 import { ErrorBoundaryProps } from '../../types';
+import { handleComponentError, showErrorNotification } from '../../utils/errorHandler';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -46,8 +47,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       errorId
     });
 
-    // 에러 로깅
-    console.error('Error caught by boundary:', error, errorInfo);
+    // 중앙화된 에러 처리 시스템 사용
+    const processedError = handleComponentError(error, errorInfo, 'ErrorBoundary');
+    
+    // 에러 알림 표시
+    showErrorNotification(processedError);
     
     // 프로덕션에서 에러 리포팅 서비스에 전송
     if (process.env.NODE_ENV === 'production') {

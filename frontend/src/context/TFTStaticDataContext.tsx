@@ -170,12 +170,14 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
         }
       }
     } catch (error) {
-      console.warn(`TFTStaticDataContext: 캐시 읽기 실패 (${key}):`, error);
+      if (import.meta.env.DEV) {
+        console.warn(`TFTStaticDataContext: 캐시 읽기 실패 (${key}):`, error);
+      }
     }
     return null;
   }, []);
 
-  const setCachedData = useCallback((key: string, data: any) => {
+  const setCachedData = useCallback((key: string, data: unknown) => {
     try {
       const cacheData = {
         data,
@@ -183,7 +185,9 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
       };
       localStorage.setItem(key, JSON.stringify(cacheData));
     } catch (error) {
-      console.warn(`TFTStaticDataContext: 캐시 저장 실패 (${key}):`, error);
+      if (import.meta.env.DEV) {
+        console.warn(`TFTStaticDataContext: 캐시 저장 실패 (${key}):`, error);
+      }
     }
   }, []);
 
@@ -230,7 +234,9 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
           setRetryCount(0);
           return;
         } catch (error) {
-          console.warn('TFTStaticDataContext: 캐시 복원 실패, API 호출로 진행:', error);
+          if (import.meta.env.DEV) {
+            console.warn('TFTStaticDataContext: 캐시 복원 실패, API 호출로 진행:', error);
+          }
         }
       }
       

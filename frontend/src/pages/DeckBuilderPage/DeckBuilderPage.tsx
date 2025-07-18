@@ -40,57 +40,75 @@ export default function DeckBuilderPage() {
   
   // 직접 Context 접근 (디버깅)
   const directContext = useContext(TFTDataContext);
-  console.log('DeckBuilderPage: 직접 Context 접근 결과:', directContext);
-  console.log('DeckBuilderPage: 직접 Context 타입:', typeof directContext);
-  console.log('DeckBuilderPage: 직접 Context 키들:', directContext ? Object.keys(directContext) : 'null');
+  if (import.meta.env.DEV) {
+    console.log('DeckBuilderPage: 직접 Context 접근 결과:', directContext);
+    console.log('DeckBuilderPage: 직접 Context 타입:', typeof directContext);
+    console.log('DeckBuilderPage: 직접 Context 키들:', directContext ? Object.keys(directContext) : 'null');
+  }
   
   // useTFTData 호출
-  console.log('DeckBuilderPage: useTFTData 함수 타입:', typeof useTFTData);
+  if (import.meta.env.DEV) {
+    console.log('DeckBuilderPage: useTFTData 함수 타입:', typeof useTFTData);
+  }
   
   let tftDataResult;
   try {
     tftDataResult = useTFTData();
-    console.log('DeckBuilderPage: useTFTData 호출 성공:', tftDataResult);
+    if (import.meta.env.DEV) {
+      console.log('DeckBuilderPage: useTFTData 호출 성공:', tftDataResult);
+    }
   } catch (error) {
-    console.error('DeckBuilderPage: useTFTData 호출 에러:', error);
+    if (import.meta.env.DEV) {
+      console.error('DeckBuilderPage: useTFTData 호출 에러:', error);
+    }
     tftDataResult = null;
   }
   
-  console.log('DeckBuilderPage: useTFTData 직접 호출 결과:', tftDataResult);
-  console.log('DeckBuilderPage: context 타입:', typeof tftDataResult);
-  console.log('DeckBuilderPage: context 키들:', tftDataResult ? Object.keys(tftDataResult) : 'null');
+  if (import.meta.env.DEV) {
+    console.log('DeckBuilderPage: useTFTData 직접 호출 결과:', tftDataResult);
+    console.log('DeckBuilderPage: context 타입:', typeof tftDataResult);
+    console.log('DeckBuilderPage: context 키들:', tftDataResult ? Object.keys(tftDataResult) : 'null');
+  }
   const champions = tftDataResult?.champions || [];
   const { t } = useTranslation();
   
-  console.log('DeckBuilderPage: useTFTData 결과:', {
-    tftDataResult: !!tftDataResult,
-    tftDataResultType: typeof tftDataResult,
-    loading: tftDataResult?.loading,
-    error: tftDataResult?.error,
-    champions: tftDataResult?.champions?.length || 0,
-    showTooltip: typeof tftDataResult?.showTooltip,
-    hideTooltip: typeof tftDataResult?.hideTooltip
-  });
+  if (import.meta.env.DEV) {
+    console.log('DeckBuilderPage: useTFTData 결과:', {
+      tftDataResult: !!tftDataResult,
+      tftDataResultType: typeof tftDataResult,
+      loading: tftDataResult?.loading,
+      error: tftDataResult?.error,
+      champions: tftDataResult?.champions?.length || 0,
+      showTooltip: typeof tftDataResult?.showTooltip,
+      hideTooltip: typeof tftDataResult?.hideTooltip
+    });
+  }
   
-  console.log('DeckBuilderPage 렌더링:', {
-    tftDataResult: !!tftDataResult,
-    champions: !!champions,
-    championsCount: champions?.length || 0,
-    loading: tftDataResult?.loading,
-    error: tftDataResult?.error
-  });
+  if (import.meta.env.DEV) {
+    console.log('DeckBuilderPage 렌더링:', {
+      tftDataResult: !!tftDataResult,
+      champions: !!champions,
+      championsCount: champions?.length || 0,
+      loading: tftDataResult?.loading,
+      error: tftDataResult?.error
+    });
+  }
   const [placedUnits, setPlacedUnits] = useState<PlacedUnits>({});
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleUnitAction = useCallback((draggedItem: DraggedUnit, targetPos: Position) => {
-    console.log('handleUnitAction 호출됨:', { draggedItem, targetPos });
+    if (import.meta.env.DEV) {
+      console.log('handleUnitAction 호출됨:', { draggedItem, targetPos });
+    }
     
     const toKey = `${targetPos.y}-${targetPos.x}`;
     const apiName = draggedItem.championApiName || draggedItem.unit?.apiName;
     const fromKey = draggedItem.fromKey;
     
-    console.log('handleUnitAction 처리:', { toKey, apiName, fromKey, championsCount: champions.length });
+    if (import.meta.env.DEV) {
+      console.log('handleUnitAction 처리:', { toKey, apiName, fromKey, championsCount: champions.length });
+    }
     
     setPlacedUnits(prev => {
       console.log('setPlacedUnits 호출됨, 이전 상태:', prev);
@@ -130,7 +148,9 @@ export default function DeckBuilderPage() {
       };
       
       next[toKey] = newUnit;
-      console.log('새로운 유닛 배치:', { toKey, newUnit, newState: next });
+      if (import.meta.env.DEV) {
+        console.log('새로운 유닛 배치:', { toKey, newUnit });
+      }
       
       return next;
     });

@@ -4,14 +4,12 @@ import express, { Request, Response, NextFunction } from 'express';
 import { getTFTDataWithLanguage } from '../services/tftData';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import logger from '../config/logger';
 import { sendSuccess, sendError } from '../utils/responseHelper';
 
 const router = express.Router();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// CommonJS 방식으로 __dirname 사용
 const itemsDataPath = path.join(__dirname, '..', 'data', 'tft14_items_index.json');
 
 // 표준 TFT 데이터 API (다국어 지원)

@@ -1,14 +1,12 @@
 // 성능 모니터링 API 라우트
 import express from 'express';
-import performanceOptimizer from '../services/performanceOptimizer';
-import memoryOptimizer from '../services/memoryOptimizer';
-import resourceOptimizer from '../services/resourceOptimizer';
-// import scalabilityManager from '../services/scalabilityManager';
+import { performanceOptimizer, memoryOptimizer, resourceOptimizer } from '../services/system';
+// import scalabilityManager from '../services/system/scalabilityManager';
 import aggregationService from '../services/aggregationService';
 import cacheManager from '../services/cacheManager';
-import logger from '../config/logger';
+import asyncHandler from '../utils/asyncHandler';
 import { performanceStats, generatePerformanceReport } from '../middlewares/performanceLogger';
-import { performanceStats as queryPerformanceStats, generateOptimizationReport } from '../utils/queryPerformanceMonitor';
+import { performanceStats as queryPerformanceStats, generateOptimizationReport } from '../utils/queryPerformance';
 import { getConnectionStats, manualConnectionCheck, resetConnectionStats } from '../middlewares/dbConnectionCheck';
 import { sendSuccess, sendError } from '../utils/responseHelper';
 
@@ -17,124 +15,94 @@ const router = express.Router();
 /**
  * 전체 성능 메트릭 조회
  */
-router.get('/metrics', async (_req, _res) => {
-  try {
-    const [
-      performanceMetrics,
-      memoryStats,
-      resourceUsage,
-      workerPoolStatus,
-      // loadBalancerStats,
-      cacheStats
-    ] = await Promise.all([
-      performanceOptimizer.getMetrics(),
-      memoryOptimizer.getMemoryStats(),
-      resourceOptimizer?.getResourceUsage(),
-      resourceOptimizer?.getWorkerPoolStatus(),
-      // scalabilityManager.getLoadBalancerStats(),
-      cacheManager.getStats()
-    ]);
+router.get('/metrics', asyncHandler(async (_req, _res) => {
+  const [
+    performanceMetrics,
+    memoryStats,
+    resourceUsage,
+    workerPoolStatus,
+    // loadBalancerStats,
+    cacheStats
+  ] = await Promise.all([
+    performanceOptimizer.getMetrics(),
+    memoryOptimizer.getMemoryStats(),
+    resourceOptimizer?.getResourceUsage(),
+    resourceOptimizer?.getWorkerPoolStatus(),
+    // scalabilityManager.getLoadBalancerStats(),
+    cacheManager.getStats()
+  ]);
 
-    _res.json({
-      timestamp: new Date().toISOString(),
-      performance: performanceMetrics,
-      memory: memoryStats,
-      resource: resourceUsage,
-      workerPool: workerPoolStatus,
-      // loadBalancer: loadBalancerStats,
-      cache: cacheStats
-    });
-  } catch (_error) {
-    logger.error('성능 메트릭 조회 실패:', _error);
-    _res.status(500).json({ _error: '성능 메트릭 조회 실패' });
-  }
-});
+  _res.json({
+    timestamp: new Date().toISOString(),
+    performance: performanceMetrics,
+    memory: memoryStats,
+    resource: resourceUsage,
+    workerPool: workerPoolStatus,
+    // loadBalancer: loadBalancerStats,
+    cache: cacheStats
+  });
+}));
 
 /**
  * 성능 최적화 상태 조회
  */
-router.get('/optimization-status', async (_req, _res) => {
-  try {
-    // const serviceStatus = scalabilityManager.getServiceStatus();
-    // const workerInfo = scalabilityManager.getWorkerInfo();
-    
-    _res.json({
-      // service: serviceStatus,
-      // workers: workerInfo,
-      optimizations: {
-        clustering: process.env.ENABLE_CLUSTERING === 'true',
-        compression: true,
-        caching: true,
-        workerThreads: !!resourceOptimizer
-      }
-    });
-  } catch (_error) {
-    logger.error('최적화 상태 조회 실패:', _error);
-    _res.status(500).json({ _error: '최적화 상태 조회 실패' });
-  }
-});
+router.get('/optimization-status', asyncHandler(async (_req, _res) => {
+  // const serviceStatus = scalabilityManager.getServiceStatus();
+  // const workerInfo = scalabilityManager.getWorkerInfo();
+  
+  _res.json({
+    // service: serviceStatus,
+    // workers: workerInfo,
+    optimizations: {
+      clustering: process.env.ENABLE_CLUSTERING === 'true',
+      compression: true,
+      caching: true,
+      workerThreads: !!resourceOptimizer
+    }
+  });
+}));
 
 /**
  * 캐시 워밍업 실행
  */
-router.post('/cache/warmup', async (_req, _res) => {
-  try {
-    await Promise.all([
-      memoryOptimizer.warmupMemory(),
-      aggregationService.warmupCache()
-    ]);
-    
-    _res.json({ message: '캐시 워밍업 완료' });
-  } catch (_error) {
-    logger.error('캐시 워밍업 실패:', _error);
-    _res.status(500).json({ _error: '캐시 워밍업 실패' });
-  }
-});
+router.post('/cache/warmup', asyncHandler(async (_req, _res) => {
+  await Promise.all([
+    memoryOptimizer.warmupMemory(),
+    aggregationService.warmupCache()
+  ]);
+  
+  _res.json({ message: '캐시 워밍업 완료' });
+}));
 
 /**
  * 분산 캐시 무효화
  */
-router.post('/cache/invalidate', async (_req, _res) => {
-  try {
-    const { pattern } = _req.body;
-    if (!pattern) {
-      return _res.status(400).json({ _error: '패턴이 필요합니다' });
-    }
-    
-    // await scalabilityManager.invalidateDistributedCache(pattern);
-    return _res.json({ message: `캐시 무효화 완료: ${pattern}` });
-  } catch (_error) {
-    logger.error('캐시 무효화 실패:', _error);
-    return _res.status(500).json({ _error: '캐시 무효화 실패' });
+router.post('/cache/invalidate', asyncHandler(async (_req, _res) => {
+  const { pattern } = _req.body;
+  if (!pattern) {
+    return _res.status(400).json({ error: '패턴이 필요합니다' });
   }
-});
+  
+  // await scalabilityManager.invalidateDistributedCache(pattern);
+  return _res.json({ message: `캐시 무효화 완료: ${pattern}` });
+}));
 
 /**
  * 동적 스케일링 실행
  */
-router.post('/scaling/dynamic', async (_req, _res) => {
-  try {
-    // await scalabilityManager.dynamicScaling();
-    return _res.json({ message: '동적 스케일링 완료 (비활성화됨)' });
-  } catch (_error) {
-    logger.error('동적 스케일링 실패:', _error);
-    return _res.status(500).json({ _error: '동적 스케일링 실패' });
-  }
-});
+router.post('/scaling/dynamic', asyncHandler(async (_req, _res) => {
+  // await scalabilityManager.dynamicScaling();
+  return _res.json({ message: '동적 스케일링 완료 (비활성화됨)' });
+}));
 
 /**
  * 메모리 최적화 실행
  */
-router.post('/memory/optimize', async (_req, _res) => {
-  try {
-    // 메모리 최적화 트리거
-    memoryOptimizer.emit('memoryOptimized');
-    _res.json({ message: '메모리 최적화 실행됨' });
-  } catch (_error) {
-    logger.error('메모리 최적화 실패:', _error);
-    _res.status(500).json({ _error: '메모리 최적화 실패' });
-  }
-});
+router.post('/memory/optimize', asyncHandler(async (_req, _res) => {
+  // 메모리 최적화 트리거
+  memoryOptimizer.emit('memoryOptimized');
+  _res.json({ message: '메모리 최적화 실행됨' });
+}));
 
 /**
  * 성능 테스트 실행

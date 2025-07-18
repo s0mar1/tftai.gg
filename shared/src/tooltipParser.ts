@@ -7,9 +7,9 @@
  */
 
 /**
- * 플레이스홀더를 찾기 위한 정규식. @Var@ 및 {@Var@} 형식을 모두 처리합니다.
+ * 플레이스홀더를 찾기 위한 정규식. @Var@ 및 {@Var@} 형식을 처리합니다.
  */
-const PLACEHOLDER_REGEX = /([{@])(@[a-zA-Z0-9]+@)([}@]?)/g;
+const PLACEHOLDER_REGEX = /\{?@[a-zA-Z0-9]+@\}?/g;
 
 // 변수 타입
 interface Variable {
@@ -85,12 +85,12 @@ export function replacePlaceholders(
 ): string {
     if (!description) return '';
 
-    return description.replace(PLACEHOLDER_REGEX, (_match, _p1, p2, _p3) => {
-        const varName = p2.replace(/@/g, '').toLowerCase();
+    return description.replace(PLACEHOLDER_REGEX, (match) => {
+        const varName = match.replace(/[{}@]/g, '').toLowerCase();
         const variable = varMap.get(varName);
 
         if (!variable) {
-            console.warn(`Warning: Variable ${p2} not found in varMap.`);
+            console.warn(`Warning: Variable ${match} not found in varMap.`);
             return `[?]`; // 변수를 찾을 수 없을 때의 폴백
         }
 

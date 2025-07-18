@@ -119,12 +119,16 @@ const HexCell: React.FC<HexCellProps> = ({ x, y, CELL, SPACING, onUnitAction }) 
     accept: [ItemTypes.UNIT, ItemTypes.PLACED_UNIT],
     drop: (item: DraggedUnit) => {
       const championApiName = item.championApiName || item.unit?.apiName;
-      console.log('HexCell 드롭 받음:', { championApiName, position: { x, y }, item });
+      if (import.meta.env.DEV) {
+        console.log('HexCell 드롭 받음:', { championApiName, position: { x, y }, item });
+      }
       onUnitAction({ championApiName, fromKey: item.fromKey, unit: item.unit }, { x, y });
     },
     collect: (m) => ({ isOver: m.isOver({ shallow: true }), canDrop: m.canDrop() }),
     hover: (item: DraggedUnit) => {
-      console.log('HexCell 위로 hover:', { x, y, item });
+      if (import.meta.env.DEV) {
+        console.log('HexCell 위로 hover:', { x, y, item });
+      }
     }
   });
 

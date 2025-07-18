@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import metaService from '../services/metaService';
+import championStatsService from '../services/championStatsService';
 
 const router = express.Router();
 
@@ -131,7 +131,7 @@ const router = express.Router();
  */
 router.get('/pick-rates', async (_req: Request, _res: Response, _next: NextFunction) => {
   try {
-    const pickRates = await metaService.calculatePickRates();
+    const pickRates = await championStatsService.calculatePickRates();
     _res.json(pickRates);
   } catch (_err) {
     _next(_err);
@@ -303,7 +303,7 @@ router.get('/pick-rates', async (_req: Request, _res: Response, _next: NextFunct
  */
 router.get('/win-rates', async (_req: Request, _res: Response, _next: NextFunction) => {
   try {
-    const winRates = await metaService.calculateWinRates();
+    const winRates = await championStatsService.calculateWinRates();
     _res.json(winRates);
   } catch (_err) {
     _next(_err);

@@ -20,7 +20,7 @@ const performanceMetrics = new Map<string, Array<{
   commitTime: number;
   phase: 'mount' | 'update';
   startTime: number;
-}>();
+}>>();
 
 // 성능 데이터 분석 함수
 const analyzePerformanceData = (id: string) => {

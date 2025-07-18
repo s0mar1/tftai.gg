@@ -173,6 +173,82 @@ router.get('/decks/:language', checkDBConnection, async (_req: Request, _res: Re
 
     logger.info(`[GET /api/tierlist/${language}] 요청 처리 시작`);
     
+    // 개발 모드에서는 DB 조회를 건너뛰고 바로 모의 데이터 반환
+    if (process.env.DEVELOPMENT_MODE === 'true') {
+      logger.info('개발 모드: DB 조회를 건너뛰고 모의 데이터를 반환합니다.');
+      
+      const mockTierData = [
+        {
+          deckKey: 'yasuo_challenger',
+          tierRank: 'S',
+          tierOrder: 1,
+          carryChampionName: {
+            ko: '야스오',
+            en: 'Yasuo',
+            ja: 'ヤスオ',
+            zh: '亚索'
+          },
+          mainTraitName: {
+            ko: '도전자',
+            en: 'Challenger',
+            ja: 'チャレンジャー',
+            zh: '挑战者'
+          },
+          coreUnits: [],
+          totalGames: 1000,
+          top4Count: 650,
+          winCount: 180,
+          averagePlacement: 3.2,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          deckKey: 'jinx_sniper',
+          tierRank: 'A',
+          tierOrder: 2,
+          carryChampionName: {
+            ko: '징크스',
+            en: 'Jinx',
+            ja: 'ジンクス',
+            zh: '金克丝'
+          },
+          mainTraitName: {
+            ko: '저격수',
+            en: 'Sniper',
+            ja: 'スナイパー',
+            zh: '狙击手'
+          },
+          coreUnits: [],
+          totalGames: 800,
+          top4Count: 480,
+          winCount: 120,
+          averagePlacement: 3.8,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      ];
+      
+      // 언어별 필드 추출 및 프론트엔드 호환 형태로 변환
+      const formattedMockData = mockTierData.map(deck => ({
+        deckKey: deck.deckKey,
+        tierRank: deck.tierRank,
+        tierOrder: deck.tierOrder,
+        carryChampionName: deck.carryChampionName[lang as keyof typeof deck.carryChampionName] || deck.carryChampionName.ko,
+        mainTraitName: deck.mainTraitName[lang as keyof typeof deck.mainTraitName] || deck.mainTraitName.ko,
+        coreUnits: deck.coreUnits,
+        totalGames: deck.totalGames,
+        top4Count: deck.top4Count,
+        winCount: deck.winCount,
+        averagePlacement: deck.averagePlacement,
+        createdAt: deck.createdAt,
+        updatedAt: deck.updatedAt
+      }));
+      
+      logger.info(`개발 모드: ${formattedMockData.length}개의 모의 티어 데이터를 ${lang} 언어로 반환합니다.`);
+      sendSuccess(_res, formattedMockData, `개발 모드 모의 티어 데이터 (${lang})`);
+      return;
+    }
+    
     // 실제 DB에서 DeckTier 데이터 조회
     const tierData = await DeckTier.find({})
       .sort({ tierOrder: 1, averagePlacement: 1 }) // 티어 순서와 평균 순위로 정렬

@@ -9,15 +9,7 @@ export default defineConfig(({ mode }) => {
   
   return {
     plugins: [
-      react({
-        // 프로덕션 빌드에서 개발 도구 제거
-        babel: {
-          plugins: isProd ? [
-            ['babel-plugin-transform-remove-console', { exclude: ['error', 'warn'] }],
-            ['babel-plugin-transform-remove-debugger']
-          ] : []
-        }
-      }),
+      react(),
       
       // Bundle analyzer - 빌드 후 stats.html 생성
       visualizer({
@@ -86,7 +78,7 @@ export default defineConfig(({ mode }) => {
     target: 'es2020',
     
     // 압축 설정
-    minify: isProd ? 'terser' : false,
+    minify: isProd ? 'esbuild' : false,
     
     // 소스맵 설정
     sourcemap: !isProd,
@@ -205,21 +197,9 @@ export default defineConfig(({ mode }) => {
         },
       },
       
-      // 압축 설정 (terser 사용 시)
+      // 압축 설정은 빌드 시 별도 처리 (terser 제거)
       ...(isProd && {
-        plugins: [
-          // 프로덕션 빌드에서 압축 최적화
-          require('rollup-plugin-terser')?.terser({
-            compress: {
-              drop_console: true,
-              drop_debugger: true,
-              pure_funcs: ['console.log']
-            },
-            format: {
-              comments: false
-            }
-          })
-        ]
+        plugins: []
       })
     },
   },
@@ -258,7 +238,7 @@ export default defineConfig(({ mode }) => {
     // 워커 설정 (다중 스레드 활용)
     worker: {
       format: 'es',
-      plugins: [
+      plugins: () => [
         react()
       ]
     },
