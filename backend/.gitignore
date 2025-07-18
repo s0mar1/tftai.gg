@@ -1,0 +1,35 @@
+# Dependencies
+/node_modules
+
+# Environment variables
+.env
+.env.*
+
+# Build outputs
+/dist
+/build
+*.js (src 디렉토리 제외)
+*.js.map
+*.d.ts.map
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+backend.log
+server.log
+test-server.log
+
+# Test coverage
+coverage/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Temporary files
+*.tmp
+*.temp
+
+# Debug files
+debug.log
+debug-*.log

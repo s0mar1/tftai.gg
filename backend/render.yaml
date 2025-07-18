@@ -1,0 +1,17 @@
+# Render.com 배포 설정
+services:
+  - type: web
+    name: tft-meta-analyzer-backend
+    env: node
+    plan: free
+    buildCommand: npm install --frozen-lockfile && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService:
+          type: web
+          name: tft-meta-analyzer-backend
+          property: port
+    autoDeploy: true

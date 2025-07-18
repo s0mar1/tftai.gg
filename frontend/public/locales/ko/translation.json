@@ -1,0 +1,188 @@
+{
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "noData": "데이터가 없습니다",
+    "search": "검색",
+    "filter": "필터",
+    "sort": "정렬",
+    "save": "저장",
+    "cancel": "취소",
+    "confirm": "확인",
+    "delete": "삭제",
+    "edit": "편집",
+    "create": "생성",
+    "back": "뒤로",
+    "next": "다음",
+    "previous": "이전",
+    "close": "닫기"
+  },
+  "nav": {
+    "home": "홈",
+    "tierlist": "추천 메타",
+    "guides": "덱공략",
+    "ranking": "랭킹",
+    "stats": "상세 통계",
+    "deckBuilder": "덱 빌더",
+    "aiChat": "AI 질문하기",
+    "about": "About TFTai.gg"
+  },
+  "header": {
+    "search_placeholder": "소환사명#태그를 입력하세요",
+    "language": "언어",
+    "darkMode": "다크 모드"
+  },
+  "stats": {
+    "title": "상세 통계",
+    "subtitle": "아이템별, 특성별 승률 분석",
+    "itemStats": "아이템 통계",
+    "traitStats": "특성 통계",
+    "filters": "필터",
+    "all": "전체",
+    "winRate": "승률",
+    "top4Rate": "Top4 비율",
+    "averagePlacement": "평균 등수",
+    "totalGames": "게임 수",
+    "highToLow": "높은 순",
+    "lowToHigh": "낮은 순",
+    "minGames": "최소 게임 수",
+    "noStatsFound": "조건에 맞는 통계가 없습니다",
+    "games": "{{count}}게임",
+    "itemTypes": {
+      "completed": "완성 아이템",
+      "basic": "기본 아이템",
+      "ornn": "오른 아이템",
+      "radiant": "광휘 아이템",
+      "emblem": "엠블럼"
+    },
+    "traitTypes": {
+      "origin": "계열",
+      "class": "직업"
+    }
+  },
+  "home": {
+    "hero": {
+      "title1": "당신의 플레이,",
+      "title2": "챌린저의 관점에서 분석해 보세요.",
+      "description": "TFTai.gg는 상위 랭커들의 데이터를 실시간으로 분석하여, 당신의 게임에 대한 깊이 있는 피드백과 함께 최신 메타 트렌드를 제공합니다.",
+      "searchPlaceholder": "소환사명 #태그",
+      "searchAlert": "소환사명#태그 형식으로 입력해주세요. (예: 챌린저#KR1)"
+    },
+    "trends": {
+      "title": "실시간 메타 트렌드",
+      "error": "메타 트렌드 정보를 불러오는 데 실패했습니다.",
+      "noData": "아직 분석된 메타 트렌드 정보가 없습니다.",
+      "noDataDescription": "데이터 수집 및 분석이 완료될 때까지 기다려주세요."
+    },
+    "features": {
+      "tierlist": {
+        "title": "추천 메타",
+        "description": "현재 메타에서 가장 강력한 덱 조합을 확인하세요"
+      },
+      "stats": {
+        "title": "상세 통계",
+        "description": "아이템과 특성별 승률을 자세히 분석해보세요"
+      },
+      "guides": {
+        "title": "덱 공략",
+        "description": "프로 플레이어들의 덱 운영 가이드를 확인하세요"
+      }
+    }
+  },
+  "tierlist": {
+    "title": "추천 메타",
+    "subtitle": "현재 시즌 최강 덱 조합",
+    "tier": "티어",
+    "winRate": "승률",
+    "pickRate": "픽률",
+    "avgPlacement": "평균 등수",
+    "games": "게임",
+    "loading": "티어리스트를 불러오는 중...",
+    "noData": "티어리스트 데이터가 없습니다",
+    "lastUpdated": "마지막 업데이트"
+  },
+  "ranking": {
+    "title": "랭킹",
+    "subtitle": "상위 플레이어 순위",
+    "rank": "순위",
+    "summoner": "소환사",
+    "tier": "티어",
+    "lp": "LP",
+    "winRate": "승률",
+    "recentGames": "최근 게임",
+    "loading": "랭킹을 불러오는 중...",
+    "noData": "랭킹 데이터가 없습니다"
+  },
+  "guides": {
+    "title": "덱 공략",
+    "subtitle": "프로 플레이어 가이드",
+    "author": "작성자",
+    "createdAt": "작성일",
+    "views": "조회수",
+    "difficulty": "난이도",
+    "easy": "쉬움",
+    "medium": "보통",
+    "hard": "어려움",
+    "newGuide": "새 가이드 작성",
+    "editGuide": "가이드 편집",
+    "deleteGuide": "가이드 삭제",
+    "loading": "가이드를 불러오는 중...",
+    "noGuides": "가이드가 없습니다"
+  },
+  "summoner": {
+    "title": "소환사 검색",
+    "searchPlaceholder": "소환사명을 입력하세요",
+    "search": "검색",
+    "notFound": "소환사를 찾을 수 없습니다",
+    "loading": "소환사 정보를 불러오는 중...",
+    "matchHistory": "경기 기록",
+    "stats": "통계",
+    "rank": "랭크",
+    "tier": "티어",
+    "lp": "LP",
+    "winRate": "승률",
+    "recentMatches": "최근 경기"
+  },
+  "deckBuilder": {
+    "title": "덱 빌더",
+    "subtitle": "나만의 덱 조합을 만들어보세요",
+    "createGuide": "공략 작성",
+    "champions": "챔피언",
+    "items": "아이템",
+    "traits": "특성",
+    "cost": "코스트",
+    "selectChampion": "챔피언 선택",
+    "selectItem": "아이템 선택",
+    "saveDeck": "덱 저장",
+    "loadDeck": "덱 불러오기",
+    "clearDeck": "덱 초기화",
+    "deckName": "덱 이름",
+    "deckDescription": "덱 설명",
+    "synergies": "시너지",
+    "unit": "유닛",
+    "details": "세부 정보",
+    "starLevel": "{{star}}성",
+    "equippedItems": "장착 아이템",
+    "noUnitSelected": "선택된 유닛이 없습니다",
+    "searchByName": "이름으로 검색..."
+  },
+  "aiChat": {
+    "title": "AI 질문하기",
+    "subtitle": "TFT 관련 궁금한 점을 AI에게 물어보세요",
+    "inputPlaceholder": "질문을 입력하세요...",
+    "send": "전송",
+    "thinking": "AI가 생각하는 중...",
+    "error": "AI 응답 중 오류가 발생했습니다",
+    "exampleQuestions": "예시 질문",
+    "examples": {
+      "meta": "현재 메타에서 가장 강한 덱은?",
+      "items": "이 아이템 조합이 좋은가요?",
+      "positioning": "어떻게 포지셔닝해야 하나요?"
+    }
+  },
+  "errors": {
+    "networkError": "네트워크 오류가 발생했습니다",
+    "dataLoadError": "데이터를 불러오는데 실패했습니다",
+    "unknownError": "알 수 없는 오류가 발생했습니다"
+  }
+}

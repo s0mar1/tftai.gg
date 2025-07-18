@@ -1,0 +1,188 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "发生错误",
+    "noData": "暂无数据",
+    "search": "搜索",
+    "filter": "筛选",
+    "sort": "排序",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "back": "返回",
+    "next": "下一个",
+    "previous": "上一个",
+    "close": "关闭"
+  },
+  "nav": {
+    "home": "首页",
+    "tierlist": "推荐阵容",
+    "guides": "阵容攻略",
+    "ranking": "排行榜",
+    "stats": "详细统计",
+    "deckBuilder": "阵容模拟器",
+    "aiChat": "AI问答",
+    "about": "关于TFTai.gg"
+  },
+  "header": {
+    "search_placeholder": "请输入召唤师名称#标签",
+    "language": "语言",
+    "darkMode": "夜间模式"
+  },
+  "stats": {
+    "title": "详细统计",
+    "subtitle": "按装备、羁绊分析胜率",
+    "itemStats": "装备统计",
+    "traitStats": "羁绊统计",
+    "filters": "筛选条件",
+    "all": "全部",
+    "winRate": "胜率",
+    "top4Rate": "前四率",
+    "averagePlacement": "平均排名",
+    "totalGames": "对局数",
+    "highToLow": "从高到低",
+    "lowToHigh": "从低到高",
+    "minGames": "最低对局数",
+    "noStatsFound": "未找到符合条件的统计数据",
+    "games": "{{count}}场对局",
+    "itemTypes": {
+      "completed": "成装",
+      "basic": "基础装备",
+      "ornn": "奥恩装备",
+      "radiant": "光明装备",
+      "emblem": "纹章"
+    },
+    "traitTypes": {
+      "origin": "种族",
+      "class": "职业"
+    }
+  },
+  "home": {
+    "hero": {
+      "title1": "您的对局，",
+      "title2": "以挑战者的视角进行分析。",
+      "description": "TFTai.gg实时分析高段位玩家数据，为您提供深入的游戏反馈和最新的版本趋势。",
+      "searchPlaceholder": "召唤师名称#标签",
+      "searchAlert": "请输入召唤师名称#标签格式。(例如：挑战者#KR1)"
+    },
+    "trends": {
+      "title": "实时阵容趋势",
+      "error": "加载阵容趋势信息失败。",
+      "noData": "暂无阵容趋势信息。",
+      "noDataDescription": "请等待数据收集和分析完成。"
+    },
+    "features": {
+      "tierlist": {
+        "title": "推荐阵容",
+        "description": "查看当前版本最强势的阵容组合"
+      },
+      "stats": {
+        "title": "详细统计",
+        "description": "深入分析装备和羁绊的胜率"
+      },
+      "guides": {
+        "title": "阵容攻略",
+        "description": "查看职业选手的阵容运营指南"
+      }
+    }
+  },
+  "tierlist": {
+    "title": "推荐阵容",
+    "subtitle": "当前赛季最强阵容组合",
+    "tier": "梯队",
+    "winRate": "胜率",
+    "pickRate": "选择率",
+    "avgPlacement": "平均排名",
+    "games": "对局",
+    "loading": "正在加载阵容列表...",
+    "noData": "暂无阵容列表数据",
+    "lastUpdated": "最后更新"
+  },
+  "ranking": {
+    "title": "排行榜",
+    "subtitle": "高段位玩家排名",
+    "rank": "排名",
+    "summoner": "召唤师",
+    "tier": "段位",
+    "lp": "胜点",
+    "winRate": "胜率",
+    "recentGames": "最近对局",
+    "loading": "正在加载排行榜...",
+    "noData": "暂无排行榜数据"
+  },
+  "guides": {
+    "title": "阵容攻略",
+    "subtitle": "职业选手指南",
+    "author": "作者",
+    "createdAt": "创建时间",
+    "views": "浏览量",
+    "difficulty": "难度",
+    "easy": "简单",
+    "medium": "中等",
+    "hard": "困难",
+    "newGuide": "新建攻略",
+    "editGuide": "编辑攻略",
+    "deleteGuide": "删除攻略",
+    "loading": "正在加载攻略...",
+    "noGuides": "暂无攻略"
+  },
+  "summoner": {
+    "title": "召唤师查询",
+    "searchPlaceholder": "请输入召唤师名称",
+    "search": "查询",
+    "notFound": "未找到该召唤师",
+    "loading": "正在加载召唤师信息...",
+    "matchHistory": "比赛记录",
+    "stats": "统计数据",
+    "rank": "段位",
+    "tier": "阶级",
+    "lp": "胜点",
+    "winRate": "胜率",
+    "recentMatches": "最近比赛"
+  },
+  "deckBuilder": {
+    "title": "阵容模拟器",
+    "subtitle": "创建您自己的阵容组合",
+    "createGuide": "创建攻略",
+    "champions": "英雄",
+    "items": "装备",
+    "traits": "羁绊",
+    "cost": "费用",
+    "selectChampion": "选择英雄",
+    "selectItem": "选择装备",
+    "saveDeck": "保存阵容",
+    "loadDeck": "加载阵容",
+    "clearDeck": "清空阵容",
+    "deckName": "阵容名称",
+    "deckDescription": "阵容描述",
+    "synergies": "羁绊组合",
+    "unit": "单位",
+    "details": "详细信息",
+    "starLevel": "{{star}}星",
+    "equippedItems": "已装备的物品",
+    "noUnitSelected": "未选择单位",
+    "searchByName": "按名称搜索..."
+  },
+  "aiChat": {
+    "title": "AI问答",
+    "subtitle": "向AI提问TFT相关问题",
+    "inputPlaceholder": "请输入您的问题...",
+    "send": "发送",
+    "thinking": "AI思考中...",
+    "error": "AI回复出错",
+    "exampleQuestions": "示例问题",
+    "examples": {
+      "meta": "当前版本最强势的阵容是什么？",
+      "items": "这套装备组合好吗？",
+      "positioning": "该如何站位？"
+    }
+  },
+  "errors": {
+    "networkError": "网络错误",
+    "dataLoadError": "数据加载失败",
+    "unknownError": "未知错误"
+  }
+}

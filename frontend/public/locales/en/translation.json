@@ -1,0 +1,188 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "noData": "No data available",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close"
+  },
+  "nav": {
+    "home": "Home",
+    "tierlist": "Meta Tier List",
+    "guides": "Team Comps",
+    "ranking": "Rankings",
+    "stats": "Detailed Stats",
+    "deckBuilder": "Team Builder",
+    "aiChat": "Ask AI",
+    "about": "About TFTai.gg"
+  },
+  "header": {
+    "search_placeholder": "Enter summoner name#tag",
+    "language": "Language",
+    "darkMode": "Dark Mode"
+  },
+  "stats": {
+    "title": "Detailed Stats",
+    "subtitle": "Win Rate Analysis by Item and Trait",
+    "itemStats": "Item Stats",
+    "traitStats": "Trait Stats",
+    "filters": "Filters",
+    "all": "All",
+    "winRate": "Win Rate",
+    "top4Rate": "Top 4 Rate",
+    "averagePlacement": "Average Placement",
+    "totalGames": "Total Games",
+    "highToLow": "High to Low",
+    "lowToHigh": "Low to High",
+    "minGames": "Minimum Games",
+    "noStatsFound": "No stats found for the selected criteria",
+    "games": "{{count}} games",
+    "itemTypes": {
+      "completed": "Completed Items",
+      "basic": "Basic Items",
+      "ornn": "Ornn Items",
+      "radiant": "Radiant Items",
+      "emblem": "Emblems"
+    },
+    "traitTypes": {
+      "origin": "Origins",
+      "class": "Classes"
+    }
+  },
+  "home": {
+    "hero": {
+      "title1": "Elevate Your Gameplay,",
+      "title2": "Analyze from a Challenger's Perspective.",
+      "description": "TFTai.gg provides real-time analysis of high-elo player data, offering in-depth feedback on your games and insights into the latest meta trends.",
+      "searchPlaceholder": "Summoner Name #Tag",
+      "searchAlert": "Please enter your summoner name followed by # and your tag (e.g., Challenger#KR1)"
+    },
+    "trends": {
+      "title": "Real-Time Meta Trends",
+      "error": "Failed to load meta trends.",
+      "noData": "No meta trends analyzed yet.",
+      "noDataDescription": "Please wait while data is being collected and analyzed."
+    },
+    "features": {
+      "tierlist": {
+        "title": "Meta Tier List",
+        "description": "Discover the strongest team compositions in the current meta."
+      },
+      "stats": {
+        "title": "Detailed Stats",
+        "description": "Analyze item and trait win rates in detail."
+      },
+      "guides": {
+        "title": "Team Comps",
+        "description": "Explore team composition guides from pro players."
+      }
+    }
+  },
+  "tierlist": {
+    "title": "Meta Tier List",
+    "subtitle": "Current Patch's Strongest Team Compositions",
+    "tier": "Tier",
+    "winRate": "Win Rate",
+    "pickRate": "Pick Rate",
+    "avgPlacement": "Avg. Placement",
+    "games": "Games",
+    "loading": "Loading Tier List...",
+    "noData": "No Tier List data available.",
+    "lastUpdated": "Last Updated"
+  },
+  "ranking": {
+    "title": "Rankings",
+    "subtitle": "Top Player Leaderboard",
+    "rank": "Rank",
+    "summoner": "Summoner",
+    "tier": "Tier",
+    "lp": "LP",
+    "winRate": "Win Rate",
+    "recentGames": "Recent Games",
+    "loading": "Loading Rankings...",
+    "noData": "No Ranking data available."
+  },
+  "guides": {
+    "title": "Team Comps",
+    "subtitle": "Pro Player Guides",
+    "author": "Author",
+    "createdAt": "Created",
+    "views": "Views",
+    "difficulty": "Difficulty",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "newGuide": "Create New Guide",
+    "editGuide": "Edit Guide",
+    "deleteGuide": "Delete Guide",
+    "loading": "Loading Guides...",
+    "noGuides": "No guides available."
+  },
+  "summoner": {
+    "title": "Summoner Search",
+    "searchPlaceholder": "Enter Summoner Name",
+    "search": "Search",
+    "notFound": "Summoner not found.",
+    "loading": "Loading Summoner info...",
+    "matchHistory": "Match History",
+    "stats": "Stats",
+    "rank": "Rank",
+    "tier": "Tier",
+    "lp": "LP",
+    "winRate": "Win Rate",
+    "recentMatches": "Recent Matches"
+  },
+  "deckBuilder": {
+    "title": "Team Builder",
+    "subtitle": "Craft Your Own Team Composition",
+    "createGuide": "Create Guide",
+    "champions": "Champions",
+    "items": "Items",
+    "traits": "Traits",
+    "cost": "Cost",
+    "selectChampion": "Select Champion",
+    "selectItem": "Select Item",
+    "saveDeck": "Save Team",
+    "loadDeck": "Load Team",
+    "clearDeck": "Clear Team",
+    "deckName": "Team Name",
+    "deckDescription": "Team Description",
+    "synergies": "Synergies",
+    "unit": "Unit",
+    "details": "Details",
+    "starLevel": "{{star}} Star",
+    "equippedItems": "Equipped Items",
+    "noUnitSelected": "No unit selected.",
+    "searchByName": "Search by name..."
+  },
+  "aiChat": {
+    "title": "Ask AI",
+    "subtitle": "Ask your TFT questions to the AI",
+    "inputPlaceholder": "Enter your question...",
+    "send": "Send",
+    "thinking": "AI is thinking...",
+    "error": "An error occurred while processing your request.",
+    "exampleQuestions": "Example Questions",
+    "examples": {
+      "meta": "What's the strongest comp in the current meta?",
+      "items": "Are these item combinations good?",
+      "positioning": "How should I position my units?"
+    }
+  },
+  "errors": {
+    "networkError": "A network error occurred.",
+    "dataLoadError": "Failed to load data.",
+    "unknownError": "An unknown error occurred."
+  }
+}

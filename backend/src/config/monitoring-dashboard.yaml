@@ -1,0 +1,405 @@
+# TFT Meta Analyzer 모니터링 대시보드 설정
+# Grafana 대시보드 구성 및 Prometheus 알림 규칙
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tft-grafana-dashboards
+  namespace: monitoring
+data:
+  # 1. 실시간 성능 대시보드
+  performance-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "TFT Meta Analyzer - 실시간 성능",
+        "tags": ["tft", "performance", "real-time"],
+        "style": "dark",
+        "timezone": "Asia/Seoul",
+        "panels": [
+          {
+            "id": 1,
+            "title": "API 응답 시간 분포",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(tft_api_response_time_bucket[5m])) by (le, endpoint_category))",
+                "legendFormat": "95th percentile - {{endpoint_category}}"
+              },
+              {
+                "expr": "histogram_quantile(0.50, sum(rate(tft_api_response_time_bucket[5m])) by (le, endpoint_category))",
+                "legendFormat": "50th percentile - {{endpoint_category}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "ms",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 100},
+                    {"color": "red", "value": 500}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": 2,
+            "title": "캐시 히트율",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(rate(tft_cache_hits_total[5m])) by (cache_layer) / (sum(rate(tft_cache_hits_total[5m])) by (cache_layer) + sum(rate(tft_cache_misses_total[5m])) by (cache_layer)) * 100",
+                "legendFormat": "{{cache_layer}} Hit Rate"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": null},
+                    {"color": "yellow", "value": 70},
+                    {"color": "green", "value": 90}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": 3,
+            "title": "외부 API 성공률",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(rate(tft_external_api_calls_total{success=\"true\"}[5m])) by (api_type) / sum(rate(tft_external_api_calls_total[5m])) by (api_type) * 100",
+                "legendFormat": "{{api_type}} Success Rate"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": null},
+                    {"color": "yellow", "value": 95},
+                    {"color": "green", "value": 99}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": 4,
+            "title": "동시 접속 사용자",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "sum(tft_concurrent_users) by (endpoint_category)",
+                "legendFormat": "{{endpoint_category}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short"
+              }
+            }
+          },
+          {
+            "id": 5,
+            "title": "에러율",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "sum(rate(tft_errors_total[5m])) by (error_type, endpoint)",
+                "legendFormat": "{{error_type}} - {{endpoint}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "reqps"
+              }
+            }
+          }
+        ]
+      }
+    }
+
+  # 2. 비즈니스 메트릭 대시보드
+  business-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "TFT Meta Analyzer - 비즈니스 메트릭",
+        "tags": ["tft", "business", "analytics"],
+        "style": "dark",
+        "timezone": "Asia/Seoul",
+        "panels": [
+          {
+            "id": 1,
+            "title": "AI 분석 요청 수",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(increase(tft_ai_analysis_total[1h])) by (analysis_type)",
+                "legendFormat": "{{analysis_type}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short"
+              }
+            }
+          },
+          {
+            "id": 2,
+            "title": "AI 분석 응답 시간",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(tft_ai_analysis_latency_bucket[5m])) by (le, analysis_type))",
+                "legendFormat": "95th percentile - {{analysis_type}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "ms"
+              }
+            }
+          },
+          {
+            "id": 3,
+            "title": "분석된 매치 수",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(increase(tft_matches_analyzed_total[1h])) by (region, tier)",
+                "legendFormat": "{{region}} - {{tier}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short"
+              }
+            }
+          },
+          {
+            "id": 4,
+            "title": "티어별 사용자 분포",
+            "type": "piechart",
+            "targets": [
+              {
+                "expr": "sum(tft_tier_distribution) by (tier)",
+                "legendFormat": "{{tier}}"
+              }
+            ]
+          },
+          {
+            "id": 5,
+            "title": "Riot API 사용량",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "sum(rate(tft_external_api_calls_total{api_type=\"riot\"}[5m])) by (region)",
+                "legendFormat": "{{region}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "reqps"
+              }
+            }
+          },
+          {
+            "id": 6,
+            "title": "AI 토큰 사용량",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "sum(rate(tft_ai_token_usage_total[5m])) by (analysis_type)",
+                "legendFormat": "{{analysis_type}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short"
+              }
+            }
+          }
+        ]
+      }
+    }
+
+  # 3. 인프라 모니터링 대시보드
+  infrastructure-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "TFT Meta Analyzer - 인프라 모니터링",
+        "tags": ["tft", "infrastructure", "system"],
+        "style": "dark",
+        "timezone": "Asia/Seoul",
+        "panels": [
+          {
+            "id": 1,
+            "title": "메모리 사용량",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "tft_memory_usage_bytes / 1024 / 1024",
+                "legendFormat": "{{type}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "MB"
+              }
+            }
+          },
+          {
+            "id": 2,
+            "title": "데이터베이스 쿼리 응답 시간",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(tft_db_query_latency_bucket[5m])) by (le, collection, operation))",
+                "legendFormat": "{{collection}} - {{operation}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "ms"
+              }
+            }
+          },
+          {
+            "id": 3,
+            "title": "데이터베이스 연결 풀",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "tft_db_connection_pool",
+                "legendFormat": "Active Connections"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short"
+              }
+            }
+          },
+          {
+            "id": 4,
+            "title": "Riot API 속도 제한",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "tft_riot_api_rate_limit by (region)",
+                "legendFormat": "{{region}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "short"
+              }
+            }
+          }
+        ]
+      }
+    }
+
+---
+# Prometheus 알림 규칙
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: tft-analyzer-alerts
+  namespace: monitoring
+spec:
+  groups:
+  - name: tft-analyzer-performance
+    rules:
+    - alert: HighApiResponseTime
+      expr: histogram_quantile(0.95, sum(rate(tft_api_response_time_bucket[5m])) by (le, endpoint_category)) > 1000
+      for: 2m
+      labels:
+        severity: warning
+        service: tft-analyzer
+      annotations:
+        summary: "TFT API 응답 시간이 높습니다"
+        description: "{{ $labels.endpoint_category }} 엔드포인트의 95th percentile 응답 시간이 1초를 초과했습니다."
+
+    - alert: LowCacheHitRate
+      expr: sum(rate(tft_cache_hits_total[5m])) by (cache_layer) / (sum(rate(tft_cache_hits_total[5m])) by (cache_layer) + sum(rate(tft_cache_misses_total[5m])) by (cache_layer)) * 100 < 70
+      for: 5m
+      labels:
+        severity: warning
+        service: tft-analyzer
+      annotations:
+        summary: "캐시 히트율이 낮습니다"
+        description: "{{ $labels.cache_layer }} 캐시의 히트율이 70% 미만입니다."
+
+    - alert: ExternalApiFailureRate
+      expr: sum(rate(tft_external_api_errors_total[5m])) by (api_type) / sum(rate(tft_external_api_calls_total[5m])) by (api_type) * 100 > 5
+      for: 3m
+      labels:
+        severity: critical
+        service: tft-analyzer
+      annotations:
+        summary: "외부 API 실패율이 높습니다"
+        description: "{{ $labels.api_type }} API의 실패율이 5%를 초과했습니다."
+
+    - alert: HighErrorRate
+      expr: sum(rate(tft_errors_total[5m])) by (endpoint) > 10
+      for: 2m
+      labels:
+        severity: warning
+        service: tft-analyzer
+      annotations:
+        summary: "에러율이 높습니다"
+        description: "{{ $labels.endpoint }} 엔드포인트에서 분당 10회 이상의 에러가 발생하고 있습니다."
+
+  - name: tft-analyzer-business
+    rules:
+    - alert: AiAnalysisLatency
+      expr: histogram_quantile(0.95, sum(rate(tft_ai_analysis_latency_bucket[5m])) by (le, analysis_type)) > 30000
+      for: 5m
+      labels:
+        severity: warning
+        service: tft-analyzer
+      annotations:
+        summary: "AI 분석 응답 시간이 너무 깁니다"
+        description: "{{ $labels.analysis_type }} 분석의 95th percentile 응답 시간이 30초를 초과했습니다."
+
+    - alert: RiotApiRateLimit
+      expr: tft_riot_api_rate_limit < 10
+      for: 1m
+      labels:
+        severity: critical
+        service: tft-analyzer
+      annotations:
+        summary: "Riot API 속도 제한에 근접했습니다"
+        description: "{{ $labels.region }} 지역의 Riot API 잔여 요청 수가 10개 미만입니다."
+
+  - name: tft-analyzer-infrastructure
+    rules:
+    - alert: HighMemoryUsage
+      expr: tft_memory_usage_bytes{type="heap_used"} / tft_memory_usage_bytes{type="heap_total"} * 100 > 80
+      for: 5m
+      labels:
+        severity: warning
+        service: tft-analyzer
+      annotations:
+        summary: "메모리 사용량이 높습니다"
+        description: "힙 메모리 사용량이 80%를 초과했습니다."
+
+    - alert: DatabaseQueryLatency
+      expr: histogram_quantile(0.95, sum(rate(tft_db_query_latency_bucket[5m])) by (le, collection)) > 5000
+      for: 3m
+      labels:
+        severity: warning
+        service: tft-analyzer
+      annotations:
+        summary: "데이터베이스 쿼리 응답 시간이 느립니다"
+        description: "{{ $labels.collection }} 컬렉션의 95th percentile 쿼리 응답 시간이 5초를 초과했습니다."

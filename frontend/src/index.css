@@ -1,0 +1,23 @@
+// frontend/src/index.js (또는 main.jsx)
+
+import React from 'react';
+import ReactDOM from 'react-dom/client'; // React 18+ 기준
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import './index.css'; // 전역 CSS (Tailwind CSS 포함)
+
+import { TFTDataProvider } from './context/TFTDataContext'; // 💡 추가: TFTDataProvider 임포트
+
+// 애플리케이션의 루트 요소를 선택
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+// 💡 수정: App 컴포넌트 위에 TFTDataProvider로 감쌉니다.
+root.render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <TFTDataProvider> {/* 💡 추가: TFT 데이터를 전역 제공 시작 */}
+        <App />
+      </TFTDataProvider> {/* 💡 추가: TFT 데이터를 전역 제공 끝 */}
+    </BrowserRouter>
+  </React.StrictMode>
+);

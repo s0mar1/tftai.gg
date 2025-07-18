@@ -1,0 +1,74 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/mnt/c/Users/jiseo/Desktop/tft-meta-analyzer-full/tft-meta-analyzer"
+      ],
+      "env": {}
+    },
+    "github": {
+      "type": "stdio",
+      "command": "env",
+      "args": [
+        "GITHUB_TOKEN=your_token_here",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {}
+    },
+    "typescript": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-typescript",
+        "/mnt/c/Users/jiseo/Desktop/tft-meta-analyzer-full/tft-meta-analyzer"
+      ],
+      "env": {}
+    },
+    "mongodb": {
+      "type": "stdio",
+      "command": "env",
+      "args": [
+        "MONGODB_URI=mongodb+srv://somari:qwer1324.@cluster0.inspj2m.mongodb.net/tft-meta?retryWrites=true&w=majority",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-mongodb"
+      ],
+      "env": {}
+    },
+    "puppeteer": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ],
+      "env": {}
+    },
+    "memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {}
+    },
+    "testing": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-testing",
+        "/mnt/c/Users/jiseo/Desktop/tft-meta-analyzer-full/tft-meta-analyzer"
+      ],
+      "env": {}
+    }
+  }
+}

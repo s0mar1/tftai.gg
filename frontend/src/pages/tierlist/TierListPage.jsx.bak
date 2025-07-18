@@ -1,0 +1,265 @@
+// frontend/src/pages/tierlist/TierListPage.jsx
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useTFTData } from '../../context/TFTDataContext'; // 💡 1. 툴팁 함수를 사용하기 위해 useTFTData를 가져옵니다.
+import TraitHexIcon from '../summoner/components/TraitHexIcon';
+
+// --- 헬퍼 함수 ---
+const getTierColor = (tierRank) => {
+  const colorMap = { S: '#E13434', A: '#B45AF3', B: '#2C98F0', C: '#20B359', D: '#9E9E9E' };
+  return colorMap[tierRank] || '#6E6E6E';
+};
+
+const getDynamicColor = (value, type) => {
+  // 파스텔 계열 색상 정의
+  const redPastel = 'text-red-700 dark:text-red-500'; // 진한 붉은색
+  const lightRedPastel = 'text-red-200 dark:text-red-200'; // 연한 붉은색 (경고)
+  const mintPastelLight = 'text-emerald-400 dark:text-emerald-300'; // 연한 민트
+  const mintPastelStrong = 'text-brand-mint'; // 우리 사이트의 민트색
+
+  if (type === 'averagePlacement') {
+    if (value <= 4.0) return mintPastelStrong; 
+    if (value <= 4.15) return mintPastelLight; 
+    if (value <= 4.3) return lightRedPastel; 
+    return redPastel; 
+  } else if (type === 'top4Rate') { 
+    if (value >= 50) return mintPastelStrong; 
+    if (value >= 45) return mintPastelLight; 
+    if (value >= 40) return lightRedPastel; 
+    return redPastel; 
+  } else if (type === 'winRate') { 
+    if (value >= 13) return mintPastelStrong; 
+    if (value >= 12) return mintPastelLight; 
+    if (value >= 10) return lightRedPastel; 
+    return redPastel; 
+  }
+  return ''; 
+};
+
+const getCostBorderStyle = (cost) => {
+  const colorMap = { 1: '#808080', 2: '#1E823C', 3: '#156293', 4: '#87259E', 5: '#B89D29' };
+  return { border: `2px solid ${colorMap[cost] || colorMap[1]}` };
+};
+
+// --- 재사용 컴포넌트 ---
+const UnitWithItems = ({ unit, showItems, isMajorUnit }) => {
+  // 💡 2. Context에서 툴팁 함수와 전체 챔피언 목록 데이터를 가져옵니다.
+  const { showTooltip, hideTooltip, champions } = useTFTData();
+
+  if (!unit || !unit.image_url) {
+    return <div className="w-14 h-24" />;
+  }
+
+  const displayedItems = showItems ? (unit.recommendedItems || []).slice(0, 3) : [];
+
+  const handleMouseEnter = (event, unitData) => {
+    // 툴팁에 필요한 전체 챔피언 정보를 `champions` 목록에서 찾습니다.
+    const fullChampionData = champions.find(c => c.apiName === unitData.apiName);
+    if (fullChampionData) {
+      showTooltip(fullChampionData, event);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    hideTooltip();
+  };
+
+  return (
+    // 💡 3. 마우스 이벤트를 감지할 div에 onMouseEnter와 onMouseLeave를 추가합니다.
+    <div 
+      className="relative flex flex-col items-center gap-1 w-14"
+      onMouseEnter={(e) => handleMouseEnter(e, unit)}
+      onMouseLeave={handleMouseLeave}
+    >
+      {unit.tier > 0 && (
+        <div className="absolute top-0 right-0 z-10 flex items-center justify-center w-5 h-5 bg-yellow-400 border border-yellow-600 rounded-full text-white font-bold text-xs">★</div>
+      )}
+      <img 
+        src={unit.image_url} 
+        alt={unit.name} 
+        title={unit.name} 
+        className="w-12 h-12 rounded-md" 
+        style={getCostBorderStyle(unit.cost)}
+      />
+      <div className="flex justify-center items-center h-4 gap-px mt-0.5">
+        {displayedItems.map((item, index) =>
+          item.image_url && <img key={index} src={item.image_url} alt={item.name} title={item.name} className="w-4 h-4 rounded-sm" />
+        )}
+      </div>
+      <span className="w-full text-xs text-center text-gray-500 truncate">{unit.name}</span>
+    </div>
+  );
+};
+
+const DeckCard = ({ deck, traitMap }) => {
+  const { champions, krNameMap } = useTFTData();
+  const tierColor = getTierColor(deck.tierRank);
+  const top4Rate = deck.totalGames > 0 ? ((deck.top4Count / deck.totalGames) * 100).toFixed(1) : "0.0";
+  const winRate = deck.totalGames > 0 ? ((deck.winCount / deck.totalGames) * 100).toFixed(1) : "0.0";
+
+  const mainTrait = traitMap.get(deck.mainTraitName.toLowerCase());
+  const mainTraitIconUrl = mainTrait ? mainTrait.icon : '';
+
+  // krNameMap을 역으로 사용하여 한국어 이름 -> apiName 매핑 생성
+  const koreanToApiNameMap = React.useMemo(() => {
+    const map = new Map();
+    if (!krNameMap) return map;
+    // console.log('krNameMap entries:', Array.from(krNameMap.entries()).slice(0, 10)); // krNameMap 내용 확인
+    for (const [apiName, koreanName] of krNameMap.entries()) {
+      if (!map.has(koreanName)) {
+        map.set(koreanName, apiName);
+      }
+    }
+    // console.log('koreanToApiNameMap entries:', Array.from(map.entries()).slice(0, 10)); // koreanToApiNameMap 내용 확인
+    return map;
+  }, [krNameMap]);
+
+  console.log('--- DeckCard Trait Debug ---');
+  console.log('deck.coreUnits:', deck.coreUnits);
+  console.log('champions (first 5):', champions.slice(0, 5));
+
+  // 덱의 유닛들로부터 활성화된 특성 계산
+  const activeTraits = {};
+  deck.coreUnits.forEach(unit => {
+    const fullChampionData = champions.find(c => c.apiName === unit.apiName);
+    console.log(`  Processing unit ${unit.apiName}: fullChampionData`, fullChampionData);
+    if (fullChampionData && fullChampionData.traits) {
+      console.log(`    Found traits for ${unit.apiName}:`, fullChampionData.traits);
+      fullChampionData.traits.forEach(koreanTraitName => {
+        console.log(`      Attempting to map Korean trait: "${koreanTraitName}"`);
+        const traitApiName = koreanToApiNameMap.get(koreanTraitName);
+        console.log(`        Mapped API name: "${traitApiName}"`);
+        if (traitApiName) {
+          activeTraits[traitApiName] = (activeTraits[traitApiName] || 0) + 1;
+        } else {
+          console.warn(`[DeckCard] Unknown Korean trait name: "${koreanTraitName}". Cannot map to API name. Check if this name exists in krNameMap.`);
+        }
+      });
+    }
+  });
+  console.log('activeTraits (raw):', activeTraits);
+
+  const sortedActiveTraits = Object.entries(activeTraits)
+    .map(([apiName, count]) => {
+      const traitData = traitMap.get(apiName.toLowerCase());
+      console.log(`  Mapping trait ${apiName}: traitData`, traitData);
+      console.log(`    traitData.style for ${apiName}:`, traitData?.style); // <-- 추가된 로그
+      return traitData ? { ...traitData, count, style: traitData.style || 'none' } : null;
+    })
+    .filter(Boolean)
+    .filter(trait => trait.style !== 'inactive') // 비활성화된 특성 필터링
+    .sort((a, b) => b.count - a.count); // 유닛 수 기준으로 정렬
+  console.log('sortedActiveTraits (final):', sortedActiveTraits);
+  console.log('traitMap keys (first 10):', Array.from(traitMap.keys()).slice(0, 10)); // traitMap 키 확인
+
+  const sortedCoreUnits = [...(deck.coreUnits || [])].sort((a, b) => {
+    const isA_Carry = a.name === deck.carryChampionName;
+    const isB_Carry = b.name === deck.carryChampionName;
+    if (isA_Carry && !isB_Carry) return -1;
+    if (!isA_Carry && isB_Carry) return 1;
+    if (a.cost !== b.cost) return a.cost - b.cost;
+    return b.tier - a.tier;
+  });
+
+  const majorUnitsToShow = new Set();
+  if (deck.carryChampionName) {
+      const carryUnit = sortedCoreUnits.find(u => u.name === deck.carryChampionName);
+      if(carryUnit) majorUnitsToShow.add(carryUnit.apiName);
+  }
+  const nonCarry4Costs = sortedCoreUnits.filter(u => u.cost === 4 && u.name !== deck.carryChampionName);
+  nonCarry4Costs.slice(0, 2).forEach(u => majorUnitsToShow.add(u.apiName));
+  const remainingUnits = sortedCoreUnits.filter(u => !majorUnitsToShow.has(u.apiName));
+  remainingUnits.forEach(u => {
+      if(majorUnitsToShow.size < 3) majorUnitsToShow.add(u.apiName);
+  });
+  
+  return (
+    <div className="flex items-center gap-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md border-l-4" style={{ borderLeftColor: tierColor }}>
+      <div className="flex items-center gap-4 flex-shrink-0 w-56">
+        <div className="flex items-center justify-center w-10 h-10 rounded-md text-white text-2xl font-bold" style={{ backgroundColor: tierColor }}>
+          {deck.tierRank}
+        </div>
+        <div>
+          <h3 className="font-bold text-lg text-gray-800 dark:text-gray-100 flex items-center gap-2">
+            {mainTraitIconUrl && <img src={mainTraitIconUrl} alt={deck.mainTraitName} className="w-6 h-6" />}
+            {deck.mainTraitName} {deck.carryChampionName}
+          </h3>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {sortedActiveTraits.map(trait => (
+              <div key={trait.apiName} className="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs text-gray-600 dark:text-gray-300">
+                <TraitHexIcon variant={trait.style} size={20} />
+                <span>{trait.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-grow flex items-start gap-1.5">
+        {sortedCoreUnits.slice(0, 8).map((unit) => (
+          <UnitWithItems
+            key={unit.apiName || unit.name}
+            unit={unit}
+            showItems={majorUnitsToShow.has(unit.apiName)}
+            isMajorUnit={majorUnitsToShow.has(unit.apiName)}
+          />
+        ))}
+      </div>
+
+      <div className="flex-shrink-0 grid grid-cols-4 gap-6 w-96 text-center">
+        <div><p className={`font-bold text-base ${getDynamicColor(deck.averagePlacement, 'averagePlacement')}`}>{deck.averagePlacement.toFixed(2)}</p><p className="text-xs text-gray-500 dark:text-gray-400">평균 등수</p></div>
+        <div><p className={`font-bold text-base ${getDynamicColor(parseFloat(top4Rate), 'top4Rate')}`}>{top4Rate}%</p><p className="text-xs text-gray-500 dark:text-gray-400">Top 4</p></div>
+        <div><p className={`font-bold text-base ${getDynamicColor(parseFloat(winRate), 'winRate')}`}>{winRate}%</p><p className="text-xs text-gray-500 dark:text-gray-400">승률</p></div>
+        <div><p className="font-bold text-base text-gray-800 dark:text-gray-100">{deck.totalGames}</p><p className="text-xs text-gray-500 dark:text-gray-400">게임 수</p></div>
+      </div>
+      
+      
+    </div>
+  );
+};
+
+// --- 메인 페이지 컴포넌트 ---
+function TierListPage() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [tierData, setTierData] = useState([]);
+  const { traitMap } = useTFTData();
+
+  useEffect(() => {
+    const fetchTierData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get('/api/deck-tiers');
+        setTierData(response.data);
+      } catch (err) { 
+        setError('덱 티어 정보를 불러오는 데 실패했습니다. 서버를 확인해 주세요.'); 
+        console.error("TierList fetch error:", err);
+      }
+      finally { setLoading(false); }
+    };
+    fetchTierData();
+  }, []);
+  
+  if (loading) return <div className="py-8 text-center text-gray-500 dark:text-gray-400">티어리스트를 분석 중입니다...</div>;
+  if (error) return <div className="py-8 text-center text-red-500 dark:text-red-400">{error}</div>;
+
+  return (
+    <div className="container mx-auto py-8 w-[95%]">
+      <h1 className="text-4xl font-bold text-center mb-2 text-gray-800 dark:text-gray-100">실시간 덱 티어리스트</h1>
+      <p className="text-center text-gray-500 dark:text-gray-400 mb-8">최신 랭커 데이터를 기반으로 집계된 티어리스트입니다.</p>
+      
+      {tierData.length > 0 ? (
+        <div className="flex flex-col gap-3">
+          {tierData.map((deck) => <DeckCard key={deck.deckKey} deck={deck} traitMap={traitMap} />)}
+        </div>
+      ) : (
+        <div className="py-8 text-center text-gray-500">
+          아직 분석된 덱 티어 정보가 없습니다. <br />
+          데이터 수집 및 분석이 완료될 때까지 기다려주세요. (매시간 분석이 갱신됩니다)
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default TierListPage;

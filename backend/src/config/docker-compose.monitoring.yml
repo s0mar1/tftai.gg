@@ -1,0 +1,178 @@
+# TFT Meta Analyzer 모니터링 스택 Docker Compose
+# Prometheus, Grafana, Jaeger를 포함한 완전한 모니터링 환경
+
+version: '3.8'
+
+services:
+  # Prometheus - 메트릭 수집
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tft-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus-alerts.yml:/etc/prometheus/alerts.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - tft-monitoring
+    restart: unless-stopped
+
+  # Grafana - 대시보드
+  grafana:
+    image: grafana/grafana:latest
+    container_name: tft-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/tft-overview.json
+    networks:
+      - tft-monitoring
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  # Jaeger - 분산 추적
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: tft-jaeger
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # jaeger.thrift over HTTP
+      - "14250:14250"  # jaeger.proto over gRPC
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+    volumes:
+      - jaeger_data:/tmp
+    networks:
+      - tft-monitoring
+    restart: unless-stopped
+
+  # AlertManager - 알림 관리
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: tft-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    networks:
+      - tft-monitoring
+    restart: unless-stopped
+
+  # Node Exporter - 시스템 메트릭 수집
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: tft-node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - tft-monitoring
+    restart: unless-stopped
+
+  # Redis Exporter - Redis 메트릭 수집
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: tft-redis-exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    networks:
+      - tft-monitoring
+    restart: unless-stopped
+
+  # MongoDB Exporter - MongoDB 메트릭 수집
+  mongodb-exporter:
+    image: percona/mongodb_exporter:latest
+    container_name: tft-mongodb-exporter
+    ports:
+      - "9216:9216"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017
+    networks:
+      - tft-monitoring
+    restart: unless-stopped
+
+  # Log aggregation with Loki
+  loki:
+    image: grafana/loki:latest
+    container_name: tft-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - tft-monitoring
+    restart: unless-stopped
+
+  # Promtail - 로그 수집
+  promtail:
+    image: grafana/promtail:latest
+    container_name: tft-promtail
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - tft-monitoring
+    restart: unless-stopped
+    depends_on:
+      - loki
+
+volumes:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  jaeger_data:
+    driver: local
+  alertmanager_data:
+    driver: local
+  loki_data:
+    driver: local
+
+networks:
+  tft-monitoring:
+    driver: bridge
+    name: tft-monitoring
+
+# 사용 방법:
+# 1. docker-compose -f docker-compose.monitoring.yml up -d
+# 2. Grafana: http://localhost:3000 (admin/admin)
+# 3. Prometheus: http://localhost:9090
+# 4. Jaeger: http://localhost:16686
+# 5. AlertManager: http://localhost:9093

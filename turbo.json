@@ -1,0 +1,124 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "public/**",
+        "*.{ts,tsx,js,jsx,json,yaml,yml}",
+        "!node_modules/**",
+        "!dist/**",
+        "!build/**"
+      ],
+      "outputs": [
+        "dist/**",
+        "build/**",
+        ".next/**",
+        "!.next/cache/**"
+      ],
+      "env": [
+        "NODE_ENV",
+        "RIOT_API_KEY",
+        "MONGODB_URI",
+        "UPSTASH_REDIS_URL",
+        "GEMINI_API_KEY",
+        "FRONTEND_URL"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "NODE_ENV",
+        "RIOT_API_KEY",
+        "MONGODB_URI",
+        "UPSTASH_REDIS_URL",
+        "GEMINI_API_KEY",
+        "FRONTEND_URL",
+        "PORT"
+      ]
+    },
+    "start": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["build"],
+      "env": [
+        "NODE_ENV",
+        "RIOT_API_KEY",
+        "MONGODB_URI",
+        "UPSTASH_REDIS_URL",
+        "GEMINI_API_KEY",
+        "FRONTEND_URL",
+        "PORT"
+      ]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "**/*.test.{ts,tsx,js,jsx}",
+        "**/*.spec.{ts,tsx,js,jsx}",
+        "jest.config.js",
+        "jest.setup.ts",
+        "setupTests.js"
+      ],
+      "outputs": [
+        "coverage/**",
+        "test-results/**"
+      ],
+      "env": [
+        "NODE_ENV"
+      ]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "test:coverage": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "**/*.test.{ts,tsx,js,jsx}",
+        "**/*.spec.{ts,tsx,js,jsx}",
+        "jest.config.js",
+        "jest.setup.ts",
+        "setupTests.js"
+      ],
+      "outputs": [
+        "coverage/**"
+      ]
+    },
+    "lint": {
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        ".eslintrc*",
+        "eslint.config.*",
+        "tsconfig.json"
+      ],
+      "outputs": []
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "tsconfig.json",
+        "tsconfig.*.json"
+      ],
+      "outputs": []
+    },
+    "clean": {
+      "cache": false,
+      "inputs": [],
+      "outputs": []
+    }
+  },
+  "globalDependencies": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "turbo.json"
+  ]
+}

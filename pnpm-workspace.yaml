@@ -1,0 +1,15 @@
+packages:
+  - 'frontend'
+  - 'backend' 
+  - 'shared'
+
+# pnpm 설정 최적화
+preferWorkspacePackages: true
+
+# 공통 설정
+catalog:
+  # 공통 버전 관리
+  typescript: "^5.8.3"
+  eslint: "^9.30.1" 
+  jest: "^30.0.4"
+  prettier: "^3.6.2"

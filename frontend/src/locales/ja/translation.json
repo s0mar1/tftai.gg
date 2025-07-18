@@ -1,0 +1,188 @@
+{
+  "common": {
+    "loading": "ロード中...",
+    "error": "エラーが発生しました",
+    "noData": "データがありません",
+    "search": "検索",
+    "filter": "フィルター",
+    "sort": "並べ替え",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ",
+    "close": "閉じる"
+  },
+  "nav": {
+    "home": "ホーム",
+    "tierlist": "おすすめメタ",
+    "guides": "デッキ攻略",
+    "ranking": "ランキング",
+    "stats": "詳細統計",
+    "deckBuilder": "デッキビルダー",
+    "aiChat": "AIに質問",
+    "about": "About TFTai.gg"
+  },
+  "header": {
+    "search_placeholder": "サモナー名#タグを入力してください",
+    "language": "言語",
+    "darkMode": "ダークモード"
+  },
+  "stats": {
+    "title": "詳細統計",
+    "subtitle": "アイテム別、特性別勝率分析",
+    "itemStats": "アイテム統計",
+    "traitStats": "特性統計",
+    "filters": "フィルター",
+    "all": "すべて",
+    "winRate": "勝率",
+    "top4Rate": "TOP4率",
+    "averagePlacement": "平均順位",
+    "totalGames": "ゲーム数",
+    "highToLow": "高い順",
+    "lowToHigh": "低い順",
+    "minGames": "最小ゲーム数",
+    "noStatsFound": "条件に一致する統計がありません",
+    "games": "{{count}}ゲーム",
+    "itemTypes": {
+      "completed": "完成アイテム",
+      "basic": "基本アイテム",
+      "ornn": "オーンアイテム",
+      "radiant": "光輝アイテム",
+      "emblem": "エンブレム"
+    },
+    "traitTypes": {
+      "origin": "オリジン",
+      "class": "クラス"
+    }
+  },
+  "home": {
+    "hero": {
+      "title1": "あなたのプレイ、",
+      "title2": "チャレンジャーの視点から分析してみましょう。",
+      "description": "TFTai.ggは上位ランカーのデータをリアルタイムで分析し、あなたのゲームへの深いフィードバックと共に最新メタトレンドを提供します。",
+      "searchPlaceholder": "サモナー名 #タグ",
+      "searchAlert": "サモナー名#タグ形式で入力してください。(例: Challenger#KR1)"
+    },
+    "trends": {
+      "title": "リアルタイムメタトレンド",
+      "error": "メタトレンド情報の読み込みに失敗しました。",
+      "noData": "まだ分析されたメタトレンド情報がありません。",
+      "noDataDescription": "データ収集及び分析が完了するまでお待ちください。"
+    },
+    "features": {
+      "tierlist": {
+        "title": "おすすめメタ",
+        "description": "現在メタで最も強力なデッキ構成を確認しましょう"
+      },
+      "stats": {
+        "title": "詳細統計",
+        "description": "アイテムと特性別勝率を詳しく分析してみましょう"
+      },
+      "guides": {
+        "title": "デッキ攻略",
+        "description": "プロプレイヤーのデッキ運用ガイドを確認しましょう"
+      }
+    }
+  },
+  "tierlist": {
+    "title": "おすすめメタ",
+    "subtitle": "現在シーズン最強デッキ構成",
+    "tier": "ティア",
+    "winRate": "勝率",
+    "pickRate": "ピック率",
+    "avgPlacement": "平均順位",
+    "games": "ゲーム",
+    "loading": "ティアリストを読み込み中...",
+    "noData": "ティアリストデータがありません",
+    "lastUpdated": "最終更新"
+  },
+  "ranking": {
+    "title": "ランキング",
+    "subtitle": "上位プレイヤー順位",
+    "rank": "順位",
+    "summoner": "サモナー",
+    "tier": "ティア",
+    "lp": "LP",
+    "winRate": "勝率",
+    "recentGames": "最近のゲーム",
+    "loading": "ランキングを読み込み中...",
+    "noData": "ランキングデータがありません"
+  },
+  "guides": {
+    "title": "デッキ攻略",
+    "subtitle": "プロプレイヤーガイド",
+    "author": "作成者",
+    "createdAt": "作成日",
+    "views": "閲覧数",
+    "difficulty": "難易度",
+    "easy": "簡単",
+    "medium": "普通",
+    "hard": "難しい",
+    "newGuide": "新規ガイド作成",
+    "editGuide": "ガイド編集",
+    "deleteGuide": "ガイド削除",
+    "loading": "ガイドを読み込み中...",
+    "noGuides": "ガイドがありません"
+  },
+  "summoner": {
+    "title": "サモナー検索",
+    "searchPlaceholder": "サモナー名を入力してください",
+    "search": "検索",
+    "notFound": "サモナーが見つかりません",
+    "loading": "サモナー情報を読み込み中...",
+    "matchHistory": "対戦履歴",
+    "stats": "統計",
+    "rank": "ランク",
+    "tier": "ティア",
+    "lp": "LP",
+    "winRate": "勝率",
+    "recentMatches": "最近の対戦"
+  },
+  "deckBuilder": {
+    "title": "デッキビルダー",
+    "subtitle": "自分だけのデッキ構成を作成してみましょう",
+    "createGuide": "攻略作成",
+    "champions": "チャンピオン",
+    "items": "アイテム",
+    "traits": "特性",
+    "cost": "コスト",
+    "selectChampion": "チャンピオン選択",
+    "selectItem": "アイテム選択",
+    "saveDeck": "デッキ保存",
+    "loadDeck": "デッキ読み込み",
+    "clearDeck": "デッキ初期化",
+    "deckName": "デッキ名",
+    "deckDescription": "デッキ説明",
+    "synergies": "シナジー",
+    "unit": "ユニット",
+    "details": "詳細情報",
+    "starLevel": "{{star}}星",
+    "equippedItems": "装備アイテム",
+    "noUnitSelected": "選択されたユニットがありません",
+    "searchByName": "名前で検索..."
+  },
+  "aiChat": {
+    "title": "AIに質問",
+    "subtitle": "TFTに関する質問をAIにしてみましょう",
+    "inputPlaceholder": "質問を入力してください...",
+    "send": "送信",
+    "thinking": "AIが考え中...",
+    "error": "AI応答中にエラーが発生しました",
+    "exampleQuestions": "質問例",
+    "examples": {
+      "meta": "現在メタで最強のデッキは？",
+      "items": "このアイテム構成は良いですか？",
+      "positioning": "どのようにポジショニングすれば良いですか？"
+    }
+  },
+  "errors": {
+    "networkError": "ネットワークエラーが発生しました",
+    "dataLoadError": "データの読み込みに失敗しました",
+    "unknownError": "不明なエラーが発生しました"
+  }
+}

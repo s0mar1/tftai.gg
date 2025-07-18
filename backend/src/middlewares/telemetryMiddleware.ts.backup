@@ -1,0 +1,297 @@
+// backend/src/middlewares/telemetryMiddleware.ts - TFT 텔레메트리 미들웨어
+import { Request, Response, NextFunction } from 'express';
+import { trace, context, SpanStatusCode } from '@opentelemetry/api';
+import {
+  recordApiResponseTime,
+  recordUserRequest,
+  recordError,
+  concurrentUsersGauge,
+} from '../services/telemetry/tftMetrics';
+import logger from '../config/logger';
+
+// 활성 사용자 추적
+const activeUsers = new Set<string>();
+
+/**
+ * TFT 특화 텔레메트리 미들웨어
+ */
+export function tftTelemetryMiddleware(req: Request, res: Response, next: NextFunction): void {
+  const startTime = Date.now();
+  const tracer = trace.getTracer('tft-meta-analyzer');
+  
+  // 스팬 생성
+  const span = tracer.startSpan(`${req.method} ${req.route?.path || req.path}`, {
+    attributes: {
+      'http.method': req.method,
+      'http.url': req.url,
+      'http.route': req.route?.path || req.path,
+      'tft.endpoint.category': getTFTEndpointCategory(req.path),
+      'tft.user.region': extractUserRegion(req),
+      'tft.user.tier': extractUserTier(req),
+      'tft.request.size': req.headers['content-length'] || '0',
+    },
+  });
+
+  // 활성 컨텍스트 설정
+  context.with(trace.setSpan(context.active(), span), () => {
+    // 사용자 추적
+    const userId = extractUserId(req);
+    if (userId) {
+      activeUsers.add(userId);
+      concurrentUsersGauge.add(1, {
+        endpoint_category: getTFTEndpointCategory(req.path),
+      });
+    }
+
+    // 사용자 요청 메트릭 기록
+    recordUserRequest(
+      req.path,
+      extractUserRegion(req),
+      extractUserTier(req)
+    );
+
+    // 응답 완료 시 처리
+    res.on('finish', () => {
+      const duration = Date.now() - startTime;
+      
+      // API 응답 시간 메트릭 기록
+      recordApiResponseTime(
+        req.path,
+        req.method,
+        res.statusCode,
+        duration
+      );
+
+      // 스팬 속성 업데이트
+      span.setAttributes({
+        'http.status_code': res.statusCode,
+        'tft.response.size': res.getHeader('content-length') || '0',
+        'tft.response.time': duration,
+        'tft.cache.hit': res.getHeader('x-cache-hit') === 'true',
+        'tft.cache.layer': res.getHeader('x-cache-layer') || 'none',
+      });
+
+      // 에러 상태 처리
+      if (res.statusCode >= 400) {
+        span.recordException(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: `HTTP ${res.statusCode}`,
+        });
+
+        // 에러 메트릭 기록
+        recordError(
+          getErrorType(res.statusCode),
+          req.path,
+          res.statusCode
+        );
+      } else {
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+
+      // 사용자 세션 정리
+      if (userId) {
+        activeUsers.delete(userId);
+        concurrentUsersGauge.add(-1, {
+          endpoint_category: getTFTEndpointCategory(req.path),
+        });
+      }
+
+      // 스팬 종료
+      span.end();
+    });
+
+    // 요청 취소 시 처리
+    req.on('close', () => {
+      if (!res.finished) {
+        span.recordException(new Error('Request cancelled'));
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: 'Request cancelled',
+        });
+        span.end();
+      }
+    });
+
+    next();
+  });
+}
+
+/**
+ * 캐시 히트 정보를 응답 헤더에 추가하는 미들웨어
+ */
+export function cacheHeaderMiddleware(req: Request, res: Response, next: NextFunction): void {
+  const originalSend = res.send;
+  
+  res.send = function(data: any) {
+    // 캐시 정보가 있다면 헤더에 추가
+    if (res.locals.cacheHit !== undefined) {
+      res.setHeader('X-Cache-Hit', res.locals.cacheHit.toString());
+    }
+    
+    if (res.locals.cacheLayer) {
+      res.setHeader('X-Cache-Layer', res.locals.cacheLayer);
+    }
+    
+    return originalSend.call(this, data);
+  };
+  
+  next();
+}
+
+/**
+ * 외부 API 호출 추적을 위한 미들웨어
+ */
+export function externalApiTrackingMiddleware(req: Request, res: Response, next: NextFunction): void {
+  const tracer = trace.getTracer('tft-meta-analyzer');
+  
+  // Riot API 호출 추적
+  if (req.url.includes('riot')) {
+    const span = tracer.startSpan('riot_api_call', {
+      attributes: {
+        'tft.api.type': 'riot',
+        'tft.api.region': extractRegionFromRequest(req),
+        'tft.api.endpoint': req.path,
+      },
+    });
+    
+    res.locals.externalApiSpan = span;
+  }
+  
+  // Google AI API 호출 추적
+  if (req.url.includes('ai')) {
+    const span = tracer.startSpan('google_ai_call', {
+      attributes: {
+        'tft.api.type': 'google_ai',
+        'tft.ai.analysis_type': extractAnalysisType(req),
+      },
+    });
+    
+    res.locals.externalApiSpan = span;
+  }
+  
+  next();
+}
+
+// === 헬퍼 함수들 ===
+
+function getTFTEndpointCategory(path: string): string {
+  if (path.includes('/summoner')) return 'summoner';
+  if (path.includes('/ai')) return 'ai_analysis';
+  if (path.includes('/match')) return 'match_data';
+  if (path.includes('/tierlist')) return 'tierlist';
+  if (path.includes('/ranking')) return 'ranking';
+  if (path.includes('/static-data')) return 'static_data';
+  if (path.includes('/cache')) return 'cache_management';
+  if (path.includes('/health')) return 'health_check';
+  return 'other';
+}
+
+function extractUserRegion(req: Request): string {
+  return req.query.region as string || 
+         req.params.region as string || 
+         req.headers['x-user-region'] as string || 
+         'kr';
+}
+
+function extractUserTier(req: Request): string | undefined {
+  return req.query.tier as string || 
+         req.headers['x-user-tier'] as string || 
+         undefined;
+}
+
+function extractUserId(req: Request): string | undefined {
+  return req.headers['x-user-id'] as string ||
+         req.query.puuid as string ||
+         req.params.puuid as string ||
+         undefined;
+}
+
+function extractRegionFromRequest(req: Request): string {
+  return req.params.region || req.query.region as string || 'kr';
+}
+
+function extractAnalysisType(req: Request): string {
+  if (req.path.includes('/analyze')) return 'match';
+  if (req.path.includes('/meta')) return 'meta';
+  if (req.path.includes('/deck')) return 'deck';
+  return 'unknown';
+}
+
+function getErrorType(statusCode: number): string {
+  if (statusCode >= 400 && statusCode < 500) {
+    switch (statusCode) {
+      case 400: return 'bad_request';
+      case 401: return 'unauthorized';
+      case 403: return 'forbidden';
+      case 404: return 'not_found';
+      case 429: return 'rate_limit';
+      default: return 'client_error';
+    }
+  }
+  
+  if (statusCode >= 500) {
+    switch (statusCode) {
+      case 500: return 'internal_server_error';
+      case 502: return 'bad_gateway';
+      case 503: return 'service_unavailable';
+      case 504: return 'gateway_timeout';
+      default: return 'server_error';
+    }
+  }
+  
+  return 'unknown';
+}
+
+/**
+ * 비즈니스 메트릭 추적을 위한 헬퍼 함수들
+ */
+export function trackMatchAnalysis(matchId: string, region: string, tier: string): void {
+  const tracer = trace.getTracer('tft-meta-analyzer');
+  
+  tracer.startSpan('match_analysis', {
+    attributes: {
+      'tft.match.id': matchId,
+      'tft.match.region': region,
+      'tft.match.tier': tier,
+    },
+  }).end();
+}
+
+export function trackAiAnalysis(analysisType: string, duration: number, success: boolean): void {
+  const tracer = trace.getTracer('tft-meta-analyzer');
+  
+  tracer.startSpan('ai_analysis', {
+    attributes: {
+      'tft.ai.analysis_type': analysisType,
+      'tft.ai.duration': duration,
+      'tft.ai.success': success,
+    },
+  }).end();
+}
+
+export function trackCacheOperation(operation: 'get' | 'set' | 'del', layer: 'L1' | 'L2', key: string, hit: boolean): void {
+  const tracer = trace.getTracer('tft-meta-analyzer');
+  
+  tracer.startSpan(`cache_${operation}`, {
+    attributes: {
+      'tft.cache.layer': layer,
+      'tft.cache.key': key,
+      'tft.cache.hit': hit,
+      'tft.cache.key_type': getCacheKeyType(key),
+    },
+  }).end();
+}
+
+function getCacheKeyType(key: string): string {
+  if (key.includes('summoner')) return 'summoner_data';
+  if (key.includes('match')) return 'match_data';
+  if (key.includes('ai_analysis')) return 'ai_analysis';
+  if (key.includes('tierlist')) return 'tierlist';
+  if (key.includes('meta')) return 'meta_data';
+  if (key.includes('translation')) return 'translation';
+  if (key.includes('tft_data')) return 'tft_static_data';
+  return 'other';
+}
+
+logger.info('🔍 TFT 텔레메트리 미들웨어 초기화 완료');

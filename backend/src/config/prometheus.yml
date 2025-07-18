@@ -1,0 +1,70 @@
+# TFT Meta Analyzer Prometheus 설정
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# 알림 규칙 설정
+rule_files:
+  - "alerts.yml"
+
+# AlertManager 설정
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# 스크래핑 설정
+scrape_configs:
+  # TFT Meta Analyzer 애플리케이션 메트릭
+  - job_name: 'tft-meta-analyzer'
+    static_configs:
+      - targets: ['host.docker.internal:9090']  # OpenTelemetry Prometheus 익스포터
+    scrape_interval: 5s
+    metrics_path: /metrics
+    scheme: http
+
+  # Prometheus 자체 메트릭
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter (시스템 메트릭)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # Redis 메트릭
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  # MongoDB 메트릭
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
+
+  # TFT 애플리케이션 상태 체크
+  - job_name: 'tft-health-check'
+    static_configs:
+      - targets: ['host.docker.internal:3001']  # TFT 애플리케이션 포트
+    metrics_path: /health/metrics
+    scrape_interval: 10s
+
+# 메트릭 저장 설정
+storage:
+  tsdb:
+    retention.time: 30d
+    retention.size: 10GB
+
+# 원격 쓰기 설정 (선택사항 - 클라우드 백업)
+# remote_write:
+#   - url: "https://your-cloud-metrics-endpoint"
+#     headers:
+#       Authorization: "Bearer your-token"
+
+# 글로벌 외부 라벨
+external_labels:
+  monitor: 'tft-analyzer'
+  environment: 'production'
+  region: 'kr'

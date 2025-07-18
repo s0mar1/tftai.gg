@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-07-08T15:45:03.713Z",
+  "baseFileHash": "7867d9237dd1e364808547e4c9c0bd88",
+  "languages": {
+    "ja": {
+      "lastTranslated": "2025-07-08T15:44:15.273Z",
+      "translatedKeys": 144,
+      "totalKeys": 144,
+      "completionRate": 100
+    },
+    "zh": {
+      "lastTranslated": "2025-07-08T15:45:03.714Z",
+      "translatedKeys": 144,
+      "totalKeys": 144,
+      "completionRate": 100
+    },
+    "en": {
+      "lastTranslated": "2025-07-08T15:43:38.425Z",
+      "translatedKeys": 144,
+      "totalKeys": 144,
+      "completionRate": 100
+    }
+  }
+}

@@ -1,0 +1,385 @@
+name: Bundle Size Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  bundle-analysis:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 이전 커밋과 비교를 위해 전체 히스토리 가져오기
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared package
+        run: pnpm build:shared
+
+      - name: Build frontend
+        run: pnpm build:frontend
+
+      - name: Initialize performance budget
+        run: |
+          cd frontend
+          pnpm bundle:budget init
+
+      - name: Run bundle size check
+        run: |
+          cd frontend
+          pnpm bundle:check
+        continue-on-error: true
+
+      - name: Run bundle analysis
+        run: |
+          cd frontend
+          pnpm build:analyze
+        continue-on-error: true
+
+      - name: Run bundle monitoring
+        run: |
+          cd frontend
+          pnpm bundle:monitor
+        continue-on-error: true
+
+      - name: Check performance budget
+        run: |
+          cd frontend
+          pnpm bundle:budget check
+        continue-on-error: true
+
+      - name: Upload bundle reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bundle-reports
+          path: |
+            frontend/dist/stats.html
+            frontend/dist/bundle-report.json
+            frontend/dist/bundle-monitor-report.json
+            frontend/dist/bundle-history.json
+            frontend/performance-budget.json
+          retention-days: 30
+
+      - name: Upload bundle visualization
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bundle-stats
+          path: frontend/dist/stats.html
+          retention-days: 30
+
+      - name: Comment PR with bundle analysis
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            let comment = '## 📦 번들 크기 분석 결과\n\n';
+            
+            try {
+              // 번들 모니터링 리포트 읽기
+              const monitorReport = JSON.parse(fs.readFileSync('frontend/dist/bundle-monitor-report.json', 'utf8'));
+              
+              comment += '### 📊 번들 크기 요약\n';
+              comment += `- 📦 총 크기: ${formatFileSize(monitorReport.summary.totalSize)}\n`;
+              comment += `- 🗜️ 압축 크기: ${formatFileSize(monitorReport.summary.totalGzipSize)}\n`;
+              comment += `- 📄 JS 크기: ${formatFileSize(monitorReport.summary.jsSize)}\n`;
+              comment += `- 🎨 CSS 크기: ${formatFileSize(monitorReport.summary.cssSize)}\n`;
+              comment += `- 📊 청크 수: ${monitorReport.summary.chunkCount}\n\n`;
+              
+              // 성능 예산 상태
+              comment += '### 💰 성능 예산 상태\n';
+              const budgetStatus = monitorReport.budget.status;
+              const budgetEmoji = budgetStatus === 'pass' ? '✅' : budgetStatus === 'warning' ? '⚠️' : '❌';
+              comment += `${budgetEmoji} **${budgetStatus.toUpperCase()}**\n\n`;
+              
+              if (monitorReport.budget.violations.length > 0) {
+                comment += '#### 📋 예산 위반 내역\n';
+                monitorReport.budget.violations.slice(0, 5).forEach(violation => {
+                  const emoji = violation.severity === 'error' ? '❌' : '⚠️';
+                  comment += `${emoji} ${violation.file}: ${formatFileSize(violation.actual)} (한도: ${formatFileSize(violation.budget)})\n`;
+                });
+                comment += '\n';
+              }
+              
+              // 상위 5개 파일
+              comment += '### 📋 상위 5개 파일\n';
+              monitorReport.metrics.slice(0, 5).forEach((metric, index) => {
+                const emoji = metric.type === 'js' ? '📄' : metric.type === 'css' ? '🎨' : '📎';
+                comment += `${index + 1}. ${emoji} ${metric.name}: ${formatFileSize(metric.gzipSize)}\n`;
+              });
+              comment += '\n';
+              
+              // 권장사항
+              if (monitorReport.budget.violations.length > 0) {
+                comment += '### 💡 권장사항\n';
+                comment += '- 🔧 번들 크기 최적화를 고려하세요\n';
+                comment += '- 📦 코드 스플리팅을 활용하세요\n';
+                comment += '- 🌳 트리 쉐이킹으로 미사용 코드를 제거하세요\n';
+                comment += '- 📊 [번들 분석 보고서](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})를 확인하세요\n';
+              }
+              
+            } catch (error) {
+              comment += '❌ 번들 분석 리포트를 읽는 중 오류가 발생했습니다.\n';
+              comment += `오류: ${error.message}\n`;
+            }
+            
+            // 파일 크기 포맷팅 함수
+            function formatFileSize(bytes) {
+              if (bytes === 0) return '0 Bytes';
+              const k = 1024;
+              const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+              const i = Math.floor(Math.log(bytes) / Math.log(k));
+              return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Fail if budget exceeded
+        if: github.event_name == 'pull_request'
+        run: |
+          cd frontend
+          if [ -f "dist/bundle-monitor-report.json" ]; then
+            BUDGET_STATUS=$(node -e "
+              const report = JSON.parse(require('fs').readFileSync('dist/bundle-monitor-report.json', 'utf8'));
+              console.log(report.budget.status);
+            ")
+            
+            if [ "$BUDGET_STATUS" = "fail" ]; then
+              echo "❌ 성능 예산 초과로 인해 PR을 차단합니다."
+              exit 1
+            fi
+          fi
+
+  bundle-comparison:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
+
+      - name: Install dependencies and build (PR)
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build:shared
+          pnpm build:frontend
+
+      - name: Analyze PR bundle
+        run: |
+          cd frontend
+          pnpm bundle:monitor
+          cp dist/bundle-monitor-report.json ../pr-bundle-report.json
+
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install dependencies and build (main)
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build:shared
+          pnpm build:frontend
+
+      - name: Analyze main bundle
+        run: |
+          cd frontend
+          pnpm bundle:monitor
+          cp dist/bundle-monitor-report.json ../main-bundle-report.json
+
+      - name: Compare bundle sizes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            const prReport = JSON.parse(fs.readFileSync('pr-bundle-report.json', 'utf8'));
+            const mainReport = JSON.parse(fs.readFileSync('main-bundle-report.json', 'utf8'));
+            
+            const sizeDiff = prReport.summary.totalGzipSize - mainReport.summary.totalGzipSize;
+            const percentDiff = (sizeDiff / mainReport.summary.totalGzipSize) * 100;
+            
+            function formatFileSize(bytes) {
+              if (bytes === 0) return '0 Bytes';
+              const k = 1024;
+              const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+              const i = Math.floor(Math.log(bytes) / Math.log(k));
+              return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            let comment = '## 📊 번들 크기 비교 (PR vs Main)\n\n';
+            
+            const diffEmoji = sizeDiff > 0 ? '📈' : sizeDiff < 0 ? '📉' : '📊';
+            const diffText = sizeDiff > 0 ? '증가' : sizeDiff < 0 ? '감소' : '변화 없음';
+            
+            comment += `### ${diffEmoji} 전체 번들 크기 ${diffText}\n`;
+            comment += `- **Main**: ${formatFileSize(mainReport.summary.totalGzipSize)}\n`;
+            comment += `- **PR**: ${formatFileSize(prReport.summary.totalGzipSize)}\n`;
+            comment += `- **차이**: ${formatFileSize(Math.abs(sizeDiff))} (${percentDiff.toFixed(1)}%)\n\n`;
+            
+            if (Math.abs(percentDiff) > 5) {
+              comment += '⚠️ **유의미한 크기 변화가 감지되었습니다.**\n\n';
+            }
+            
+            // 파일별 상세 비교
+            comment += '### 📋 주요 파일별 변화\n';
+            comment += '| 파일 | Main | PR | 변화 |\n';
+            comment += '|------|------|----|---------|\n';
+            
+            const prFiles = new Map(prReport.metrics.map(m => [m.name, m]));
+            const mainFiles = new Map(mainReport.metrics.map(m => [m.name, m]));
+            
+            [...new Set([...prFiles.keys(), ...mainFiles.keys()])].slice(0, 10).forEach(fileName => {
+              const prFile = prFiles.get(fileName);
+              const mainFile = mainFiles.get(fileName);
+              
+              if (prFile && mainFile) {
+                const fileDiff = prFile.gzipSize - mainFile.gzipSize;
+                const filePercent = (fileDiff / mainFile.gzipSize) * 100;
+                const changeEmoji = fileDiff > 0 ? '📈' : fileDiff < 0 ? '📉' : '📊';
+                
+                comment += `| ${fileName} | ${formatFileSize(mainFile.gzipSize)} | ${formatFileSize(prFile.gzipSize)} | ${changeEmoji} ${formatFileSize(Math.abs(fileDiff))} (${filePercent.toFixed(1)}%) |\n`;
+              } else if (prFile) {
+                comment += `| ${fileName} | - | ${formatFileSize(prFile.gzipSize)} | ✨ 새 파일 |\n`;
+              } else if (mainFile) {
+                comment += `| ${fileName} | ${formatFileSize(mainFile.gzipSize)} | - | 🗑️ 삭제됨 |\n`;
+              }
+            });
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  bundle-trending:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and analyze
+        run: |
+          pnpm build:shared
+          pnpm build:frontend
+          cd frontend
+          pnpm bundle:monitor
+
+      - name: Update bundle trending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // 번들 크기 트렌드 추적을 위한 이슈 업데이트
+            const fs = require('fs');
+            
+            try {
+              const report = JSON.parse(fs.readFileSync('frontend/dist/bundle-monitor-report.json', 'utf8'));
+              
+              // 트렌드 추적 이슈 찾기 또는 생성
+              const { data: issues } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['bundle-trending'],
+                state: 'open'
+              });
+              
+              const now = new Date();
+              const trendingData = {
+                timestamp: now.toISOString(),
+                commit: context.sha.substring(0, 7),
+                totalGzipSize: report.summary.totalGzipSize,
+                jsSize: report.summary.jsSize,
+                cssSize: report.summary.cssSize,
+                chunkCount: report.summary.chunkCount
+              };
+              
+              if (issues.length === 0) {
+                // 새 트렌딩 이슈 생성
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: '📊 Bundle Size Trending',
+                  labels: ['bundle-trending'],
+                  body: `# 📊 Bundle Size Trending\n\n자동으로 업데이트되는 번들 크기 트렌드입니다.\n\n## 📈 최근 데이터\n\n\`\`\`json\n${JSON.stringify(trendingData, null, 2)}\n\`\`\`\n\n마지막 업데이트: ${now.toLocaleString()}`
+                });
+              } else {
+                // 기존 이슈 업데이트
+                const issueBody = `# 📊 Bundle Size Trending\n\n자동으로 업데이트되는 번들 크기 트렌드입니다.\n\n## 📈 최근 데이터\n\n\`\`\`json\n${JSON.stringify(trendingData, null, 2)}\n\`\`\`\n\n마지막 업데이트: ${now.toLocaleString()}`;
+                
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issues[0].number,
+                  body: issueBody
+                });
+              }
+              
+              console.log('✅ 번들 트렌딩 데이터 업데이트 완료');
+              
+            } catch (error) {
+              console.error('❌ 트렌딩 데이터 업데이트 중 오류:', error);
+            }

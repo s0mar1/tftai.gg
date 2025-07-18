@@ -1,0 +1,30 @@
+{
+  "name": "@tft-meta-analyzer/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "dev": "pnpm dev:win",
+    "dev:win": "npx tsc --watch",
+    "dev:unix": "../../node_modules/.bin/tsc --watch",
+    "type-check": "npx tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "zod": "^3.24.1",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.4",
+    "ts-jest": "^29.4.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

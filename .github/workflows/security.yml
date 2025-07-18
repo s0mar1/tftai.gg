@@ -1,0 +1,184 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # 매일 오전 9시 (UTC)에 실행
+    - cron: '0 9 * * *'
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run security audit
+        run: pnpm run security:audit
+        continue-on-error: true
+
+      - name: Run detailed security check
+        run: pnpm run security:check
+        continue-on-error: true
+
+      - name: Run vulnerability scan
+        run: pnpm run security:scan
+        continue-on-error: true
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            security-report.json
+            dependency-update-report.json
+            vulnerability-scan-report.json
+          retention-days: 30
+
+      - name: Comment PR with security results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            let comment = '## 🔒 보안 검사 결과\n\n';
+            
+            // 보안 리포트 읽기
+            try {
+              const securityReport = JSON.parse(fs.readFileSync('security-report.json', 'utf8'));
+              const vulnReport = JSON.parse(fs.readFileSync('vulnerability-scan-report.json', 'utf8'));
+              
+              comment += '### 📊 취약점 요약\n';
+              comment += `- 🚨 치명적: ${securityReport.audit.vulnerabilities.critical}\n`;
+              comment += `- ⚠️ 높음: ${securityReport.audit.vulnerabilities.high}\n`;
+              comment += `- 💡 보통: ${securityReport.audit.vulnerabilities.moderate}\n`;
+              comment += `- ℹ️ 낮음: ${securityReport.audit.vulnerabilities.low}\n\n`;
+              
+              comment += `### 📈 위험도 점수: ${vulnReport.riskScore}/100\n\n`;
+              
+              if (securityReport.audit.vulnerabilities.critical > 0) {
+                comment += '🚨 **치명적 취약점이 발견되었습니다. 즉시 조치하세요!**\n\n';
+              }
+              
+              if (vulnReport.recommendations.length > 0) {
+                comment += '### 💡 권장사항\n';
+                vulnReport.recommendations.slice(0, 5).forEach(rec => {
+                  comment += `- ${rec}\n`;
+                });
+              }
+              
+            } catch (error) {
+              comment += '❌ 보안 리포트를 읽는 중 오류가 발생했습니다.\n';
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Notify on critical vulnerabilities
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('🚨 치명적 보안 취약점이 발견되었습니다!');
+            core.setFailed('Critical security vulnerabilities found');
+
+  dependency-update:
+    needs: security-audit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run dependency update
+        run: pnpm run security:update
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: 자동 보안 업데이트'
+          title: '🔒 자동 보안 업데이트'
+          body: |
+            ## 🔒 자동 보안 업데이트
+            
+            이 PR은 보안 취약점 해결을 위한 자동 업데이트입니다.
+            
+            ### 📋 업데이트 내용
+            - 패치 레벨 보안 업데이트 자동 적용
+            - 보안 관련 패키지의 마이너 업데이트 적용
+            
+            ### 🔍 검토 사항
+            - [ ] 업데이트된 패키지의 변경사항 확인
+            - [ ] 테스트 통과 확인
+            - [ ] 보안 취약점 해결 확인
+            
+            🤖 자동 생성된 PR입니다.
+          branch: security-updates
+          delete-branch: true
+
+  security-reporting:
+    needs: security-audit
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Generate security summary
+        run: |
+          echo "## 🔒 보안 검사 요약" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 실행 정보" >> $GITHUB_STEP_SUMMARY
+          echo "- 실행 시간: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "- 트리거: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 브랜치: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 관련 링크" >> $GITHUB_STEP_SUMMARY
+          echo "- [보안 리포트 아티팩트](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [보안 정책](https://github.com/${{ github.repository }}/security/policy)" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    // 🚨 TypeScript 철의 장막 규칙: 최대 엄격성 설정
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ES2020"],
+    
+    // 엄격성 설정
+    "strict": true,
+    "noImplicitAny": true,                  // 암시적 any 타입 금지
+    "strictNullChecks": true,               // null/undefined 엄격 체크
+    "strictFunctionTypes": true,            // 함수 타입 엄격 체크
+    "strictBindCallApply": true,            // bind, call, apply 엄격 체크
+    "strictPropertyInitialization": true,   // 클래스 속성 초기화 엄격 체크
+    "noImplicitReturns": true,              // 모든 경로에서 return 필수
+    "noFallthroughCasesInSwitch": true,    // switch문 fallthrough 방지
+    "noUncheckedIndexedAccess": true,       // 인덱스 접근 시 undefined 체크
+    "noImplicitOverride": true,             // override 키워드 명시 필수
+    "exactOptionalPropertyTypes": true,     // 선택적 속성 타입 엄격 체크
+    "noImplicitThis": true,                 // this 타입 명시 필수
+    "noUnusedLocals": true,                 // 사용하지 않는 지역 변수 금지
+    "noUnusedParameters": true,             // 사용하지 않는 매개변수 금지
+    "allowUnreachableCode": false,          // 도달할 수 없는 코드 금지
+    "allowUnusedLabels": false,             // 사용하지 않는 라벨 금지
+    
+    // 모듈 설정
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    
+    // 컴파일러 설정
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "noEmitOnError": true,                  // 에러 발생 시 컴파일 중단
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    
+    // 품질 설정
+    "skipDefaultLibCheck": true,
+    "allowJs": false,
+    "checkJs": false
+  }
+}

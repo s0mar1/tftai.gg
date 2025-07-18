@@ -1,0 +1,39 @@
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Generated files
+*.js.map
+*.d.ts
+*.d.ts.map
+
+# Coverage reports
+coverage/
+**/coverage/
+
+# Logs
+*.log
+logs/
+**/logs/
+
+# Cache
+.cache/
+**/.cache/
+
+# IDE files
+.vscode/
+.idea/
+
+# Environment files
+.env*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,30 @@
+{
+  "low": true,
+  "moderate": true,
+  "high": true,
+  "critical": true,
+  "report": true,
+  "summary": true,
+  "allowlist": [],
+  "skip-dev": false,
+  "package-manager": "pnpm",
+  "pass-enoaudit": true,
+  "output-format": "json",
+  "advisories": {
+    "skip": [],
+    "ignore": []
+  },
+  "levels": {
+    "low": false,
+    "moderate": false,
+    "high": true,
+    "critical": true
+  },
+  "excludes": [
+    "node_modules",
+    "dist",
+    "build",
+    ".git",
+    "coverage"
+  ]
+}

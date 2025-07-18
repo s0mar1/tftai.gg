@@ -1,0 +1,10 @@
+{
+  "watch": ["src", "jobs"],
+  "ext": "ts,js,json",
+  "ignore": ["src/**/*.spec.ts", "src/**/*.test.ts", "dist/**/*"],
+  "exec": "npx tsx",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": 1000
+}
