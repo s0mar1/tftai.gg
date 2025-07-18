@@ -6,7 +6,7 @@ export interface BaseModel {
 }
 
 // 공유 타입에서 임포트
-import { Champion, Item, Trait } from '@tft-meta-analyzer/shared';
+import { Champion, Item, Trait } from '../shared/types';
 
 // 덱 구성 인터페이스
 export interface DeckComposition {
