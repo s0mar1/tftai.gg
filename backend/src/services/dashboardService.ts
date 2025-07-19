@@ -101,8 +101,8 @@ export class DashboardService {
       };
     }
 
-    // 전체 응답 시간 통계 계산
-    const allResponseTimes = responseMetrics.flatMap(metric => metric.responseTimes || []);
+    // 전체 응답 시간 통계 계산 (현재 사용하지 않음)
+    // const _allResponseTimes = responseMetrics.flatMap(metric => metric.responseTimes || []);
     const totalSlowRequests = responseMetrics.reduce((sum, metric) => {
       return sum + (metric.responseTimes?.filter((time: number) => time > 1000).length || 0);
     }, 0);
@@ -245,12 +245,10 @@ export class DashboardService {
     // MongoDB 연결 상태 체크
     let dbStatus = 'healthy';
     try {
-      // const dbStats = await mcpService.getDatabaseStats({ type: 'overview' }); // Temporarily disabled
-      const dbStats = { collections: 0, documents: 0, indexes: 0 }; // Mock data
-      if (dbStats.content && dbStats.content[0]?.text) {
-        const stats = JSON.parse(dbStats.content[0].text);
-        dbStatus = stats.result ? 'healthy' : 'degraded';
-      }
+      // const _dbStats = await mcpService.getDatabaseStats({ type: 'overview' }); // Temporarily disabled
+      // const _dbStats = { collections: 0, documents: 0, indexes: 0 }; // Mock data (미사용)
+      // Mock 데이터이므로 단순히 healthy로 설정
+      dbStatus = 'healthy';
     } catch (error) {
       logger.warn('MongoDB health check failed', error);
       dbStatus = 'critical';
@@ -278,24 +276,22 @@ export class DashboardService {
    */
   async getMCPMetrics(): Promise<any> {
     try {
-      const [dbStats, performanceMetrics] = await Promise.all([
-        // mcpService.getDatabaseStats({ type: 'overview' }), // Temporarily disabled
-        // mcpService.analyzePerformance({ timeRange: '1h' }) // Temporarily disabled
-        Promise.resolve({ collections: 0 }), // Mock data
-        Promise.resolve({ performance: 'good' }) // Mock data
-      ]);
+      // Mock 데이터로 간단하게 처리
+      const dbStats = { collections: 0 };
+      const performanceMetrics = { performance: 'good' };
 
-      const dbStatsResult = dbStats.content?.[0]?.text ? JSON.parse(dbStats.content[0].text) : null;
-      const performanceResult = performanceMetrics.content?.[0]?.text ? JSON.parse(performanceMetrics.content[0].text) : null;
+      // Mock 데이터는 content 속성이 없으므로 직접 할당
+      const dbStatsResult = dbStats;
+      const performanceResult = performanceMetrics;
 
       return {
         database: {
-          stats: dbStatsResult?.result || null,
-          timestamp: dbStatsResult?.timestamp || new Date().toISOString()
+          stats: (dbStatsResult as any)?.result || null,
+          timestamp: (dbStatsResult as any)?.timestamp || new Date().toISOString()
         },
         performance: {
           analysis: performanceResult || null,
-          timestamp: performanceResult?.timestamp || new Date().toISOString()
+          timestamp: (performanceResult as any)?.timestamp || new Date().toISOString()
         }
       };
     } catch (error) {

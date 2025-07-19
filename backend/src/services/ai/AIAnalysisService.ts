@@ -7,7 +7,6 @@ import logger from '../../config/logger';
 import { AI_CONFIG, envGuards } from '../../config/env';
 
 // 프롬프트 임포트
-import systemRole from '../../prompts/common/systemRole';
 import analysisSystemRole from '../../prompts/common/analysisSystemRole';
 import autoAnalysisContext from '../../prompts/autoAnalysis/context';
 import autoAnalysisFormat from '../../prompts/autoAnalysis/format';
@@ -27,9 +26,6 @@ function hasProperty<T, K extends string>(
   return obj != null && typeof obj === 'object' && prop in obj;
 }
 
-function isValidPlayerDeck(deck: any): deck is any {
-  return deck != null && typeof deck === 'object';
-}
 import { createGradeInfo, calculateGradeFromScore } from '../../utils/ai/gradeCalculator';
 import { buildAnalysisPrompt, sanitizeAIResponse, extractKeyInsights, extractImprovements } from '../../utils/ai/promptBuilder';
 
@@ -37,9 +33,7 @@ import { buildAnalysisPrompt, sanitizeAIResponse, extractKeyInsights, extractImp
 import { 
   AIAnalysisResult, 
   FinalAnalysisResult, 
-  AIScores, 
   AIComments,
-  AIRequestBody,
   PlayerDeck 
 } from '../../types/ai';
 
@@ -334,7 +328,7 @@ export class AIAnalysisService {
 
     for (const pattern of summaryPatterns) {
       const match = response.match(pattern);
-      if (match) {
+      if (match && match[1]) {
         return match[1].trim();
       }
     }
@@ -370,7 +364,7 @@ export class AIAnalysisService {
 
     for (const pattern of nextStepsPatterns) {
       const match = response.match(pattern);
-      if (match) {
+      if (match && match[1]) {
         return match[1].trim();
       }
     }
@@ -402,7 +396,7 @@ export class AIAnalysisService {
   private extractRecommendations(response: string, category: string): string[] {
     const pattern = new RegExp(`${category}[^\\n]*?[:：]([^\\n]+(?:\\n[^\\n]*?)*)`, 'i');
     const match = response.match(pattern);
-    if (match) {
+    if (match && match[1]) {
       return match[1].split(/[,\n]/).map(item => item.trim()).filter(item => item.length > 0);
     }
     return [`${category} 관련 추천사항을 분석 중입니다.`];
@@ -411,7 +405,7 @@ export class AIAnalysisService {
   private extractComparison(response: string, type: string): string {
     const pattern = new RegExp(`${type}[^\\n]*?[:：]([^\\n]+)`, 'i');
     const match = response.match(pattern);
-    if (match) {
+    if (match && match[1]) {
       return match[1].trim();
     }
     return `${type} 대비 분석 결과를 준비 중입니다.`;
@@ -420,7 +414,7 @@ export class AIAnalysisService {
   // JSON 응답에서 데이터 추출하는 헬퍼 메서드들
   private extractSummaryFromJson(analysis: string): string {
     const summaryMatch = analysis.match(/\*\*총평:\*\*\s*(.*?)(?=\n\*\*|$)/s);
-    if (summaryMatch) {
+    if (summaryMatch && summaryMatch[1]) {
       return summaryMatch[1].trim();
     }
     return "AI가 경기를 종합적으로 분석했습니다.";
@@ -432,15 +426,15 @@ export class AIAnalysisService {
     const itemMatch = analysis.match(/\*\*아이템 효율성 분석:\*\*\s*(.*?)(?=\n\*\*|$)/s);
 
     return {
-      metaFit: metaMatch ? metaMatch[1].trim() : "메타 적합도를 분석 중입니다.",
-      deckCompletion: deckMatch ? deckMatch[1].trim() : "덱 완성도를 분석 중입니다.",
-      itemEfficiency: itemMatch ? itemMatch[1].trim() : "아이템 효율성을 분석 중입니다."
+      metaFit: metaMatch && metaMatch[1] ? metaMatch[1].trim() : "메타 적합도를 분석 중입니다.",
+      deckCompletion: deckMatch && deckMatch[1] ? deckMatch[1].trim() : "덱 완성도를 분석 중입니다.",
+      itemEfficiency: itemMatch && itemMatch[1] ? itemMatch[1].trim() : "아이템 효율성을 분석 중입니다."
     };
   }
 
   private extractKeyInsightsFromJson(analysis: string): string[] {
     const insightsMatch = analysis.match(/\*\*핵심 인사이트:\*\*\s*(.*?)(?=\n\*\*|$)/s);
-    if (insightsMatch) {
+    if (insightsMatch && insightsMatch[1]) {
       const insights = insightsMatch[1].split(/\n-\s*/).filter(item => item.trim().length > 0);
       return insights.map(item => item.trim().replace(/^-\s*/, ''));
     }
@@ -449,7 +443,7 @@ export class AIAnalysisService {
 
   private extractImprovementsFromJson(analysis: string): string[] {
     const improvementsMatch = analysis.match(/\*\*개선점:\*\*\s*(.*?)(?=\n\*\*|$)/s);
-    if (improvementsMatch) {
+    if (improvementsMatch && improvementsMatch[1]) {
       const improvements = improvementsMatch[1].split(/\n-\s*/).filter(item => item.trim().length > 0);
       return improvements.map(item => item.trim().replace(/^-\s*/, ''));
     }
@@ -458,7 +452,7 @@ export class AIAnalysisService {
 
   private extractNextStepsFromJson(analysis: string): string {
     const nextStepsMatch = analysis.match(/\*\*다음 게임 가이드:\*\*\s*(.*?)(?=\n\*\*|$)/s);
-    if (nextStepsMatch) {
+    if (nextStepsMatch && nextStepsMatch[1]) {
       return nextStepsMatch[1].trim();
     }
     return "다음 게임을 위한 가이드를 준비 중입니다.";

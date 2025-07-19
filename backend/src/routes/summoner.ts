@@ -12,10 +12,9 @@ import { getTFTDataWithLanguage } from '../services/tftData';
 import cacheManager from '../services/cacheManager'; // cacheManager import
 import { CACHE_TTL } from '../config/cacheTTL';
 import logger from '../config/logger';
-import { ValidationError, NotFoundError } from '../utils/errors';
+import { ValidationError } from '../utils/errors';
 import { getTraitStyleInfo } from '../utils/tft-helpers';
-import { validateRegion, validatePagination } from '../middlewares/validation';
-import { sendSuccess, sendError, sendCachedSuccess, sendValidationError, sendRateLimit } from '../utils/responseHelper';
+import { sendError, sendCachedSuccess, sendRateLimit } from '../utils/responseHelper';
 import { processMatchDetailsBatch, logBatchStats } from '../utils/batchProcessor';
 
 type Region = 'kr' | 'jp' | 'na' | 'br' | 'la1' | 'la2' | 'euw' | 'eune' | 'tr' | 'ru';

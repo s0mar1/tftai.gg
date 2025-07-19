@@ -1,15 +1,13 @@
 // backend/src/services/telemetry-enhanced-riot-api.ts - 텔레메트리 강화된 Riot API 서비스
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { trace, context } from '@opentelemetry/api';
+import axios, { AxiosResponse } from 'axios';
+import { trace } from '@opentelemetry/api';
 import { SummonerFlowTracer } from './telemetry/distributedTracing';
 import { recordExternalApiCall, updateRiotApiRateLimit } from './telemetry/tftMetrics';
 import logger from '../config/logger';
 import {
   RiotAccountDTO,
   RiotMatchDTO,
-  RiotSummonerDTO,
   RiotLeagueEntryDTO,
-  RiotChallengerLeagueDTO,
 } from '../types/riot-api';
 
 const tracer = trace.getTracer('tft-meta-analyzer', '1.0.0');
@@ -100,7 +98,7 @@ async function telemetryEnhancedApiRequest<T>(
       
       // 속도 제한 정보 업데이트
       if (rateLimitHeaders.appRateLimit) {
-        const [requests, timeWindow] = rateLimitHeaders.appRateLimit.split(':');
+        const [requests, _timeWindow] = rateLimitHeaders.appRateLimit.split(':');
         const [usedRequests] = rateLimitHeaders.appRateLimitCount?.split(':') || ['0'];
         const remainingRequests = parseInt(requests) - parseInt(usedRequests);
         updateRiotApiRateLimit(region, remainingRequests, remainingRequests);

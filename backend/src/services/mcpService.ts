@@ -248,7 +248,7 @@ export class MCPService {
         result = collections.map(col => ({
           name: col.name,
           type: col.type,
-          options: col.options,
+          options: (col as any).options,
         }));
         break;
         
@@ -258,7 +258,7 @@ export class MCPService {
         
         for (const col of collectionsForIndexes) {
           const indexes = await this.db.collection(col.name).indexes();
-          result[col.name] = indexes;
+          (result as any)[col.name] = indexes;
         }
         break;
         
@@ -302,7 +302,7 @@ export class MCPService {
     // 컬렉션별 성능 분석
     if (collection) {
       const col = this.db.collection(collection);
-      const stats = await col.stats();
+      const stats = await (col as any).stats();
       const indexes = await col.indexes();
       
       analysis.metrics = {

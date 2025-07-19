@@ -59,29 +59,32 @@ export class IndexAnalyzer {
 
     const results: CollectionIndexInfo[] = [];
 
-    for (const { model, name } of collections) {
+    for (const { model: _model, name } of collections) {
       try {
         const db = mongoose.connection.db;
+        if (!db) continue;
         const collection = db.collection(name);
         
         // 인덱스 정보 조회
         const indexes = await collection.indexes();
         
-        // 인덱스 통계 조회
-        const stats = await collection.stats();
+        // 인덱스 통계 조회 (stats 메서드가 없을 수 있음)
+        // const stats = await collection.stats();
         
         const indexInfo: CollectionIndexInfo = {
           collection: name,
           indexes: indexes.map(index => ({
-            name: index.name,
-            key: index.key,
-            size: index.size || 0,
-            usageStats: index.accesses ? {
-              ops: index.accesses.ops,
-              since: index.accesses.since
-            } : undefined
+            name: index.name || '',
+            key: index.key as Record<string, number>,
+            size: Number((index as any).size) || 0,
+            ...((index as any).accesses && {
+              usageStats: {
+                ops: Number((index as any).accesses.ops) || 0,
+                since: new Date((index as any).accesses.since) || new Date()
+              }
+            })
           })),
-          totalSize: stats.totalIndexSize || 0
+          totalSize: 0 // stats.totalIndexSize || 0 (stats is commented out)
         };
 
         results.push(indexInfo);
@@ -104,6 +107,7 @@ export class IndexAnalyzer {
   ): Promise<IndexAnalysisResult> {
     try {
       const db = mongoose.connection.db;
+      if (!db) throw new Error('Database connection not available');
       const coll = db.collection(collection);
       
       // 쿼리 실행 계획 조회
@@ -122,7 +126,7 @@ export class IndexAnalyzer {
       
       // 인덱스 사용 여부 분석
       const stage = executionStats.stage || 'UNKNOWN';
-      const isIndexScan = stage === 'IXSCAN';
+      // const _isIndexScan = stage === 'IXSCAN'; // unused
       const isCollectionScan = stage === 'COLLSCAN';
       
       const indexesUsed: string[] = [];

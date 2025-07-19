@@ -92,12 +92,12 @@ export async function processBatches<T, R>(
 
     // 결과 분류
     batchResults.forEach(result => {
-      if (result.success) {
+      if (result.success && result.data !== undefined) {
         results.push(result.data);
       } else {
         failedItems.push({
           item: result.item,
-          error: result.error,
+          error: result.error || new Error('Unknown error'),
           retryCount: result.retryCount
         });
       }

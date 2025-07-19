@@ -2,14 +2,11 @@
 
 import 'express-async-errors';
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
-import compression from 'compression';
 import logger from './config/logger';
 import { initializeCoreModules } from './initialization/coreModules';
 import { setupRoutes } from './initialization/routeSetup';
 import { loadAndValidateEnv } from './initialization/envLoader';
-import errorHandler from './middlewares/errorHandler';
 
 dotenv.config();
 

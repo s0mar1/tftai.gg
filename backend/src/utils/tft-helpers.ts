@@ -81,8 +81,8 @@ export const getTraitStyleInfo = (
   
   return {
     name: meta.name,
-    apiName: traitApiName || meta.apiName || meta.name || '',
-    image_url: meta.icon,
+    apiName: traitApiName || meta.apiName || meta.name || 'unknown',
+    image_url: meta.icon || '',
     tier_current: currentUnitCount,
     style: styleKey,
     styleOrder: styleOrder,

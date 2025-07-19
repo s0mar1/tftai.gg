@@ -1,15 +1,75 @@
+# Render 배포 설정 파일
+# TFT Meta Analyzer Backend 서비스
+
 services:
+  # Backend API 서버
   - type: web
-    name: tft-backend
+    name: tft-meta-analyzer-backend
     runtime: node
-    plan: free
-    rootDir: backend
-    buildCommand: npm install && npm run build
-    startCommand: npm start
-    healthCheckPath: /api/health
+    region: singapore
+    plan: starter
+    buildCommand:  < /dev/null | 
+      cd backend && npm ci && npm run build
+    startCommand: cd backend && npm start
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
+        value: 4001
+      # 환경변수들은 Render 대시보드에서 직접 설정
+      # - RIOT_API_KEY (필수)
+      - key: RIOT_API_KEY
+        sync: false # 수동으로 설정해야 함
+      # - MONGODB_URI (필수)  
+      - key: MONGODB_URI
+        sync: false # 수동으로 설정해야 함
+      # - UPSTASH_REDIS_URL (선택사항)
+      - key: UPSTASH_REDIS_URL
+        sync: false # 수동으로 설정해야 함
+      # - GEMINI_API_KEY (선택사항)
+      - key: GEMINI_API_KEY
+        sync: false # 수동으로 설정해야 함
+      # MongoDB 연결 설정
+      - key: MONGODB_TIMEOUT
         value: 10000
+      - key: MONGODB_RETRY_COUNT
+        value: 3
+      - key: MONGODB_RETRY_DELAY
+        value: 1000
+      - key: MONGODB_POOL_MIN
+        value: 2
+      - key: MONGODB_POOL_MAX
+        value: 10
+      - key: ENABLE_MONGODB_RETRY
+        value: true
+      # TFT 데이터 로딩 설정
+      - key: TFT_DATA_TIMEOUT
+        value: 15000
+      - key: TFT_DATA_RETRY_COUNT
+        value: 2
+      - key: TFT_DATA_RETRY_DELAY
+        value: 2000
+      # Redis 설정
+      - key: REDIS_TIMEOUT
+        value: 10000
+      - key: REDIS_RETRY_COUNT
+        value: 3
+      - key: REDIS_RETRY_DELAY
+        value: 1000
+    # 자동 배포 설정
     autoDeploy: true
+    branch: main
+    repo: https://github.com/your-username/tft-meta-analyzer.git
+    rootDir: /
+    buildFilter:
+      paths:
+        - backend/**
+        - shared/**
+        - package.json
+        - pnpm-workspace.yaml
+      ignoredPaths:
+        - frontend/**
+        - "**/*.md"
+        - "**/*.test.*"
+        - "**/__tests__/**"

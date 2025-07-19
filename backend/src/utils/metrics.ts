@@ -1,7 +1,7 @@
 // 메트릭 수집 및 모니터링 시스템
 import { Request, Response, NextFunction } from 'express';
 import logger from '../config/logger';
-import { alertService } from '../services/alertService';
+// import { alertService } from '../services/alertService'; // Unused
 
 /**
  * 백분위수 계산 함수
@@ -340,7 +340,7 @@ class MetricsCollector {
     
     // 에러율 알림 체크
     if (this.requestCount >= 10) {
-      const errorRate = this.errorCount / this.requestCount;
+      // const _errorRate = this.errorCount / this.requestCount; // unused
       // alertService.checkErrorRate(errorRate, this.requestCount);
     }
     
@@ -601,7 +601,9 @@ class MetricsCollector {
     // 가동시간 계산
     if (metric.timestamps.length > 0) {
       const firstCall = metric.timestamps[0];
-      metric.uptime = now - firstCall;
+      if (firstCall) {
+        metric.uptime = now - firstCall;
+      }
     }
     
     // 최근 100개의 duration만 유지
@@ -783,7 +785,7 @@ class MetricsCollector {
       
       // 히트율 트렌드 분석
       const hitRateTrend = metric.recentHitRates.length >= 2
-        ? metric.recentHitRates[metric.recentHitRates.length - 1] - metric.recentHitRates[0]
+        ? (metric.recentHitRates[metric.recentHitRates.length - 1] || 0) - (metric.recentHitRates[0] || 0)
         : 0;
       
       // 메모리 효율성 계산
@@ -853,9 +855,9 @@ class MetricsCollector {
     }
     
     const recentHitRates = metric.recentHitRates;
-    if (recentHitRates.length >= 5) {
+    if (recentHitRates && recentHitRates.length >= 5) {
       const recent = recentHitRates.slice(-5);
-      const isDecreasing = recent.every((rate, i) => i === 0 || rate <= recent[i - 1]);
+      const isDecreasing = recent.every((rate, i) => i === 0 || (rate || 0) <= (recent[i - 1] || 0));
       if (isDecreasing) {
         recommendations.push('히트율이 감소 추세입니다. 캐시 무효화 전략을 검토하세요.');
       }

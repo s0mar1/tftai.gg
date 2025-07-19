@@ -143,8 +143,8 @@ export class StatsAnalyzer {
           if (!itemStatsMap.has(itemId)) {
             itemStatsMap.set(itemId, {
               itemId,
-              itemName: itemData.name,
-              itemIcon: itemData.icon,
+              itemName: itemData.name || 'Unknown Item',
+              itemIcon: itemData.icon || '',
               itemType: this.getItemType(itemData, tftData),
               totalGames: 0,
               totalTop4: 0,
@@ -164,7 +164,7 @@ export class StatsAnalyzer {
     }
 
     const statsToSave: ItemStatsData[] = [];
-    for (const [itemId, stats] of itemStatsMap) {
+    for (const [_itemId, stats] of itemStatsMap) {
       if (stats.totalGames >= 10) {
         stats.winRate = (stats.totalWins / stats.totalGames * 100).toFixed(2);
         stats.top4Rate = (stats.totalTop4 / stats.totalGames * 100).toFixed(2);
@@ -255,7 +255,7 @@ export class StatsAnalyzer {
     }
 
     const statsToSave: TraitStatsData[] = [];
-    for (const [traitId, stats] of traitStatsMap) {
+    for (const [_traitId, stats] of traitStatsMap) {
       if (stats.totalGames >= 10) {
         stats.winRate = (stats.totalWins / stats.totalGames * 100).toFixed(2);
         stats.top4Rate = (stats.totalTop4 / stats.totalGames * 100).toFixed(2);
@@ -263,7 +263,7 @@ export class StatsAnalyzer {
 
         const activationLevels: ActivationLevel[] = [];
         const levelMap = stats.activationLevels as Map<number, ActivationLevel>;
-        for (const [level, levelStats] of levelMap) {
+        for (const [_level, levelStats] of levelMap) {
           if (levelStats.games >= 5) {
             levelStats.winRate = (levelStats.wins / levelStats.games * 100).toFixed(2);
             levelStats.top4Rate = (levelStats.top4 / levelStats.games * 100).toFixed(2);

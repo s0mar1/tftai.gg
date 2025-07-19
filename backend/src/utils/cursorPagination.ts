@@ -137,7 +137,7 @@ export class CursorPagination {
 
     // 이전 페이지 조회 시 정렬 순서 반전
     if (cursorInfo?.direction === 'backward') {
-      query = query.sort({ [sortField]: -sortOrder });
+      query = query.sort({ [sortField]: -sortOrder } as any);
     }
 
     // limit + 1로 다음 페이지 존재 여부 확인
@@ -156,11 +156,11 @@ export class CursorPagination {
 
     // 커서 생성
     const nextCursor = items.length > 0 && hasNextPage ? 
-      this.encodeCursor(items[items.length - 1][sortField], items[items.length - 1]._id, 'forward') : 
+      this.encodeCursor((items[items.length - 1] as any)?.[sortField], (items[items.length - 1] as any)?._id, 'forward') : 
       null;
 
     const prevCursor = items.length > 0 && cursorInfo ? 
-      this.encodeCursor(items[0][sortField], items[0]._id, 'backward') : 
+      this.encodeCursor((items[0] as any)?.[sortField], (items[0] as any)?._id, 'backward') : 
       null;
 
     // 이전 페이지 존재 여부 확인 (커서가 있으면 이전 페이지 존재)
@@ -245,11 +245,11 @@ export class CursorPagination {
     }
 
     const nextCursor = items.length > 0 && hasNextPage ? 
-      this.encodeCursor(items[items.length - 1][sortField], items[items.length - 1]._id) : 
+      this.encodeCursor((items[items.length - 1] as any)?.[sortField], (items[items.length - 1] as any)?._id) : 
       null;
 
     const prevCursor = items.length > 0 && cursor ? 
-      this.encodeCursor(items[0][sortField], items[0]._id, 'backward') : 
+      this.encodeCursor((items[0] as any)?.[sortField], (items[0] as any)?._id, 'backward') : 
       null;
 
     return {
@@ -302,14 +302,18 @@ export class CursorPagination {
         // 이전 필드들은 동일한 값
         for (let j = 0; j < i; j++) {
           const prevField = sortFields[j];
-          andConditions[prevField.field] = cursorInfo.value[prevField.field];
+          if (prevField?.field) {
+            andConditions[prevField.field] = cursorInfo.value[prevField.field];
+          }
         }
         
         // 현재 필드는 커서 값과 비교
-        if (field.order === -1) {
-          andConditions[field.field] = { $lt: cursorInfo.value[field.field] };
-        } else {
-          andConditions[field.field] = { $gt: cursorInfo.value[field.field] };
+        if (field?.field) {
+          if (field.order === -1) {
+            andConditions[field.field] = { $lt: cursorInfo.value[field.field] };
+          } else {
+            andConditions[field.field] = { $gt: cursorInfo.value[field.field] };
+          }
         }
         
         orConditions.push(andConditions);

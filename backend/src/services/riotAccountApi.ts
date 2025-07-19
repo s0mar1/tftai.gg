@@ -34,7 +34,10 @@ export const getAccountsByPuuids = async (puuids: string[]): Promise<Map<string,
   results.forEach((account, index) => {
     // 성공적으로 가져온 계정 정보만 Map에 추가
     if (account) {
-      accountsMap.set(puuids[index], account);
+      const puuid = puuids[index];
+      if (puuid) {
+        accountsMap.set(puuid, account);
+      }
     }
   });
 

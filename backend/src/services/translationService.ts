@@ -36,7 +36,7 @@ interface TranslationResults {
 
 // Gemini AI 설정 - lazy initialization
 let genAI: GoogleGenerativeAI | null = null;
-let model: GenerativeModel | null = null;
+let model: any | null = null; // GenerativeModel from @google/generative-ai
 
 function initializeGeminiAI() {
   if (!genAI) {
@@ -105,13 +105,17 @@ function reconstructObjectFromTexts(translatedTexts: TranslationText[]): any {
     let current = result;
     
     for (let i = 0; i < keys.length - 1; i++) {
-      if (!(keys[i] in current)) {
-        current[keys[i]] = {};
+      const key = keys[i];
+      if (!key || !(key in current)) {
+        current[key || ''] = {};
       }
-      current = current[keys[i]];
+      current = current[key || ''];
     }
     
-    current[keys[keys.length - 1]] = text;
+    const lastKey = keys[keys.length - 1];
+    if (lastKey) {
+      current[lastKey] = text;
+    }
   }
   
   return result;
@@ -231,7 +235,7 @@ export async function translateUITexts(targetLanguage: string, forceUpdate: bool
     
     return {
       success: true,
-      message: `${TRANSLATION_INSTRUCTIONS[targetLanguage].name} 번역이 완료되었습니다.`,
+      message: `${TRANSLATION_INSTRUCTIONS[targetLanguage]?.name || 'Unknown'} 번역이 완료되었습니다.`,
       translated: translatedTexts.length,
       total: textsToTranslate.length,
       filePath: targetFilePath
@@ -251,7 +255,10 @@ export async function translateAllLanguages(): Promise<TranslationResults> {
   
   for (const language of languages) {
     try {
-      results[language] = await translateUITexts(language);
+      const result = await translateUITexts(language);
+      if (result) {
+        results[language] = result;
+      }
     } catch (_error: any) {
       results[language] = {
         success: false,

@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import DeckTier from '../models/DeckTier';
 import logger from '../config/logger';
-import { sendSuccess, sendError } from '../utils/responseHelper';
+import { sendSuccess } from '../utils/responseHelper';
 import { checkDBConnection } from '../middlewares/dbConnectionCheck';
 
 const router = express.Router();

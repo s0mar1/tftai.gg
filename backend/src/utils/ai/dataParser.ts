@@ -1,4 +1,4 @@
-import { PlayerUnit, PlayerDeck } from '../../types/ai';
+import { PlayerDeck } from '../../types/ai';
 
 export function parsePlayerDeck(participant: any): PlayerDeck {
   const safeUnits = participant.units || [];

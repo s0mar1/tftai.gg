@@ -1,6 +1,6 @@
 // backend/src/services/telemetry-enhanced-ai-service.ts - 텔레메트리 강화된 AI 분석 서비스
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
-import { trace, context } from '@opentelemetry/api';
+import { trace } from '@opentelemetry/api';
 import { AiAnalysisFlowTracer } from './telemetry/distributedTracing';
 import { recordAiAnalysis } from './telemetry/tftMetrics';
 // import { trackAiAnalysis } from '../middlewares/telemetryMiddleware'; // 임시 비활성화
@@ -62,10 +62,10 @@ export class TelemetryEnhancedAIAnalysisService {
         return {
           ...cachedResult,
           metadata: {
-            ...cachedResult.metadata,
+            ...(cachedResult as any).metadata,
             cacheHit: true
           }
-        };
+        } as FinalAnalysisResult;
       }
 
       // 2. 매치 데이터 조회
@@ -157,7 +157,13 @@ export class TelemetryEnhancedAIAnalysisService {
     const playerData = formatPlayerDataForAI(playerDeck);
     const metaData = formatMetaDecksForAI(metaDecks);
     
-    const prompt = buildAnalysisPrompt(playerData, metaData);
+    const prompt = buildAnalysisPrompt(
+      playerData, 
+      metaData, 
+      'TFT 전략 분석 AI', 
+      '플레이어의 덱을 분석하고 개선점을 제안합니다.', 
+      'JSON 형식으로 응답해주세요.'
+    );
     
     return await flowTracer.traceAiModelCall(
       'gemini-2.5-pro',
@@ -309,7 +315,7 @@ export class TelemetryEnhancedAIAnalysisService {
     for (const pattern of patterns) {
       const match = response.match(pattern);
       if (match) {
-        const score = parseInt(match[1]);
+        const score = parseInt(match[1] || '0');
         if (score >= 0 && score <= 100) {
           return score;
         }
@@ -320,15 +326,15 @@ export class TelemetryEnhancedAIAnalysisService {
 
   private extractSummary(response: string): string {
     const summaryMatch = response.match(/요약[:\\s]*(.*?)(?=\\n\\n|\\n[A-Z]|$)/s);
-    return summaryMatch ? summaryMatch[1].trim() : "분석 요약";
+    return summaryMatch?.[1]?.trim() || "분석 요약";
   }
 
   private extractSummaryFromJson(analysis: string): string {
     const summaryMatch = analysis.match(/\\*\\*총평:\\*\\*\\s*(.*?)(?=\\n\\*\\*|$)/s);
-    return summaryMatch ? summaryMatch[1].trim() : "AI 종합 분석 결과";
+    return summaryMatch?.[1]?.trim() || "AI 종합 분석 결과";
   }
 
-  private extractScoreAnalysisFromJson(analysis: string): any {
+  private extractScoreAnalysisFromJson(_analysis: string): any {
     return {
       metaFit: "메타 적합도 분석",
       deckCompletion: "덱 완성도 분석",
@@ -336,15 +342,15 @@ export class TelemetryEnhancedAIAnalysisService {
     };
   }
 
-  private extractKeyInsightsFromJson(analysis: string): string[] {
+  private extractKeyInsightsFromJson(_analysis: string): string[] {
     return ["핵심 인사이트 1", "핵심 인사이트 2"];
   }
 
-  private extractImprovementsFromJson(analysis: string): string[] {
+  private extractImprovementsFromJson(_analysis: string): string[] {
     return ["개선 사항 1", "개선 사항 2"];
   }
 
-  private extractNextStepsFromJson(analysis: string): string {
+  private extractNextStepsFromJson(_analysis: string): string {
     return "다음 게임을 위한 가이드";
   }
 

@@ -66,7 +66,7 @@ interface Grade {
 /**
  * 메타 적합도 점수 계산 (0-100점)
  */
-function calculateMetaFitScore(playerDeck: PlayerDeck, primaryMatchDeck: SimilarityResult | null, similarities: SimilarityResult[]): number {
+function calculateMetaFitScore(_playerDeck: PlayerDeck, primaryMatchDeck: SimilarityResult | null, _similarities: SimilarityResult[]): number {
     if (!primaryMatchDeck) return 0;
     
     const baseScore = primaryMatchDeck.similarity || 0;
@@ -247,7 +247,7 @@ function calculateCostDistributionScore(units: Unit[]): number {
     if (!units || units.length === 0) return 0;
     
     const costCounts: { [key: number]: number } = {};
-    units.forEach(unit => {
+    units.forEach(_unit => {
         // Unit 타입에 cost 속성이 없으므로 임시로 1을 사용하거나 다른 방법 사용
         const cost = 1; // 실제로는 champion 데이터에서 가져와야 함
         costCounts[cost] = (costCounts[cost] || 0) + 1;
@@ -262,7 +262,7 @@ function calculateCostDistributionScore(units: Unit[]): number {
     Object.keys(idealDistribution).forEach(costStr => {
         const cost = parseInt(costStr);
         const actual = costCounts[cost] || 0;
-        const ideal = idealDistribution[cost];
+        const ideal = idealDistribution[cost]!;
         const deviation = Math.abs(actual - ideal);
         score += Math.max(0, 2 - deviation); // 각 코스트당 최대 2점
     });
@@ -308,11 +308,11 @@ function calculateMetaItemMatchScore(playerDeck: PlayerDeck, metaDeck: MetaDeck)
         );
         
         if (playerUnit && (playerUnit as any).items) {
-            const playerItemNames = (playerUnit as any).items.map(item => String(item).toLowerCase());
+            const playerItemNames = (playerUnit as any).items.map((item: any) => String(item).toLowerCase());
             
             coreUnit.recommendedItems.forEach(recItem => {
                 totalRecommendedItems++;
-                const hasRecommendedItem = playerItemNames.some(playerItem => 
+                const hasRecommendedItem = playerItemNames.some((playerItem: any) => 
                     playerItem.includes(recItem.name.toLowerCase()) || 
                     recItem.name.toLowerCase().includes(playerItem)
                 );

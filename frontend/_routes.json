@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "description": "TFT Meta Analyzer Cloudflare Pages Routes",
+  "include": [
+    "/*"
+  ],
+  "exclude": [
+    "/api/*"
+  ]
+}

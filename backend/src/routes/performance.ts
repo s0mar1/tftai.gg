@@ -1,7 +1,8 @@
 // 성능 모니터링 API 라우트
 import express from 'express';
 import logger from '../config/logger';
-import { performanceOptimizer, memoryOptimizer, resourceOptimizer } from '../services/system';
+import systemOptimizer from '../services/system';
+const { performanceOptimizer, memoryOptimizer, resourceOptimizer } = systemOptimizer;
 // import scalabilityManager from '../services/system/scalabilityManager';
 import aggregationService from '../services/aggregationService';
 import cacheManager from '../services/cacheManager';
@@ -114,23 +115,22 @@ router.post('/test/load', async (_req, _res) => {
     
     logger.info(`부하 테스트 시작: 동시성 ${concurrency}, 지속시간 ${duration}초`);
     
-    const testTasks = Array.from({ length: concurrency }, (_: unknown, i: number) => 
+    const testTasks = Array.from({ length: concurrency }, (_: unknown, _i: number) => 
       async () => {
         const start = Date.now();
         
         // 모의 CPU 집약적 작업
-        await resourceOptimizer?.processCPUIntensiveTask(
-          'heavyComputation',
-          { iterations: 1000000 },
-          1
-        );
+        await resourceOptimizer?.processCPUIntensiveTask({
+          type: 'heavyComputation',
+          iterations: 1000000
+        });
         
         return Date.now() - start;
       }
     );
     
-    const results = await performanceOptimizer.parallelProcess(testTasks, concurrency);
-    const averageTime = results.reduce((a, b) => a + b, 0) / results.length;
+    const results = await performanceOptimizer.parallelProcess(testTasks);
+    const averageTime = results.reduce((a: number, b: number) => a + b, 0) / results.length;
     
     _res.json({
       message: '부하 테스트 완료',
@@ -276,7 +276,7 @@ router.get('/recommendations', async (_req, _res) => {
 /**
  * 통합 성능 통계 조회
  */
-router.get('/enhanced-stats', async (req, res) => {
+router.get('/enhanced-stats', async (_req, res) => {
   try {
     const apiStats = performanceStats.getStats();
     const queryStats = queryPerformanceStats.getSummary();
@@ -297,7 +297,7 @@ router.get('/enhanced-stats', async (req, res) => {
 /**
  * 성능 최적화 리포트 조회
  */
-router.get('/optimization-report', async (req, res) => {
+router.get('/optimization-report', async (_req, res) => {
   try {
     const apiReport = generatePerformanceReport();
     const queryReport = generateOptimizationReport();
@@ -316,7 +316,7 @@ router.get('/optimization-report', async (req, res) => {
 /**
  * 느린 쿼리 및 요청 조회
  */
-router.get('/slow-operations', async (req, res) => {
+router.get('/slow-operations', async (_req, res) => {
   try {
     const slowQueries = queryPerformanceStats.getSlowQueries();
     const slowRequests = performanceStats.getSlowRequests();
@@ -337,7 +337,7 @@ router.get('/slow-operations', async (req, res) => {
 /**
  * 데이터베이스 연결 상태 상세 조회
  */
-router.get('/db-status', async (req, res) => {
+router.get('/db-status', async (_req, res) => {
   try {
     const connectionStats = getConnectionStats();
     const connectionCheck = await manualConnectionCheck();
@@ -356,7 +356,7 @@ router.get('/db-status', async (req, res) => {
 /**
  * 데이터베이스 연결 테스트
  */
-router.post('/db-test', async (req, res) => {
+router.post('/db-test', async (_req, res) => {
   try {
     logger.info('수동 DB 연결 테스트 시작');
     const testResult = await manualConnectionCheck();
@@ -374,7 +374,7 @@ router.post('/db-test', async (req, res) => {
 /**
  * 성능 통계 초기화
  */
-router.post('/reset-stats', async (req, res) => {
+router.post('/reset-stats', async (_req, res) => {
   try {
     performanceStats.clear();
     queryPerformanceStats.clear();
@@ -394,7 +394,7 @@ router.post('/reset-stats', async (req, res) => {
 /**
  * 실시간 성능 모니터링
  */
-router.get('/realtime-monitoring', async (req, res) => {
+router.get('/realtime-monitoring', async (_req, res) => {
   try {
     const recentRequests = performanceStats.getRecentRequests(100);
     const oneMinuteAgo = new Date(Date.now() - 60000);

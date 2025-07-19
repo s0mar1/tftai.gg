@@ -9,8 +9,7 @@ import {
   RiotMatchDTO,
   RiotSummonerDTO,
   RiotLeagueEntryDTO,
-  RiotChallengerLeagueDTO,
-  RiotErrorDTO
+  RiotChallengerLeagueDTO
 } from '../types/riot-api';
 
 dotenv.config();

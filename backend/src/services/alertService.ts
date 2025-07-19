@@ -405,7 +405,7 @@ export class AlertService extends EventEmitter {
   /**
    * 알림 메시지 생성
    */
-  private generateAlertMessage(rule: AlertRule, error: StructuredError): string {
+  private generateAlertMessage(_rule: AlertRule, error: StructuredError): string {
     const lines = [
       `**에러 메시지:** ${error.message}`,
       `**심각도:** ${error.severity}`,

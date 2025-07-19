@@ -1,6 +1,6 @@
 // backend/src/services/telemetry/tftMetrics.ts - TFT 특화 메트릭 정의
 import { metrics } from '@opentelemetry/api';
-import { MeterProvider } from '@opentelemetry/sdk-metrics';
+// import { MeterProvider } from '@opentelemetry/sdk-metrics'; // Unused
 import logger from '../../config/logger';
 
 // 메터 인스턴스 생성
@@ -141,7 +141,7 @@ export function recordCacheMiss(cacheLayer: 'L1' | 'L2', keyType: string): void 
 /**
  * 외부 API 호출 결과 기록
  */
-export function recordExternalApiCall(apiType: 'riot' | 'google_ai', region: string, success: boolean, duration: number): void {
+export function recordExternalApiCall(apiType: 'riot' | 'google_ai', region: string, success: boolean, _duration: number): void {
   externalApiCallsCounter.add(1, {
     api_type: apiType,
     region,

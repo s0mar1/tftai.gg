@@ -14,7 +14,7 @@ import qnaFormat from '../../prompts/qna/format';
 import { buildQnAPrompt, sanitizeAIResponse } from '../../utils/ai/promptBuilder';
 
 // 타입 임포트
-import { ChatMessage, QnARequestBody, QnAResponse } from '../../types/ai';
+import { ChatMessage, QnAResponse } from '../../types/ai';
 
 export class QnAService {
   private model: GenerativeModel;
@@ -45,6 +45,7 @@ export class QnAService {
           ...cachedResult,
           metadata: {
             ...cachedResult.metadata,
+            answeredAt: cachedResult.metadata?.answeredAt || new Date().toISOString(),
             cacheHit: true
           }
         };

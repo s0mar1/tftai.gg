@@ -33,13 +33,14 @@ interface LanguageToLocale {
   [key: string]: string;
 }
 
-interface StyleOrder {
-  [key: string]: number;
-}
+// 사용하지 않는 인터페이스들 제거
+// interface StyleOrder {
+//   [key: string]: number;
+// }
 
-interface Palette {
-  [key: string]: string;
-}
+// interface Palette {
+//   [key: string]: string;
+// }
 
 interface StyleNumberToVariant {
   [key: number]: string;
@@ -332,13 +333,13 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
     const localeData: RawTFTData = localeResponse?.data;
     
     const currentSetKey = Object.keys(enData.sets).sort((a, b) => parseInt(b) - parseInt(a))[0];
-    const enSetData = enData?.sets?.[currentSetKey];
-    const localeSetData = localeData?.sets?.[currentSetKey];
+    const enSetData = currentSetKey ? enData?.sets?.[currentSetKey] : undefined;
+    const localeSetData = currentSetKey ? localeData?.sets?.[currentSetKey] : undefined;
 
     const localeChampionNames = new Map(localeSetData?.champions?.map((c: any) => [c.apiName, c.name]) || []);
     const localeTraitNames = new Map(localeSetData?.traits?.map((t: any) => [t.apiName, t.name]) || []);
-    // 한국어 특성 이름 -> API 이름 역방향 매핑 생성
-    const koreanToApiTraitNames = new Map(localeSetData.traits.map(t => [t.name, t.apiName]));
+    // 한국어 특성 이름 -> API 이름 역방향 매핑 생성 (현재 미사용)
+    // const _koreanToApiTraitNames = new Map(localeSetData?.traits?.map(t => [t.name, t.apiName]) || []);
     const localeItemNames = new Map();
     
     enData.items.forEach(enItem => {
@@ -353,7 +354,7 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
         }
     });
 
-    const champions: Champion[] = enSetData?.champions
+    const champions: Champion[] = enSetData?.champions || []
       ?.filter((champ: any) => champ.cost > 0 && champ.traits?.length > 0 && !champ.apiName.includes('Tutorial'))
       ?.map((enChamp: any) => {
           const champName = localeChampionNames.get(enChamp.apiName) || enChamp.name || enChamp.apiName || '미확인 챔피언';

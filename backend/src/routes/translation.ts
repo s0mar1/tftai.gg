@@ -1,6 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { translateUITexts, translateAllLanguages } from '../services/translationService';
-import { getTFTDataWithLanguage } from '../services/tftData';
 import cacheManager from '../services/cacheManager';
 import asyncHandler from '../utils/asyncHandler';
 

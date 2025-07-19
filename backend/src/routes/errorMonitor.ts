@@ -70,6 +70,16 @@ router.get('/error/:fingerprint', checkDBConnection, async (_req: Request, _res:
   try {
     const { fingerprint } = _req.params;
     
+    if (!fingerprint) {
+      return _res.status(400).json({
+        success: false,
+        error: {
+          message: 'fingerprint 매개변수가 필요합니다.',
+          statusCode: 400
+        }
+      });
+    }
+    
     const errorDetails = errorMonitor.getErrorDetails(fingerprint);
     
     if (!errorDetails) {
@@ -88,7 +98,7 @@ router.get('/error/:fingerprint', checkDBConnection, async (_req: Request, _res:
     });
   } catch (error) {
     logger.error('에러 상세 정보 조회 중 오류 발생:', error);
-    _next(error);
+    return _next(error);
   }
 });
 
@@ -97,6 +107,16 @@ router.post('/error/:fingerprint/resolve', checkDBConnection, async (_req: Reque
   try {
     const { fingerprint } = _req.params;
     const { resolvedBy = 'unknown' } = _req.body;
+    
+    if (!fingerprint) {
+      return _res.status(400).json({
+        success: false,
+        error: {
+          message: 'fingerprint 매개변수가 필요합니다.',
+          statusCode: 400
+        }
+      });
+    }
     
     const success = errorMonitor.resolveError(fingerprint, resolvedBy);
     
@@ -121,7 +141,7 @@ router.post('/error/:fingerprint/resolve', checkDBConnection, async (_req: Reque
     });
   } catch (error) {
     logger.error('에러 해결 처리 중 오류 발생:', error);
-    _next(error);
+    return _next(error);
   }
 });
 

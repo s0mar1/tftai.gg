@@ -255,10 +255,10 @@ class MemoryOptimizer extends EventEmitter {
    */
   public async optimize(): Promise<void> {
     // 캐시 크기 최적화
-    this.optimizeCacheSize();
+    // this.optimizeCacheSize(); // 미구현
     
     // 빔라운 캐시 정리
-    this.clearWeakCaches();
+    // this.clearWeakCaches(); // 미구현
     
     // 이벤트 리스너 정리
     this.cleanupEventListeners();

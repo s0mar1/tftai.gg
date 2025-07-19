@@ -225,6 +225,13 @@ router.post('/alerts/:alertId/resolve', async (_req: Request, _res: Response, _n
   try {
     const { alertId } = _req.params;
     
+    if (!alertId) {
+      return _res.status(400).json({
+        success: false,
+        message: 'alertId 매개변수가 필요합니다.'
+      });
+    }
+    
     logger.info(`알림 해결 요청: ${alertId}`);
     
     const resolved = alertService.resolveAlert(alertId);
@@ -243,7 +250,7 @@ router.post('/alerts/:alertId/resolve', async (_req: Request, _res: Response, _n
     
   } catch (error) {
     logger.error('알림 해결 실패', error);
-    _next(error);
+    return _next(error);
   }
 });
 
@@ -314,6 +321,13 @@ router.put('/alerts/config/:configId', async (_req: Request, _res: Response, _ne
     const { configId } = _req.params;
     const updateData = _req.body;
     
+    if (!configId) {
+      return _res.status(400).json({
+        success: false,
+        message: 'configId 매개변수가 필요합니다.'
+      });
+    }
+    
     logger.info(`알림 설정 업데이트 요청: ${configId}`, updateData);
     
     const updated = alertService.updateAlertConfig(configId, updateData);
@@ -332,7 +346,7 @@ router.put('/alerts/config/:configId', async (_req: Request, _res: Response, _ne
     
   } catch (error) {
     logger.error('알림 설정 업데이트 실패', error);
-    _next(error);
+    return _next(error);
   }
 });
 

@@ -1,7 +1,7 @@
 // backend/src/services/telemetry-enhanced-cache.ts - 텔레메트리 강화된 캐시 서비스
 import NodeCache from 'node-cache';
 import Redis from 'ioredis';
-import { trace, context } from '@opentelemetry/api';
+import { trace } from '@opentelemetry/api';
 import { CacheFlowTracer } from './telemetry/distributedTracing';
 import { recordCacheHit, recordCacheMiss } from './telemetry/tftMetrics';
 // import { trackCacheOperation } from '../middlewares/telemetryMiddleware'; // 임시 비활성화
@@ -130,7 +130,7 @@ export class TelemetryEnhancedCacheManager {
       async () => {
         // 원본 데이터 소스 (실제로는 null 반환)
         logger.debug(`Cache MISS for key: ${key}`);
-        return null;
+        return null as T;
       }
     );
   }

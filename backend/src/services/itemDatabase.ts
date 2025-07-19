@@ -69,7 +69,7 @@ const initializeItemDatabase = async (): Promise<ItemDatabase> => {
   for (const category in customItemData) {
     if (Object.hasOwnProperty.call(customItemData, category)) {
       finalCategorizedItems[category] = [];
-      for (const customItem of customItemData[category]) {
+      for (const customItem of (customItemData[category] || [])) {
         // 4. "부품 공급처"에 해당 부품(아이템)이 있는지 확인합니다.
         const liveItem = liveItemMap.get(customItem.api_name);
 
@@ -79,7 +79,7 @@ const initializeItemDatabase = async (): Promise<ItemDatabase> => {
           name: customItem.korean_name, // 설계도의 한글 이름을 사용합니다.
           // 아이콘은 live 데이터에 있으면 그것을 쓰고(신뢰도 높음), 
           // 없으면(tftData.js의 버그) 우리 JSON의 것을 대체재로 사용합니다.
-          icon: liveItem ? liveItem.icon : (customItem.icon_path || '').toLowerCase(),
+          icon: liveItem?.icon || (customItem.icon_path || '').toLowerCase(),
           category: category,
         };
         

@@ -266,7 +266,7 @@ export class QueryPerformanceTracker extends EventEmitter {
     const totalQueries = this.stats.length;
     const averageDuration = totalQueries > 0 ?
       this.stats.reduce((sum, stat) => sum + stat.duration, 0) / totalQueries : 0;
-    const slowQueries = this.getSlowQueries().length;
+    // const _slowQueries = this.getSlowQueries().length; // unused
     const uptime = Date.now() - this.startTime;
 
     const collectionStats: Record<string, { count: number; avgDuration: number }> = {};
@@ -274,13 +274,13 @@ export class QueryPerformanceTracker extends EventEmitter {
       if (!collectionStats[stat.collection]) {
         collectionStats[stat.collection] = { count: 0, avgDuration: 0 };
       }
-      collectionStats[stat.collection].count++;
+      collectionStats[stat.collection]!.count++;
     });
 
     // 각 컬렉션의 평균 실행 시간 계산
     Object.keys(collectionStats).forEach(collection => {
       const collectionQueries = this.getStatsByCollection(collection);
-      collectionStats[collection].avgDuration = collectionQueries.length > 0 ?
+      collectionStats[collection]!.avgDuration = collectionQueries.length > 0 ?
         collectionQueries.reduce((sum, stat) => sum + stat.duration, 0) / collectionQueries.length : 0;
     });
 
@@ -432,13 +432,13 @@ export async function monitorQuery<T>(
       endTime: new Date(),
       filter: options.filter,
       sort: options.sort,
-      limit: options.limit,
-      skip: options.skip,
+      limit: options.limit || 0,
+      skip: options.skip || 0,
       success: true,
-      explainStats,
+      explainStats: explainStats || { stage: 'unknown', executionTimeMillis: 0, totalExamined: 0, totalReturned: 0, indexesUsed: [], needsOptimization: false, optimizationSuggestions: [] },
       optimizationSuggestions: explainStats?.optimizationSuggestions || [],
-      stackTrace: queryTracker.config.enableStackTrace && duration > queryTracker.config.thresholds.warning ?
-        queryTracker['getStackTrace']() : undefined
+      stackTrace: (queryTracker.config.enableStackTrace && duration > queryTracker.config.thresholds.warning ?
+        queryTracker['getStackTrace']() : undefined) || 'No stack trace'
     };
 
     queryTracker.addStat(stat);
@@ -458,12 +458,12 @@ export async function monitorQuery<T>(
       endTime: new Date(),
       filter: options.filter,
       sort: options.sort,
-      limit: options.limit,
-      skip: options.skip,
+      limit: options.limit || 0,
+      skip: options.skip || 0,
       success: false,
       error,
       optimizationSuggestions: [],
-      stackTrace: queryTracker.config.enableStackTrace ? queryTracker['getStackTrace']() : undefined
+      stackTrace: queryTracker.config.enableStackTrace ? (queryTracker['getStackTrace']() || 'Stack trace unavailable') : 'Stack trace disabled'
     };
 
     queryTracker.addStat(stat);
@@ -493,13 +493,13 @@ export async function monitorMongooseQuery<T>(
       queryId: options.queryId || 'mongoose',
       collection: options.collection,
       operation: options.operation,
-      enableExplain: options.enableExplain,
+      enableExplain: options.enableExplain || false,
       explainQuery: options.enableExplain ?
-        () => query.clone().explain('executionStats') : undefined,
+        async () => query.clone().explain('executionStats') : async () => ({}),
       filter: queryConditions,
       sort: queryOptions.sort,
-      limit: queryOptions.limit,
-      skip: queryOptions.skip
+      limit: queryOptions.limit || 0,
+      skip: queryOptions.skip || 0
     }
   );
 }
@@ -523,9 +523,9 @@ export async function monitorAggregateQuery<T>(
       queryId: options.queryId || 'aggregate',
       collection: options.collection,
       operation: options.operation,
-      enableExplain: options.enableExplain,
+      enableExplain: options.enableExplain || false,
       explainQuery: options.enableExplain ?
-        () => model.aggregate(pipeline).explain('executionStats') : undefined,
+        async () => model.aggregate(pipeline).explain('executionStats') : async () => ({}),
       filter: { pipeline: pipeline.slice(0, 2) }
     }
   );

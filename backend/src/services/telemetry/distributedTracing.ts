@@ -45,7 +45,7 @@ export class SummonerFlowTracer {
         'tft.cache.key': cacheKey,
         'tft.cache.key_type': this.getCacheKeyType(cacheKey),
       },
-    }, context.setSpan(context.active(), this.parentSpan));
+    }, this.parentSpan ? trace.setSpan(context.active(), this.parentSpan) : context.active());
 
     try {
       const result = await operation();
@@ -89,7 +89,7 @@ export class SummonerFlowTracer {
         'http.method': 'GET',
         'http.url': endpoint,
       },
-    }, context.setSpan(context.active(), this.parentSpan));
+    }, this.parentSpan ? trace.setSpan(context.active(), this.parentSpan) : context.active());
 
     const startTime = Date.now();
     try {

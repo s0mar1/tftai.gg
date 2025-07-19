@@ -7,8 +7,8 @@ import logger from '../config/logger';
 const router = Router();
 
 // MongoDB 쿼리 실행
-router.post('/mongodb/query', asyncHandler(async (req, res) => {
-    const { query, collection, operation } = req.body;
+router.post('/mongodb/query', asyncHandler(async (_req, res) => {
+    const { query, collection, operation } = _req.body;
     
     // 기본 검증
     if (!query || typeof query !== 'string') {
@@ -39,8 +39,8 @@ router.post('/mongodb/query', asyncHandler(async (req, res) => {
 );
 
 // 데이터베이스 통계 조회
-router.get('/mongodb/stats', asyncHandler(async (req, res) => {
-    const { type = 'overview' } = req.query;
+router.get('/mongodb/stats', asyncHandler(async (_req, res) => {
+    const { type = 'overview' } = _req.query;
     
     // 기본 검증
     if (!['overview', 'collections', 'indexes', 'performance'].includes(type as string)) {
@@ -63,8 +63,8 @@ router.get('/mongodb/stats', asyncHandler(async (req, res) => {
 );
 
 // 성능 분석
-router.post('/mongodb/analyze', asyncHandler(async (req, res) => {
-    const { collection, timeRange } = req.body;
+router.post('/mongodb/analyze', asyncHandler(async (_req, res) => {
+    const { collection, timeRange } = _req.body;
     
     logger.info('MCP MongoDB performance analysis request', { collection, timeRange });
     
@@ -79,8 +79,8 @@ router.post('/mongodb/analyze', asyncHandler(async (req, res) => {
 );
 
 // 쿼리 설명 및 최적화 제안
-router.post('/mongodb/explain', asyncHandler(async (req, res) => {
-    const { collection, query } = req.body;
+router.post('/mongodb/explain', asyncHandler(async (_req, res) => {
+    const { collection, query } = _req.body;
     
     // 기본 검증
     if (!collection || typeof collection !== 'string') {
@@ -110,7 +110,7 @@ router.post('/mongodb/explain', asyncHandler(async (req, res) => {
 );
 
 // MCP 서비스 상태 확인
-router.get('/status', asyncHandler(async (req, res) => {
+router.get('/status', asyncHandler(async (_req, res) => {
   res.json({
     success: true,
     data: {

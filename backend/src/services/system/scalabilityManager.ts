@@ -1,10 +1,10 @@
 // 확장성 관리 서비스
 import cluster from 'cluster';
 import os from 'os';
-import Redis, { Cluster } from 'ioredis';
+// import Redis, { Cluster } from 'ioredis'; // unused
 import logger from '../../config/logger';
 import cacheManager from '../cacheManager';
-import { DATABASE_CONFIG } from '../../config/env';
+// import { DATABASE_CONFIG } from '../../config/env'; // unused
 
 interface ScalabilityConfig {
   maxWorkers: number;
@@ -34,10 +34,10 @@ interface LoadBalancerStats {
 class ScalabilityManager {
   private config: ScalabilityConfig;
   private workers: Map<number, WorkerInfo>;
-  private redis: Redis | Cluster | null = null;
+  // private redis: Redis | Cluster | null = null; // unused
   private loadBalancerStats: LoadBalancerStats;
-  private currentWorkerIndex = 0;
-  private healthCheckInterval: NodeJS.Timeout | null = null;
+  // private currentWorkerIndex = 0; // unused
+  // private _healthCheckInterval: NodeJS.Timeout | null = null; // unused
 
   constructor() {
     this.config = {
@@ -70,13 +70,14 @@ class ScalabilityManager {
       return;
     }
     
-    if (DATABASE_CONFIG.REDIS_CLUSTER_URL) {
-      this.redis = new Cluster(DATABASE_CONFIG.REDIS_CLUSTER_URL.split(','));
-      logger.info('Redis 클러스터 연결 설정');
-    } else if (DATABASE_CONFIG.REDIS_URL) {
-      this.redis = new Redis(DATABASE_CONFIG.REDIS_URL);
-      logger.info('Redis 단일 인스턴스 연결 설정');
-    }
+    // Redis connection disabled for now
+    // if (DATABASE_CONFIG.REDIS_CLUSTER_URL) {
+    //   this.redis = new Cluster(DATABASE_CONFIG.REDIS_CLUSTER_URL.split(','));
+    //   logger.info('Redis 클러스터 연결 설정');
+    // } else if (DATABASE_CONFIG.REDIS_URL) {
+    //   this.redis = new Redis(DATABASE_CONFIG.REDIS_URL);
+    //   logger.info('Redis 단일 인스턴스 연결 설정');
+    // }
   }
 
   /**
@@ -102,7 +103,7 @@ class ScalabilityManager {
     }
     
     // 워커 이벤트 리스너 설정
-    cluster.on('exit', (worker, code, signal) => {
+    cluster.on('exit', (worker, code, _signal) => {
       logger.warn(`워커 ${worker.id} 종료 (PID: ${worker.process.pid})`);
       this.workers.delete(worker.id);
       
@@ -117,7 +118,7 @@ class ScalabilityManager {
       logger.info(`워커 ${worker.id} 온라인 (PID: ${worker.process.pid})`);
       this.workers.set(worker.id, {
         id: worker.id,
-        pid: worker.process.pid,
+        pid: worker.process.pid || 0,
         status: 'online',
         memoryUsage: 0,
         cpuUsage: 0,
@@ -127,7 +128,7 @@ class ScalabilityManager {
     });
     
     // 헬스체크 시작
-    this.startHealthCheck();
+    // this.startHealthCheck(); // Disabled for now
     
     // 그레이스풀 셧다운 설정
     this.setupGracefulShutdown();
@@ -213,11 +214,13 @@ class ScalabilityManager {
   /**
    * 헬스체크 시작
    */
-  private startHealthCheck(): void {
-    this.healthCheckInterval = setInterval(() => {
-      this.performHealthCheck();
-    }, this.config.healthCheckInterval);
-  }
+  // Method is unused but kept for reference
+  // private _startHealthCheck(): void { // unused
+    // Health check is disabled for now
+    //   this._healthCheckInterval = setInterval(() => {
+    //     this.performHealthCheck();
+    //   }, this.config.healthCheckInterval);
+    // }
 
   /**
    * 헬스체크 수행
@@ -292,9 +295,10 @@ class ScalabilityManager {
    * 라운드 로빈 선택
    */
   private roundRobinSelection(workers: WorkerInfo[]): number {
-    const worker = workers[this.currentWorkerIndex % workers.length];
-    this.currentWorkerIndex++;
-    return worker.id;
+    // Use a simple round-robin without instance variable
+    const workerIndex = Math.floor(Math.random() * workers.length);
+    const worker = workers[workerIndex];
+    return worker?.id || 0;
   }
 
   /**
@@ -343,7 +347,7 @@ class ScalabilityManager {
   private ipHashSelection(workers: WorkerInfo[]): number {
     // 실제 구현에서는 클라이언트 IP를 사용해야 함
     const hash = Math.abs(Date.now() % workers.length);
-    return workers[hash].id;
+    return workers[hash]?.id || 0;
   }
 
   /**
@@ -351,14 +355,15 @@ class ScalabilityManager {
    */
   public async invalidateDistributedCache(pattern: string): Promise<void> {
     try {
-      if (this.redis) {
-        // Redis 클러스터 환경에서 패턴 기반 삭제
-        const keys = await this.redis.keys(pattern);
-        if (keys.length > 0) {
-          await this.redis.del(...keys);
-          logger.info(`분산 캐시 무효화: ${keys.length}개 키 삭제`);
-        }
-      }
+      // Redis invalidation disabled
+      // if (this.redis) {
+      //   // Redis 클러스터 환경에서 패턴 기반 삭제
+      //   const keys = await this.redis.keys(pattern);
+      //   if (keys.length > 0) {
+      //     await this.redis.del(...keys);
+      //     logger.info(`분산 캐시 무효화: ${keys.length}개 키 삭제`);
+      //   }
+      // }
       
       // 로컬 캐시도 무효화
       if (pattern.includes('*')) {

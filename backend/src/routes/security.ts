@@ -62,7 +62,7 @@ router.post('/csp-report', (req: Request, res: Response): void => {
  * 보안 메트릭스 리셋 (개발 환경 전용)
  * POST /api/security/reset-metrics
  */
-router.post('/reset-metrics', (req: Request, res: Response) => {
+router.post('/reset-metrics', (_req: Request, res: Response) => {
   if (process.env.NODE_ENV !== 'development') {
     return sendError(res, '이 기능은 개발 환경에서만 사용할 수 있습니다.', '403');
   }

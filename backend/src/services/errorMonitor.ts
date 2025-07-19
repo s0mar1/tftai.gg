@@ -175,7 +175,7 @@ export class ErrorMonitor extends EventEmitter {
   /**
    * 에러 심각도 자동 판정
    */
-  private assessSeverity(error: Error, context: ErrorContext): ErrorSeverity {
+  private assessSeverity(error: Error, _context: ErrorContext): ErrorSeverity {
     const message = error.message.toLowerCase();
 
     // 치명적 에러
@@ -242,9 +242,9 @@ export class ErrorMonitor extends EventEmitter {
         occurrenceCount: 1,
         resolved: false,
         tags: this.generateTags(error, context, category, severity)
-      };
+      } as StructuredError;
       
-      this.errorStore.set(fingerprint, structuredError);
+      this.errorStore.set(fingerprint, structuredError!);
       
       // 에러 저장소 크기 제한
       if (this.errorStore.size > this.MAX_ERROR_STORE_SIZE) {
@@ -253,7 +253,9 @@ export class ErrorMonitor extends EventEmitter {
     }
 
     // 배치 처리를 위해 버퍼에 추가
-    this.batchBuffer.push(structuredError);
+    if (structuredError) {
+      this.batchBuffer.push(structuredError);
+    }
     
     // 배치 크기에 도달하거나 중요한 에러인 경우 즉시 처리
     if (this.batchBuffer.length >= this.BATCH_SIZE || 
@@ -265,7 +267,7 @@ export class ErrorMonitor extends EventEmitter {
       this.scheduleBatchProcessing();
     }
 
-    return structuredError;
+    return structuredError!;
   }
 
   /**
@@ -602,8 +604,10 @@ export class ErrorMonitor extends EventEmitter {
     
     for (let i = 0; i < fingerprints.length; i++) {
       for (let j = i + 1; j < fingerprints.length; j++) {
-        const error1 = this.errorStore.get(fingerprints[i])!;
-        const error2 = this.errorStore.get(fingerprints[j])!;
+        const error1 = this.errorStore.get(fingerprints[i]!);
+        const error2 = this.errorStore.get(fingerprints[j]!);
+        
+        if (!error1 || !error2) continue;
         
         // 간단한 상관관계 계산 (시간대 기반)
         const correlation = this.calculateTimeBasedCorrelation(error1, error2);
@@ -827,7 +831,7 @@ process.on('uncaughtException', (error) => {
   });
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason, _promise) => {
   const error = reason instanceof Error ? reason : new Error(String(reason));
   errorMonitor.captureError(error, {
     category: 'UNKNOWN',

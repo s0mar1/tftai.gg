@@ -1,4 +1,4 @@
-import cron from 'node-cron';
+import * as cron from 'node-cron';
 import { collectTopRankerMatches } from '../jobs/matchCollector';
 import { analyzeAndCacheDeckTiers } from '../jobs/deckAnalyzer';
 import { analyzePlayerStats } from '../jobs/playerStatsAnalyzer';
@@ -216,7 +216,7 @@ process.on('uncaughtException', (error) => {
     stopScheduler();
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason, _promise) => {
     logger.error('처리되지 않은 Promise 거부:', reason);
     stopScheduler();
 });

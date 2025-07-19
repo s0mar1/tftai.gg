@@ -41,7 +41,7 @@ router.get('/key/:keyName', asyncHandler(async (req, res) => {
  * 모든 캐시 키 통계 조회
  * GET /api/cache-monitor/all
  */
-router.get('/all', asyncHandler(async (req, res) => {
+router.get('/all', asyncHandler(async (_req, res) => {
   const allStats = cacheMonitor.getStats();
   
   // Map을 일반 객체로 변환
@@ -58,7 +58,7 @@ router.get('/all', asyncHandler(async (req, res) => {
  * 성능 리포트 조회
  * GET /api/cache-monitor/performance
  */
-router.get('/performance', asyncHandler(async (req, res) => {
+router.get('/performance', asyncHandler(async (_req, res) => {
   const report = cacheMonitor.getPerformanceReport();
   
   res.json({
@@ -119,7 +119,7 @@ router.put('/toggle', asyncHandler(async (req, res) => {
  * 캐시 상태 대시보드 정보
  * GET /api/cache-monitor/dashboard
  */
-router.get('/dashboard', asyncHandler(async (req, res) => {
+router.get('/dashboard', asyncHandler(async (_req, res) => {
   const summary = cacheMonitor.getSummary();
   const performance = cacheMonitor.getPerformanceReport();
   

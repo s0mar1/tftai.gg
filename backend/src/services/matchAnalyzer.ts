@@ -145,13 +145,13 @@ export async function findAnalysisTargets(
     try {
         // 메타 덱 데이터가 없으면 DB에서 조회
         if (!allMetaDecks) {
-            allMetaDecks = await DeckTier.find({})
+            allMetaDecks = (await DeckTier.find({})
                 .sort({ winRate: -1, pickRate: -1 })
                 .limit(50)
-                .lean();
+                .lean()) as unknown as MetaDeck[];
         }
         
-        if (allMetaDecks.length === 0) {
+        if (!allMetaDecks || allMetaDecks.length === 0) {
             return {
                 primaryMatchDeck: null,
                 alternativeDeck: null,
@@ -160,7 +160,7 @@ export async function findAnalysisTargets(
         }
         
         // 1. 모든 메타 덱과의 유사도 계산
-        const similarities: SimilarityResult[] = allMetaDecks.map(metaDeck => {
+        const similarities: SimilarityResult[] = (allMetaDecks || []).map(metaDeck => {
             const similarity = calculateDeckSimilarity(playerDeck, metaDeck);
             const metaSynergyStrength = calculateDeckSynergyStrength(metaDeck);
             
@@ -205,7 +205,7 @@ export async function findAnalysisTargets(
                 // 승률이 가장 높은 덱을 추천
                 alternativeDeck = potentialAlternatives.sort((a, b) => 
                     (b.metaDeck.winRate || 0) - (a.metaDeck.winRate || 0)
-                )[0];
+                )[0] || null;
             }
         }
         
@@ -222,7 +222,7 @@ export async function findAnalysisTargets(
             alternativeDeck: null,
             similarities: [],
             playerPerformance: undefined
-        };
+        } as unknown as AnalysisTargets;
     }
 }
 
@@ -308,7 +308,7 @@ function analyzeSynergyDifferences(playerDeck: PlayerDeck, targetDeck: MetaDeck)
 /**
  * 아이템 추천 분석
  */
-function analyzeItemSuggestions(playerDeck: PlayerDeck, targetDeck: MetaDeck): ItemSuggestion[] {
+function analyzeItemSuggestions(_playerDeck: PlayerDeck, targetDeck: MetaDeck): ItemSuggestion[] {
     // 현재는 기본적인 아이템 분석만 구현
     // 향후 더 정교한 아이템 매칭 로직 구현 가능
     

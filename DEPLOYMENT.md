@@ -1,6 +1,25 @@
 # 🚀 TFT Meta Analyzer 배포 가이드
 
-이 문서는 TFT Meta Analyzer 프로젝트를 Render.com(백엔드)와 Cloudflare Pages(프론트엔드)에 배포하는 방법을 설명합니다.
+## 📋 배포 개요
+
+이 프로젝트는 모노레포 구조를 유지하면서도 다음과 같이 분리 배포됩니다:
+
+- **백엔드**: Render 서버로 배포 (`render.yaml` 설정 포함)
+- **프론트엔드**: Cloudflare Pages로 배포 (모노레포 지원)
+- **개발 환경**: 모노레포로 통합 관리
+
+## 🔧 배포 전 준비사항
+
+### TypeScript 컴파일 확인
+```bash
+# 백엔드 타입 체크
+cd backend && npm run type-check
+
+# 프론트엔드 타입 체크  
+cd frontend && npm run type-check
+```
+
+### 필수 환경변수 준비
 
 ## 📋 배포 전 체크리스트
 

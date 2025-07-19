@@ -66,7 +66,7 @@ export interface NotificationChannel {
 }
 
 export class ConsoleChannel implements NotificationChannel {
-  async send(alert: Alert, config: Record<string, any>): Promise<string> {
+  async send(alert: Alert, _config: Record<string, any>): Promise<string> {
     const severityEmoji = {
       low: '🟡',
       medium: '🟠',

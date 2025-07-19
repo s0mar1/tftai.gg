@@ -248,7 +248,7 @@ export class IndexOptimizationGuide {
 /**
  * 인덱스 적용 예시 (실제 모델에 적용 시 참고)
  */
-export function applyOptimizedIndexesToModel(schema: Schema, modelName: string): void {
+export function applyOptimizedIndexesToModel(_schema: Schema, modelName: string): void {
   console.log(`Applying optimized indexes to ${modelName} model...`);
   
   // 기존 인덱스 드롭 (선택사항)
