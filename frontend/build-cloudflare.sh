@@ -6,21 +6,13 @@ set -e
 
 echo "🚀 Cloudflare Pages 빌드 시작..."
 
-# 1. 루트 디렉토리로 이동
-cd ../
-
-# 2. 종속성 설치 (pnpm 사용)
+# 종속성 설치 (npm 사용)
 echo "📦 종속성 설치 중..."
-npm install -g pnpm
-pnpm install
+npm install
 
-# 3. 공유 패키지 빌드
-echo "🔧 공유 패키지 빌드 중..."
-cd shared && pnpm build && cd ../
-
-# 4. 프론트엔드 빌드
+# 프론트엔드 빌드
 echo "🎨 프론트엔드 빌드 중..."
-cd frontend && pnpm build
+npm run build
 
 # 5. Cloudflare Pages용 라우팅 파일 복사
 echo "🌐 Cloudflare Pages 설정 복사 중..."

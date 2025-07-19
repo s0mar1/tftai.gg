@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions, QueryClient } from '@tanstack/react-query';
 import { api } from '../utils/fetchApi';
 import { fetchDeckTiersAPI } from '../api';
-import { SummonerData, Match, DeckTier, Guide, ApiResponse, Ranker, ItemStats, TraitStats } from '../../../shared/src/types';
+import { SummonerData, Match, DeckTier, Guide, ApiResponse, Ranker, ItemStats, TraitStats } from '../shared/types';
 
 // API 응답 래퍼 타입 정의
 interface SummonerApiResponse {

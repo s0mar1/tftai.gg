@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { commonEnvSchema, envUtils, createSafeValidator, type EnvValidationResult } from '../../../shared/src/env/envBase.js';
+import { commonEnvSchema, envUtils, createSafeValidator, type EnvValidationResult } from '../shared/env/envBase';
 
 /**
  * 프론트엔드 전용 환경 변수 스키마

@@ -1,5 +1,5 @@
 // 공유 타입들을 중앙화된 위치에서 import
-export * from '../../../shared/src/types';
+export * from '../shared/types';
 
 // 프론트엔드 전용 타입들만 여기에 유지
 

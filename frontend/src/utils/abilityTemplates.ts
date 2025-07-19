@@ -2,7 +2,7 @@
  * abilityTemplates.ts: 챔피언별 커스텀 툴팁 생성 로직
  * 각 템플릿은 tooltipParser.ts의 유틸리티를 활용합니다.
  */
-import { buildVariableMap, formatValuesByStar } from '../../../shared/src/tooltipParser';
+import { buildVariableMap, formatValuesByStar } from '../shared/tooltipParser';
 
 // ==========================================================
 //                        타입 정의
