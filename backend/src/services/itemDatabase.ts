@@ -1,13 +1,11 @@
 // backend/src/services/itemDatabase.ts
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { getTFTDataWithLanguage } from './tftData';
 import logger from '../config/logger';
 import { Item } from '../types/index';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// CommonJS 환경에서는 __dirname이 자동으로 사용 가능
 const itemsDataPath = path.join(__dirname, '..', 'data', 'tft14_items_index.json');
 
 interface TFTItem {

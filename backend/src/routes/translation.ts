@@ -87,11 +87,8 @@ router.post('/cache/invalidate', asyncHandler(async (_req: Request<{}, {}, Cache
 router.get('/status', asyncHandler(async (_req: Request, _res: Response) => {
   const fs = await import('fs');
   const path = await import('path');
-  const { fileURLToPath } = await import('url');
   
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  
+  // CommonJS 환경에서는 __dirname이 자동으로 사용 가능
   const localesDir = path.join(__dirname, '../../..', 'frontend/public/locales');
   const languages = ['ko', 'en', 'ja', 'zh'];
   

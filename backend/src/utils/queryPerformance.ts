@@ -5,11 +5,9 @@ import mongoose, { Query } from 'mongoose';
 import { EventEmitter } from 'events';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { performance } from 'perf_hooks';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// CommonJS 환경에서는 __dirname이 자동으로 사용 가능
 
 /**
  * 통합된 쿼리 성능 모니터링 시스템

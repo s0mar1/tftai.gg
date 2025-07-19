@@ -1,14 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import cacheManager from './cacheManager';
 import dotenv from 'dotenv';
 import { AI_CONFIG, envGuards } from '../config/env';
 
-// translationService.ts의 위치를 기준으로 상위 폴더의 .env 파일을 명시적으로 지정합니다.
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// CommonJS 환경에서는 __dirname이 자동으로 사용 가능
 dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 interface TranslationInstructions {
