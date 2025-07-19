@@ -48,10 +48,16 @@ export class DashboardService {
       cache: cacheMetrics,
       api: apiMetrics,
       alerts: {
-        active: activeAlerts,
-        recentCount: alertHistory.recent.length,
+        active: activeAlerts as any[],
+        recentCount: alertHistory.length,
         criticalCount: activeAlerts.filter(a => a.severity === 'critical').length,
-        history: alertHistory
+        history: {
+          total: alertHistory.length,
+          byType: {},
+          bySeverity: {},
+          recent: alertHistory.slice(0, 10) as any[],
+          resolved: []
+        }
       }
     };
   }

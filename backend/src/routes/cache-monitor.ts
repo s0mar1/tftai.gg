@@ -108,7 +108,7 @@ router.put('/toggle', asyncHandler(async (req, res) => {
   
   cacheMonitor.setEnabled(enabled);
   
-  res.json({
+  return res.json({
     success: true,
     data: { enabled },
     message: `Cache monitoring ${enabled ? 'enabled' : 'disabled'}`

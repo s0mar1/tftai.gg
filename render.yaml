@@ -1,14 +1,15 @@
 services:
   - type: web
-    name: tft-meta-analyzer-backend
+    name: tft-backend
+    runtime: node
+    plan: free
     rootDir: backend
-    env: node
-    buildCommand: npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
     autoDeploy: true
-    healthCheckPath: /api/health/ping

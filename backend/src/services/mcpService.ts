@@ -295,7 +295,7 @@ export class MCPService {
       timestamp: new Date().toISOString(),
       collection: collection,
       timeRange: timeRange,
-      recommendations: [],
+      recommendations: [] as any[],
       metrics: {},
     };
 
@@ -346,7 +346,7 @@ export class MCPService {
       query: query,
       collection: collection,
       executionStats: explanation.executionStats,
-      recommendations: [],
+      recommendations: [] as any[],
     };
     
     // 성능 분석 및 권장사항

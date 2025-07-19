@@ -25,8 +25,7 @@
     "migrate:up": "npm run migrate up",
     "migrate:down": "npm run migrate down --force",
     "migrate:dry-run": "npm run migrate dry-run",
-    "prepare": "husky",
-    "postinstall": "npm run build"
+    "prepare": "husky"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

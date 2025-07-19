@@ -244,6 +244,33 @@ class ResourceOptimizer {
   }
 
   /**
+   * 리소스 메트릭 조회
+   */
+  public getResourceMetrics(): ResourceUsage {
+    return { ...this.resourceUsage };
+  }
+
+  /**
+   * 리소스 최적화 수행
+   */
+  public async optimize(): Promise<void> {
+    // CPU 사용률 모니터링
+    await this.updateCPUUsage();
+    
+    // 메모리 사용률 업데이트
+    this.resourceUsage.memory = process.memoryUsage().heapUsed / (1024 * 1024 * 1024);
+    
+    // 워커 풀 최적화
+    if (this.resourceUsage.cpu > 0.8) {
+      // CPU 사용률이 높으면 워커 수 감소
+      this.resizeWorkerPool(Math.max(1, Math.floor(this.MAX_WORKERS / 2)));
+    } else if (this.resourceUsage.cpu < 0.3) {
+      // CPU 사용률이 낮으면 워커 수 증가
+      this.resizeWorkerPool(this.MAX_WORKERS);
+    }
+  }
+
+  /**
    * I/O 최적화 - 파일 읽기/쓰기
    */
   public async optimizedFileRead(filePath: string): Promise<Buffer> {

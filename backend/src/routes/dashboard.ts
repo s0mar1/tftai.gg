@@ -236,7 +236,7 @@ router.post('/alerts/:alertId/resolve', async (_req: Request, _res: Response, _n
       });
     }
     
-    _res.json({
+    return _res.json({
       success: true,
       message: '알림이 성공적으로 해결되었습니다.'
     });
@@ -325,7 +325,7 @@ router.put('/alerts/config/:configId', async (_req: Request, _res: Response, _ne
       });
     }
     
-    _res.json({
+    return _res.json({
       success: true,
       message: '알림 설정이 성공적으로 업데이트되었습니다.'
     });

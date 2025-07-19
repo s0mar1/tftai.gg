@@ -30,7 +30,7 @@ router.post('/mongodb/query', asyncHandler(async (req, res) => {
     // MCP 서비스를 통해 쿼리 실행
     const result = await mcpService.executeMongoDBQuery({ query, collection, operation });
     
-    res.json({
+    return res.json({
       success: true,
       data: result,
       timestamp: new Date().toISOString()
@@ -54,7 +54,7 @@ router.get('/mongodb/stats', asyncHandler(async (req, res) => {
     
     const result = await mcpService.getDatabaseStats({ type });
     
-    res.json({
+    return res.json({
       success: true,
       data: result,
       timestamp: new Date().toISOString()
@@ -70,7 +70,7 @@ router.post('/mongodb/analyze', asyncHandler(async (req, res) => {
     
     const result = await mcpService.analyzePerformance({ collection, timeRange });
     
-    res.json({
+    return res.json({
       success: true,
       data: result,
       timestamp: new Date().toISOString()
@@ -101,7 +101,7 @@ router.post('/mongodb/explain', asyncHandler(async (req, res) => {
     
     const result = await mcpService.explainQuery({ collection, query });
     
-    res.json({
+    return res.json({
       success: true,
       data: result,
       timestamp: new Date().toISOString()

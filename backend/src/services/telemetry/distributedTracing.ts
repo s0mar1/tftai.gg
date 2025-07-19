@@ -1,5 +1,5 @@
 // backend/src/services/telemetry/distributedTracing.ts - TFT 분산 추적 구현
-import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
+import { trace, context, SpanStatusCode, SpanKind, Span } from '@opentelemetry/api';
 import { 
   recordExternalApiCall, 
   recordCacheHit, 
@@ -17,7 +17,7 @@ const tracer = trace.getTracer('tft-meta-analyzer', '1.0.0');
  * 소환사 정보 조회 플로우 추적
  */
 export class SummonerFlowTracer {
-  private parentSpan: any;
+  private parentSpan: Span;
 
   constructor(gameName: string, tagLine: string, region: string) {
     this.parentSpan = tracer.startSpan('summoner_lookup_flow', {
@@ -40,13 +40,12 @@ export class SummonerFlowTracer {
     operation: () => Promise<T>
   ): Promise<T | null> {
     const span = tracer.startSpan(`cache_lookup_${layer.toLowerCase()}`, {
-      parent: this.parentSpan,
       attributes: {
         'tft.cache.layer': layer,
         'tft.cache.key': cacheKey,
         'tft.cache.key_type': this.getCacheKeyType(cacheKey),
       },
-    });
+    }, context.setSpan(context.active(), this.parentSpan));
 
     try {
       const result = await operation();
@@ -82,7 +81,6 @@ export class SummonerFlowTracer {
     operation: () => Promise<T>
   ): Promise<T> {
     const span = tracer.startSpan('riot_api_call', {
-      parent: this.parentSpan,
       kind: SpanKind.CLIENT,
       attributes: {
         'tft.api.type': 'riot',
@@ -91,7 +89,7 @@ export class SummonerFlowTracer {
         'http.method': 'GET',
         'http.url': endpoint,
       },
-    });
+    }, context.setSpan(context.active(), this.parentSpan));
 
     const startTime = Date.now();
     try {
@@ -146,7 +144,6 @@ export class SummonerFlowTracer {
     dbOperation: () => Promise<T>
   ): Promise<T> {
     const span = tracer.startSpan('db_query', {
-      parent: this.parentSpan,
       attributes: {
         'tft.db.collection': collection,
         'tft.db.operation': operation,
@@ -246,7 +243,6 @@ export class AiAnalysisFlowTracer {
     operation: () => Promise<T>
   ): Promise<T> {
     const span = tracer.startSpan('match_data_retrieval', {
-      parent: this.parentSpan,
       attributes: {
         'tft.match.id': matchId,
         'tft.match.region': region,
@@ -280,7 +276,6 @@ export class AiAnalysisFlowTracer {
     operation: () => Promise<T>
   ): Promise<T> {
     const span = tracer.startSpan('meta_data_retrieval', {
-      parent: this.parentSpan,
       attributes: {
         'tft.meta.source': 'database',
       },
@@ -313,7 +308,6 @@ export class AiAnalysisFlowTracer {
     operation: () => Promise<T>
   ): Promise<T> {
     const span = tracer.startSpan('ai_model_call', {
-      parent: this.parentSpan,
       kind: SpanKind.CLIENT,
       attributes: {
         'tft.ai.model': model,
@@ -363,7 +357,6 @@ export class AiAnalysisFlowTracer {
     operation: () => Promise<T>
   ): Promise<T> {
     const span = tracer.startSpan('analysis_result_saving', {
-      parent: this.parentSpan,
       attributes: {
         'tft.cache.key': cacheKey,
         'tft.db.save': dbSave,

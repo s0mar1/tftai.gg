@@ -194,7 +194,7 @@ router.get('/decks/:language', checkDBConnection, async (_req: Request, _res: Re
             ja: 'チャレンジャー',
             zh: '挑战者'
           },
-          coreUnits: [],
+          coreUnits: [] as any[],
           totalGames: 1000,
           top4Count: 650,
           winCount: 180,
@@ -218,7 +218,7 @@ router.get('/decks/:language', checkDBConnection, async (_req: Request, _res: Re
             ja: 'スナイパー',
             zh: '狙击手'
           },
-          coreUnits: [],
+          coreUnits: [] as any[],
           totalGames: 800,
           top4Count: 480,
           winCount: 120,
@@ -278,7 +278,7 @@ router.get('/decks/:language', checkDBConnection, async (_req: Request, _res: Re
             ja: 'チャレンジャー',
             zh: '挑战者'
           },
-          coreUnits: [],
+          coreUnits: [] as any[],
           totalGames: 1000,
           top4Count: 650,
           winCount: 180,
@@ -302,7 +302,7 @@ router.get('/decks/:language', checkDBConnection, async (_req: Request, _res: Re
             ja: 'スナイパー',
             zh: '狙击手'
           },
-          coreUnits: [],
+          coreUnits: [] as any[],
           totalGames: 800,
           top4Count: 480,
           winCount: 120,

@@ -130,7 +130,7 @@ class PerformanceOptimizer {
    * 응답 압축 최적화
    */
   public optimizeResponse() {
-    return (_req: Request, _res: Response, _next: NextFunction) => {
+    return (_req: Request, _res: Response, _next: NextFunction): void => {
       const originalSend = _res.send;
       const originalJson = _res.json;
 
@@ -241,6 +241,35 @@ class PerformanceOptimizer {
     }
 
     return results;
+  }
+
+  /**
+   * 성능 메트릭 조회
+   */
+  public getPerformanceMetrics(): PerformanceMetrics {
+    return { ...this.metrics };
+  }
+
+  /**
+   * 전반적인 최적화 수행
+   */
+  public async optimize(): Promise<void> {
+    // 캐시 최적화
+    this.optimizeCache();
+    
+    // 응답 최적화
+    this.optimizeResponse();
+    
+    // 메트릭 리셋
+    if (this.metrics.requestCount > 10000) {
+      this.metrics = {
+        requestCount: 0,
+        averageResponseTime: 0,
+        slowRequests: 0,
+        concurrentRequests: 0,
+        queueSize: 0
+      };
+    }
   }
 
   /**

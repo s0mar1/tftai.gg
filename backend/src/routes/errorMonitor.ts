@@ -4,6 +4,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { errorMonitor, ErrorCategory, ErrorSeverity } from '../services/errorMonitor';
 import { checkDBConnection } from '../middlewares/dbConnectionCheck';
 import asyncHandler from '../utils/asyncHandler';
+import logger from '../config/logger';
 
 const router = express.Router();
 
@@ -81,7 +82,7 @@ router.get('/error/:fingerprint', checkDBConnection, async (_req: Request, _res:
       });
     }
     
-    _res.json({
+    return _res.json({
       success: true,
       data: errorDetails
     });
@@ -109,7 +110,7 @@ router.post('/error/:fingerprint/resolve', checkDBConnection, async (_req: Reque
       });
     }
     
-    _res.json({
+    return _res.json({
       success: true,
       message: '에러가 해결 처리되었습니다.',
       data: {

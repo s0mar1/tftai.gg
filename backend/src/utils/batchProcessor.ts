@@ -198,8 +198,8 @@ async function processItemWithRetry<T, R>(
  */
 export async function processMatchDetailsBatch<T>(
   matchIds: string[],
-  region: string,
-  processor: (matchId: string, region: string) => Promise<T>
+  region: any,
+  processor: (matchId: string, region: any) => Promise<T>
 ): Promise<BatchResult<T>> {
   return processBatches(
     matchIds,

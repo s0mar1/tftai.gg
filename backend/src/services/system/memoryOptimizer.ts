@@ -244,6 +244,33 @@ class MemoryOptimizer extends EventEmitter {
   }
 
   /**
+   * 메모리 메트릭 조회
+   */
+  public getMemoryMetrics(): MemoryStats {
+    return { ...this.memoryStats };
+  }
+
+  /**
+   * 메모리 최적화 수행
+   */
+  public async optimize(): Promise<void> {
+    // 캐시 크기 최적화
+    this.optimizeCacheSize();
+    
+    // 빔라운 캐시 정리
+    this.clearWeakCaches();
+    
+    // 이벤트 리스너 정리
+    this.cleanupEventListeners();
+    
+    // 강제 GC 수행 (만약 필요하면)
+    const usage = this.getMemoryUsage();
+    if (usage.heapUsed / usage.heapTotal > this.GC_THRESHOLD) {
+      this.forceGarbageCollection();
+    }
+  }
+
+  /**
    * 메모리 통계 로깅
    */
   private logMemoryStats(): void {

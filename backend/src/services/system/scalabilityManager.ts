@@ -298,6 +298,37 @@ class ScalabilityManager {
   }
 
   /**
+   * 확장성 메트릭 조회
+   */
+  public getScalabilityMetrics(): LoadBalancerStats {
+    return { ...this.loadBalancerStats };
+  }
+
+  /**
+   * 확장성 최적화 수행
+   */
+  public async optimize(): Promise<void> {
+    // 헬스체크 수행
+    await this.performHealthCheck();
+    
+    // 비정상 워커 재시작
+    this.workers.forEach((worker, id) => {
+      if (worker.status === 'offline') {
+        this.restartWorker(id);
+      }
+    });
+    
+    // 부하 분산 최적화
+    const avgActiveConnections = Array.from(this.workers.values())
+      .reduce((sum, w) => sum + w.activeConnections, 0) / this.workers.size;
+    
+    if (avgActiveConnections > 100 && this.workers.size < this.config.maxWorkers) {
+      // 부하가 높으면 워커 추가
+      logger.info('부하가 높아 워커를 추가합니다.');
+    }
+  }
+
+  /**
    * 최소 연결 선택
    */
   private leastConnectionsSelection(workers: WorkerInfo[]): number {

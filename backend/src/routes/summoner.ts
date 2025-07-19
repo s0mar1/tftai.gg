@@ -432,7 +432,7 @@ router.get('/', async (_req: Request<{}, any, any, SummonerQuery>, _res: Respons
 
     const account = await getAccountByRiotId(gameName, tagLine, region as Region);
     const summonerInfo = await getSummonerByPuuid(account.puuid, region as Region);
-    const leagueEntry = await getLeagueEntriesByPuuid(summonerInfo.puuid, region as Region).catch(err => {
+    const leagueEntry = await getLeagueEntriesByPuuid(summonerInfo.puuid, region as Region).catch((err: Error) => {
       logger.error(`ERROR: getLeagueEntriesByPuuid failed:`, err.message);
       return null;
     });

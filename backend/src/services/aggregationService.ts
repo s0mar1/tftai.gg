@@ -189,7 +189,7 @@ export class AggregationService {
       await cacheManager.set(cacheKey, result, CACHE_TTL.META_STATS);
       logger.info(`특성별 통계 집계 완료: ${result.length}개`);
       
-      return result;
+      return result as AggregationResult[];
     } catch (_error) {
       logger.error('특성별 통계 집계 실패:', _error);
       throw _error;
@@ -345,7 +345,7 @@ export class AggregationService {
         // 5. 통계 계산 및 최근 매치 정보 수집
         {
           $group: {
-            _id: null,
+            _id: null as any,
             totalMatches: { $sum: 1 },
             totalWins: {
               $sum: { $cond: [{ $eq: ['$participant.placement', 1] }, 1, 0] }
