@@ -15,7 +15,7 @@ import { z } from 'zod';
 export const envSchema = z.object({
   // === 기본 서버 설정 ===
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.coerce.number().int().positive().default(4001),
+  PORT: z.coerce.number().int().positive().default(10000),
   
   // === 필수 외부 서비스 API 키 ===
   RIOT_API_KEY: z.string().min(1, 'Riot API 키는 필수입니다').optional(),

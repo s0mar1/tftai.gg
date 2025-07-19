@@ -30,7 +30,8 @@
       "Bash(find:*)",
       "Bash(mkdir:*)",
       "Bash(git checkout:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(PORT=10000 NODE_ENV=production npm run start:tsx)"
     ],
     "deny": []
   }
