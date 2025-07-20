@@ -1,5 +1,6 @@
 // 메트릭 수집 및 모니터링 시스템
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { ExtendedRequest } from '../types/express';
 import logger from '../config/logger';
 // import { alertService } from '../services/alertService'; // Unused
 
@@ -1001,12 +1002,6 @@ class MetricsCollector {
 // 싱글톤 인스턴스 생성
 const metricsCollector = new MetricsCollector();
 
-// Express Request 확장
-interface ExtendedRequest extends Omit<Request, 'route'> {
-  route?: {
-    path: string;
-  };
-}
 
 // 미들웨어 함수
 export const metricsMiddleware = (_req: ExtendedRequest, _res: Response, _next: NextFunction): void => {
