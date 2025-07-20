@@ -13,7 +13,7 @@ pnpm install --frozen-lockfile
 
 # 프론트엔드 빌드 (Turborepo 사용)
 echo "🎨 프론트엔드 빌드 중..."
-turbo build --filter=@tft-meta-analyzer/frontend...
+npx turbo build --filter=@tft-meta-analyzer/frontend...
 cd frontend
 
 # 5. Cloudflare Pages용 라우팅 파일 복사

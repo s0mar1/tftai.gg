@@ -3,7 +3,7 @@ name = "tft-meta-analyzer-frontend"
 compatibility_date = "2024-07-20"
 
 [build]
-command = "corepack enable && pnpm install --frozen-lockfile && turbo build --filter=@tft-meta-analyzer/frontend..."
+command = "corepack enable && pnpm install --frozen-lockfile && npx turbo build --filter=@tft-meta-analyzer/frontend..."
 cwd = ""
 watch_dir = "frontend"
 
