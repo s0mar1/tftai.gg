@@ -30,6 +30,7 @@ export const envSchema = z.object({
   UPSTASH_REDIS_URL: z.string().url().optional().or(z.literal('')),
   REDIS_CLUSTER_URL: z.string().optional(),
   FRONTEND_URL: z.string().default('http://localhost:3000,http://localhost:5173'),
+  ALLOWED_ORIGINS: z.string().optional(), // 프로덕션 CORS 설정용 (FRONTEND_URL보다 우선)
   
   // === MongoDB 설정 ===
   MONGODB_URI_LOCAL: z.string().url().optional(),
@@ -170,7 +171,7 @@ export function createEnvAccessors(config: EnvConfig) {
       isProduction: config.NODE_ENV === 'production',
       isDevelopment: config.NODE_ENV === 'development',
       isTest: config.NODE_ENV === 'test',
-      corsOrigins: config.FRONTEND_URL.split(',').map(url => url.trim()),
+      corsOrigins: (config.ALLOWED_ORIGINS || config.FRONTEND_URL).split(',').map(url => url.trim()),
       httpsEnabled: config.HTTPS,
       developmentMode: config.DEVELOPMENT_MODE
     }),

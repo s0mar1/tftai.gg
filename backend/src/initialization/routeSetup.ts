@@ -61,7 +61,8 @@ const setupMiddlewares = (app: Application): void => {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    exposedHeaders: ['X-Total-Count', 'X-Page-Count']
+    exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
+    optionsSuccessStatus: 200 // 프리플라이트 요청 처리 개선
   }));
   logger.info(`  ✓ CORS 설정 완료 (허용 오리진: ${config.corsOrigins.join(', ')})`);
   
