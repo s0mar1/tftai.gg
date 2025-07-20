@@ -26,7 +26,7 @@
     "migrate:up": "npm run migrate up",
     "migrate:down": "npm run migrate down --force",
     "migrate:dry-run": "npm run migrate dry-run",
-    "prepare": "husky",
+    "prepare": "node -e \"if (!process.env.CI && !process.env.RENDER) { try { require('husky').install() } catch(e) {} }\"",
     "postinstall": "echo 'Backend dependencies installed successfully'"
   },
   "dependencies": {

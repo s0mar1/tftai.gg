@@ -34,7 +34,10 @@
       "Bash(PORT=10000 NODE_ENV=production npm run start:tsx)",
       "Bash(sed:*)",
       "Bash(gemini:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(CI=true npm install)",
+      "Bash(RENDER=true npm install --prefix backend)",
+      "Bash(RENDER=true npm install)"
     ],
     "deny": []
   }
