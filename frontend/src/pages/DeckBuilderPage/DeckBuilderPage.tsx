@@ -124,12 +124,21 @@ export default function DeckBuilderPage() {
       if (next[toKey] && next[toKey].apiName !== apiName) delete next[toKey];
 
       const fullUnitData = champions.find(c => c.apiName === apiName);
-      console.log('fullUnitData 찾기:', { 
+      console.log('🔍 fullUnitData 찾기:', { 
         apiName, 
         found: !!fullUnitData, 
-        fullUnitData: fullUnitData ? { name: fullUnitData.name, apiName: fullUnitData.apiName } : null,
+        fullUnitData: fullUnitData ? { 
+          name: fullUnitData.name, 
+          apiName: fullUnitData.apiName,
+          traits: fullUnitData.traits,
+          traitsCount: fullUnitData.traits?.length || 0
+        } : null,
         availableChampionsCount: champions.length,
-        sampleChampion: champions[0] ? { name: champions[0].name, apiName: champions[0].apiName } : null
+        sampleChampion: champions[0] ? { 
+          name: champions[0].name, 
+          apiName: champions[0].apiName, 
+          traits: champions[0].traits 
+        } : null
       });
       
       if (!fullUnitData) {
@@ -211,7 +220,10 @@ export default function DeckBuilderPage() {
   }, [navigate, placedUnits]);
 
   const selectedUnit = selectedKey ? placedUnits[selectedKey] : null;
-  const unitsForSynergy = useMemo(() => Object.values(placedUnits), [placedUnits]);
+  const unitsForSynergy = useMemo(() => {
+    console.log('DeckBuilderPage: unitsForSynergy 계산', { placedUnits, values: Object.values(placedUnits) });
+    return placedUnits; // SynergyPanel에서 객체를 배열로 변환하도록 수정했으므로 객체 그대로 전달
+  }, [placedUnits]);
 
   // 데이터가 로딩 중이면 로딩 화면 표시
   if (tftDataResult?.loading) {

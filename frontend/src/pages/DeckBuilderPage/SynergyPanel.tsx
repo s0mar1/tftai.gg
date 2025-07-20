@@ -5,14 +5,37 @@ import { useTraitProcessing } from '../../hooks/useTraitProcessing';
 import Trait from '../../pages/summoner/components/Trait';
 import { Champion, Trait as TraitType } from '../../types';
 
+interface PlacedUnit extends Champion {
+  pos?: { x: number; y: number };
+  star?: number;
+  items?: any[];
+}
+
 interface SynergyPanelProps {
-  placedUnits: Champion[];
+  placedUnits: PlacedUnit[] | { [key: string]: PlacedUnit };
 }
 
 const SynergyPanel: React.FC<SynergyPanelProps> = ({ placedUnits }) => {
   const { t } = useTranslation();
   
-  const unitsArray = useMemo(() => Object.values(placedUnits || {}), [placedUnits]);
+  const unitsArray = useMemo(() => {
+    if (!placedUnits) return [];
+    
+    // 배열인 경우 그대로 반환
+    if (Array.isArray(placedUnits)) {
+      console.log('SynergyPanel: placedUnits는 배열:', placedUnits);
+      return placedUnits;
+    }
+    
+    // 객체인 경우 값들을 배열로 변환
+    const units = Object.values(placedUnits);
+    console.log('SynergyPanel: placedUnits를 배열로 변환:', { 
+      originalKeys: Object.keys(placedUnits),
+      unitsCount: units.length,
+      units: units.map(u => ({ name: u.name, traits: u.traits }))
+    });
+    return units;
+  }, [placedUnits]);
   
   const { processedTraits } = useTraitProcessing(unitsArray);
 

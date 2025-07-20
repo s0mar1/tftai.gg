@@ -60,7 +60,7 @@ router.get('/tft-data/:language?', async (_req: Request, _res: Response, _next: 
       locale: tft.locale,
       traitMap: tft.traitMap ? Array.from(tft.traitMap.entries()) : [],
       nameMap: tft.nameMap ? Array.from(tft.nameMap.entries()) : [],
-      krNameMap: tft.nameMap ? Array.from(tft.nameMap.entries()) : [], // 프론트엔드 호환성을 위해 추가
+      krNameMap: tft.krNameMap ? Array.from(tft.krNameMap.entries()) : [], // krNameMap 사용
     };
     
     logger.info(`[GET /tft-data/${language}] 응답 데이터 준비 완료:`, {

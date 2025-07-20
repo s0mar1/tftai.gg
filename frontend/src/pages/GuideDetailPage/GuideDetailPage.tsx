@@ -8,6 +8,7 @@ import SynergyPanel from '../DeckBuilderPage/SynergyPanel'; // 시너지 패널 
 import { useTFTData } from '../../context/TFTDataContext';
 import { decodeDeck } from '../../utils/deckCode';
 import { createComponentLogger } from '../../utils/logger';
+import { processImagePath } from '../../utils/imageUtils';
 
 const logger = createComponentLogger('GuideDetailPage');
 
@@ -146,7 +147,7 @@ export default function GuideDetailPage(): JSX.Element {
                 if (!itemData) return null;
                 return (
                     <div key={itemData.apiName} className="flex items-center gap-2 bg-background-base dark:bg-dark-background-base p-2 rounded-md">
-                        <img src={itemData.icon} alt={itemData.name} className="w-10 h-10"/>
+                        <img src={processImagePath(itemData.icon)} alt={itemData.name} className="w-10 h-10"/>
                         <span className="font-semibold">{itemData.name}</span>
                     </div>
                 )

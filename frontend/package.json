@@ -8,6 +8,7 @@
     "dev:win": "npx vite",
     "dev:unix": "npx vite",
     "build": "npx vite build",
+    "build:cloudflare": "pnpm install --frozen-lockfile && pnpm build",
     "build:analyze": "npx vite build && echo '📊 Bundle analysis saved to dist/stats.html' && echo '📈 Opening bundle analyzer...' && node scripts/bundle-analyzer.js",
     "lint": "eslint . --ext ts,tsx,js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "npx vite preview",
@@ -18,7 +19,8 @@
     "build-storybook": "storybook build",
     "bundle:check": "bundlesize",
     "bundle:monitor": "tsx scripts/bundle-monitor.ts",
-    "bundle:budget": "tsx scripts/performance-budget.ts"
+    "bundle:budget": "tsx scripts/performance-budget.ts",
+    "postinstall": "echo 'Frontend dependencies installed successfully'"
   },
   "bundlesize": [
     {

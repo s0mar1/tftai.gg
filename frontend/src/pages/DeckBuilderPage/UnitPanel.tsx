@@ -5,6 +5,7 @@ import { useTFTData } from '../../context/TFTDataContext';
 import { useTranslation } from 'react-i18next';
 import { Champion, Trait } from '../../types';
 import { ChampionCardSkeleton } from '../../components/common/TFTSkeletons';
+import { processImagePath } from '../../utils/imageUtils';
 
 const COST_COLORS: { [key: number]: string } = { 1: '#808080', 2: '#1E823C', 3: '#156293', 4: '#87259E', 5: '#B89D29' };
 
@@ -94,7 +95,7 @@ const DraggableUnit: React.FC<DraggableUnitProps> = ({ champion }) => {
         style={{ width: 52, height: 52, border: `2px solid ${borderColor}` }}
         title={champion.name}
       >
-        <img src={champion.tileIcon} alt={champion.name} className="w-full h-full object-cover" />
+        <img src={processImagePath(champion.tileIcon)} alt={champion.name} className="w-full h-full object-cover" />
       </div>
       <span className="block w-full text-center text-[0.55rem] leading-tight truncate">
         {champion.name}
@@ -149,10 +150,19 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
     let currentChampions = [...champions];
     if (search) {
       const lowerCaseSearch = search.toLowerCase();
-      currentChampions = currentChampions.filter(c => c.name.toLowerCase().includes(lowerCaseSearch));
+      currentChampions = currentChampions.filter(c => {
+        const name = c.name || '';
+        return name.toLowerCase().includes(lowerCaseSearch);
+      });
     }
     if (activeTab === 'cost') {
-      return currentChampions.sort((a, b) => (a.cost !== b.cost ? a.cost - b.cost : a.name.localeCompare(b.name, 'ko')));
+      return currentChampions.sort((a, b) => {
+        if (a.cost !== b.cost) return a.cost - b.cost;
+        // null 값 안전 처리
+        const nameA = a.name || '';
+        const nameB = b.name || '';
+        return nameA.localeCompare(nameB, 'ko');
+      });
     }
     if (filterTrait) {
       currentChampions = currentChampions.filter(c => c.traits.includes(filterTrait));
@@ -165,23 +175,96 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
 
   const groupedChampions = useMemo(() => {
     if (activeTab === 'cost') return null;
+    
+    console.log('🔍 UnitPanel groupedChampions 계산 시작:', {
+      activeTab,
+      originsCount: origins.length,
+      classesCount: classes.length,
+      filteredCount: filtered.length,
+      sampleOrigins: origins.slice(0, 3).map(t => ({ apiName: t.apiName, name: t.name })),
+      sampleClasses: classes.slice(0, 3).map(t => ({ apiName: t.apiName, name: t.name })),
+      sampleChampions: filtered.slice(0, 3).map(c => ({ name: c.name, traits: c.traits }))
+    });
+    
     const groupMap = new Map<string, { trait: Trait; champions: Champion[] }>();
     const targetTraits = activeTab === 'origin' ? origins : classes;
+    
+    // 특성 이름 매핑 헬퍼 함수 (useTraitProcessing과 동일한 로직)
+    const findTraitByName = (traitNameOrApiName: string): Trait | null => {
+      // 1. 한국어 이름으로 직접 찾기
+      let trait = targetTraits.find(t => t.name === traitNameOrApiName);
+      if (trait) return trait;
+      
+      // 2. API 이름으로 찾기 (대소문자 구분 없음)
+      trait = targetTraits.find(t => 
+        t.apiName?.toLowerCase() === traitNameOrApiName.toLowerCase()
+      );
+      if (trait) return trait;
+      
+      // 3. 부분 매칭 시도 (API 이름에서 접두사 제거)
+      const cleanApiName = traitNameOrApiName.toLowerCase()
+        .replace(/^tft\d+_/, '')  // tft14_ 같은 접두사 제거
+        .replace(/^set\d+_/, ''); // set14_ 같은 접두사 제거
+      
+      trait = targetTraits.find(t => 
+        t.apiName?.toLowerCase().includes(cleanApiName) ||
+        cleanApiName.includes(t.apiName?.toLowerCase() || '')
+      );
+      if (trait) return trait;
+      
+      return null;
+    };
+    
     filtered.forEach(champion => {
+      console.log(`🧩 ${champion.name} 특성 매칭 시작:`, champion.traits);
+      
       champion.traits.forEach(traitName => {
-        const foundTrait = targetTraits.find(t => t.name === traitName);
+        const foundTrait = findTraitByName(traitName);
+        
+        console.log('🔄 특성 매칭 결과:', {
+          championName: champion.name,
+          originalTraitName: traitName,
+          foundTrait: foundTrait ? { apiName: foundTrait.apiName, name: foundTrait.name } : null
+        });
+        
         if (foundTrait) {
           if (!groupMap.has(foundTrait.apiName)) {
             groupMap.set(foundTrait.apiName, { trait: foundTrait, champions: [] });
           }
           groupMap.get(foundTrait.apiName)?.champions.push(champion);
+        } else {
+          console.warn(`❌ UnitPanel: ${champion.name}의 특성 "${traitName}"을 찾을 수 없음`);
         }
       });
     });
+    
     groupMap.forEach(group => {
-      group.champions.sort((a, b) => (a.cost !== b.cost ? a.cost - b.cost : a.name.localeCompare(b.name, 'ko')));
+      group.champions.sort((a, b) => {
+        if (a.cost !== b.cost) return a.cost - b.cost;
+        // null 값 안전 처리
+        const nameA = a.name || '';
+        const nameB = b.name || '';
+        return nameA.localeCompare(nameB, 'ko');
+      });
     });
-    return Array.from(groupMap.values()).sort((a, b) => a.trait.name.localeCompare(b.trait.name, 'ko'));
+    
+    const result = Array.from(groupMap.values()).sort((a, b) => {
+      // null 값 안전 처리
+      const nameA = a.trait.name || '';
+      const nameB = b.trait.name || '';
+      return nameA.localeCompare(nameB, 'ko');
+    });
+    
+    console.log('✅ UnitPanel groupedChampions 계산 완료:', {
+      groupCount: result.length,
+      groups: result.map(g => ({ 
+        traitName: g.trait.name, 
+        championCount: g.champions.length,
+        championNames: g.champions.map(c => c.name).slice(0, 3)
+      }))
+    });
+    
+    return result;
   }, [filtered, activeTab, origins, classes]);
 
   if (loading) {
@@ -228,7 +311,7 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
         <div className="grid gap-x-[2px] gap-y-1" style={{ gridTemplateColumns: 'repeat(auto-fill, 32px)' }}>
           {filtered.map((ch) => (
             <div key={ch.apiName} className="w-8 h-8 rounded-md overflow-hidden shadow-md" title={ch.name}>
-              <img src={ch.tileIcon} alt={ch.name} className="w-full h-full object-cover" />
+              <img src={processImagePath(ch.tileIcon)} alt={ch.name} className="w-full h-full object-cover" />
             </div>
           ))}
         </div>

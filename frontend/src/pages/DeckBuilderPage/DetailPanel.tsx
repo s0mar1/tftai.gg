@@ -3,6 +3,7 @@ import { useDrop } from 'react-dnd';
 import { ItemTypes } from '../../constants';
 import { useTranslation } from 'react-i18next';
 import { Champion, Item } from '../../types';
+import { safeProcessImagePath } from '../../utils/imageUtils';
 
 // 타입 정의
 interface Position {
@@ -67,7 +68,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-2">
             <img 
-                src={selectedUnit.tileIcon} 
+                src={safeProcessImagePath(selectedUnit.tileIcon)} 
                 alt={selectedUnit.name} 
                 className="w-12 h-12 rounded-md" 
                 style={{ border: `2px solid ${unitBorderColor}`}}

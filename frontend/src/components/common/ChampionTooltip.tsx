@@ -4,65 +4,9 @@ import TraitTooltipItem from './TraitTooltipItem';
 import { generateTooltip } from '../../utils/abilityTemplates';
 import { Champion } from '../../types';
 import { createComponentLogger } from '../../utils/logger';
+import { getAbilityIconUrl, preloadImage, safeProcessImagePath } from '../../utils/imageUtils';
 
 const logger = createComponentLogger('ChampionTooltip');
-
-// 이미지 캐시 Map을 모듈 스코프에서 관리하여 성능 최적화
-const imageCache = new Map<string, Promise<string>>();
-
-// 이미지 프리로딩 함수
-const preloadImage = (url: string): Promise<string> => {
-  if (imageCache.has(url)) {
-    return imageCache.get(url)!;
-  }
-  
-  const promise = new Promise<string>((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(url);
-    img.onerror = () => resolve(url); // 오류 발생 시에도 resolve
-    img.src = url;
-  });
-  
-  imageCache.set(url, promise);
-  return promise;
-};
-
-// 챔피언의 스킬 아이콘 경로를 생성합니다.
-const getAbilityIconUrl = (iconPath: string | undefined): string => {
-  if (!iconPath) return '';
-
-  let cleanedPath = iconPath.toLowerCase().replace('.dds', '.png');
-
-  // 1. 잘못된 전체 URL 접두사를 제거합니다.
-  const incorrectPrefix = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/';
-  if (cleanedPath.startsWith(incorrectPrefix)) {
-    cleanedPath = cleanedPath.substring(incorrectPrefix.length);
-  }
-
-  // 2. 경로가 'assets/characters/'로 시작하는지 확인하고, 그렇지 않다면 올바른 구조를 만듭니다.
-  if (!cleanedPath.startsWith('assets/characters/')) {
-    let championName = '';
-    // 경로에서 챔피언 이름 (예: tft14_renekton)을 추출합니다.
-    const championNameMatch = cleanedPath.match(/(tft\d+_[a-zA-Z]+)/);
-    if (championNameMatch && championNameMatch[1]) {
-      championName = championNameMatch[1];
-    } else {
-      // 챔피언 이름을 추출할 수 없는 경우 경고를 출력하고 빈 문자열을 반환합니다.
-      return ''; 
-    }
-
-    if (championName) {
-      cleanedPath = `assets/characters/${championName}/hud/icons2d/${cleanedPath}`;
-    }
-  }
-
-  const finalUrl = `https://raw.communitydragon.org/latest/game/${cleanedPath}`;
-  
-  // 이미지 프리로딩 시작
-  preloadImage(finalUrl);
-  
-  return finalUrl;
-};
 
 const costColors: Record<number, string> = { 1: '#808080', 2: '#1E823C', 3: '#156293', 4: '#87259E', 5: '#B89D29' };
 const getCostColor = (cost: number): string => costColors[cost] || costColors[1];
@@ -134,7 +78,7 @@ const ChampionTooltip = React.memo<ChampionTooltipProps>(function ChampionToolti
     >
       <div className="flex items-start gap-3 pb-3">
         <div className="w-12 h-12 rounded" style={{ border: `2px solid ${getCostColor(cost)}` }}>
-          <img src={champion.tileIcon} alt={name} className="w-full h-full object-cover rounded-sm" />
+          <img src={safeProcessImagePath(champion.tileIcon)} alt={name} className="w-full h-full object-cover rounded-sm" />
         </div>
         <div className="flex-1">
           <h3 className="font-bold text-base" style={{ color: getCostColor(cost) }}>{name}</h3>

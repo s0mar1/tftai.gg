@@ -1,6 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import TraitHexIcon from './TraitHexIcon';
+import { processImagePath } from '../../../utils/imageUtils';
 
 interface TraitData {
   name: string;
@@ -63,7 +64,7 @@ const Trait: React.FC<TraitProps> = ({ trait, showCount = true }) => {
           <TraitHexIcon variant={hexVariant} size={traitIconSize} />
           {/* 특성 아이콘 이미지 */}
           <img 
-            src={trait.image_url || trait.icon} 
+            src={processImagePath(trait.image_url || trait.icon)} 
             alt={trait.name} 
             className="trait-img" 
             style={{ 

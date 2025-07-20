@@ -1,0 +1,26 @@
+# Cloudflare Pages 배포 설정 - pnpm 통일 전략
+name = "tft-meta-analyzer-frontend"
+compatibility_date = "2024-07-20"
+
+[build]
+command = "corepack enable && pnpm install --frozen-lockfile && turbo build --filter=@tft-meta-analyzer/frontend..."
+cwd = ""
+watch_dir = "frontend"
+
+[build.upload]
+format = "directory"
+dir = "frontend/dist"
+
+# 환경 변수 설정
+[env.production.vars]
+NODE_ENV = "production"
+VITE_API_BASE_URL = "https://tft-meta-analyzer-backend.onrender.com"
+VITE_APP_TITLE = "TFT Meta Analyzer"
+
+[env.preview.vars]
+NODE_ENV = "preview"
+VITE_API_BASE_URL = "https://tft-meta-analyzer-backend-preview.onrender.com"
+VITE_APP_TITLE = "TFT Meta Analyzer (Preview)"
+
+# 페이지 설정 (Cloudflare Pages는 wrangler.toml보다 대시보드 설정을 우선 사용)
+# pages_build_output_dir = "frontend/dist"

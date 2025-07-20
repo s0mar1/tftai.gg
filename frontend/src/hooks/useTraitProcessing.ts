@@ -74,29 +74,86 @@ export const useTraitProcessing = (placedUnits: PlacedUnit[]) => {
   const tftDataResult = useTFTData();
   const { traits: allTraits = [] } = tftDataResult || {};
 
-  // 특성별 유닛 개수 계산 (한국어 특성 이름 기준)
+  // 특성별 유닛 개수 계산 (영어 API 이름과 한국어 이름 모두 지원)
   const traitCount = useMemo(() => {
     const counts: { [key: string]: number } = {};
+    
+    console.log('🔍 useTraitProcessing: 입력 데이터:', { 
+      placedUnits, 
+      isArray: Array.isArray(placedUnits),
+      length: Array.isArray(placedUnits) ? placedUnits.length : 'not array',
+      allTraitsCount: allTraits.length,
+      sampleTraits: allTraits.slice(0, 5).map(t => ({ 
+        apiName: t.apiName, 
+        name: t.name, 
+        type: t.type 
+      })),
+      allTraitsTypes: allTraits.map(t => t.type).filter((type, index, arr) => arr.indexOf(type) === index),
+      originTraits: allTraits.filter(t => t.type === 'origin').slice(0, 3).map(t => ({ apiName: t.apiName, name: t.name })),
+      classTraits: allTraits.filter(t => t.type === 'class').slice(0, 3).map(t => ({ apiName: t.apiName, name: t.name }))
+    });
+    
     if (!Array.isArray(placedUnits)) {
+      console.log('useTraitProcessing: placedUnits가 배열이 아님');
       return counts;
     }
 
+    // 한국어 특성 이름 검증 (이제 챔피언 traits가 이미 한국어로 변환되어 옴)
+    const getKoreanTraitName = (traitName: string): string | null => {
+      // 단순히 allTraits에서 해당 한국어 이름이 존재하는지 확인
+      const foundTrait = allTraits.find(t => t.name === traitName);
+      if (foundTrait) {
+        return foundTrait.name;
+      }
+      
+      console.warn(`⚠️ 특성을 찾을 수 없음: "${traitName}"`);
+      return null;
+    };
+
     placedUnits.forEach((unit: PlacedUnit) => {
+      console.log('🔍 useTraitProcessing: 유닛 처리 중:', { 
+        name: unit.name, 
+        apiName: unit.apiName,
+        traits: unit.traits,
+        traitsType: typeof unit.traits,
+        traitsIsArray: Array.isArray(unit.traits),
+        traitsCount: unit.traits?.length || 0
+      });
+      
       if (unit.traits && Array.isArray(unit.traits)) {
         const uniqueTraits = new Set(unit.traits);
-        uniqueTraits.forEach(koreanTraitName => {
-          // 한국어 특성 이름을 그대로 키로 사용
-          counts[koreanTraitName] = (counts[koreanTraitName] || 0) + 1;
+        console.log(`📊 ${unit.name}의 특성 목록:`, Array.from(uniqueTraits));
+        
+        uniqueTraits.forEach(traitName => {
+          const koreanTraitName = getKoreanTraitName(traitName);
+          
+          if (koreanTraitName) {
+            counts[koreanTraitName] = (counts[koreanTraitName] || 0) + 1;
+            console.log('✅ useTraitProcessing: 특성 카운트 증가:', { 
+              traitName: koreanTraitName, 
+              count: counts[koreanTraitName] 
+            });
+          }
         });
+      } else {
+        console.warn('⚠️ useTraitProcessing: 유닛에 특성이 없거나 배열이 아님:', unit.name);
       }
     });
     
+    console.log('useTraitProcessing: 최종 특성 카운트:', counts);
     return counts;
-  }, [placedUnits]);
+  }, [placedUnits, allTraits]);
 
   // 특성 스타일 및 색상 계산 (한국어 특성 이름 기준)
   const processedTraits = useMemo((): ProcessedTrait[] => {
+    console.log('processedTraits 계산 시작:', { 
+      allTraitsCount: allTraits.length,
+      traitCount,
+      traitCountKeys: Object.keys(traitCount)
+    });
+    
     if (!allTraits || allTraits.length === 0) {
+      console.log('processedTraits: allTraits가 없음');
       return [];
     }
 
@@ -104,10 +161,20 @@ export const useTraitProcessing = (placedUnits: PlacedUnit[]) => {
     
     // traitCount의 한국어 특성 이름으로 순회
     for (const [koreanTraitName, count] of Object.entries(traitCount) as [string, number][]) {
-      if (count === 0) continue;
+      console.log('processedTraits: 특성 처리 중:', { koreanTraitName, count });
+      
+      // 카운트가 0인 특성도 비활성 상태로 표시하기 위해 continue 제거
+      // if (count === 0) continue;
       
       // allTraits에서 한국어 이름으로 특성 찾기
       const trait = allTraits.find(t => t.name === koreanTraitName);
+      
+      console.log('processedTraits: 특성 찾기 결과:', { 
+        koreanTraitName, 
+        found: !!trait,
+        traitApiName: trait?.apiName 
+      });
+      
       if (!trait) continue;
 
       const sortedEffects = [...trait.effects].sort((a, b) => a.minUnits - b.minUnits);
@@ -165,11 +232,24 @@ export const useTraitProcessing = (placedUnits: PlacedUnit[]) => {
       });
     }
     
-    return calculatedTraits.sort((a, b) => {
+    const sortedTraits = calculatedTraits.sort((a, b) => {
       if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
       if (b.styleOrder !== a.styleOrder) return b.styleOrder - a.styleOrder;
       return b.tier_current - a.tier_current;
     });
+    
+    console.log('processedTraits 계산 완료:', { 
+      calculatedTraitsCount: calculatedTraits.length,
+      activeTraitsCount: calculatedTraits.filter(t => t.isActive).length,
+      traits: calculatedTraits.map(t => ({ 
+        name: t.name, 
+        count: t.tier_current, 
+        isActive: t.isActive,
+        style: t.style 
+      }))
+    });
+    
+    return sortedTraits;
   }, [allTraits, traitCount]);
 
   return {

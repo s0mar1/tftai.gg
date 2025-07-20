@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTFTData } from '../context/TFTDataContext';
 import { useTraitProcessing } from '../hooks/useTraitProcessing';
 import Trait from '../pages/summoner/components/Trait'; // Trait 컴포넌트 임포트
+import { safeProcessImagePath } from '../utils/imageUtils';
 
 // Deck prop의 타입을 정의하는 인��페이스
 interface Deck {
@@ -49,7 +50,19 @@ const MetaTrendCard: React.FC<{ deck: Deck }> = ({ deck }) => {
     ? deck.carryChampionName 
     : deck.carryChampionName?.ko;
   const carryChampion = champions.find(c => c.name === carryChampionName);
-  const carryChampionImageUrl = carryChampion ? carryChampion.image_url : 'https://via.placeholder.com/64';
+  
+  if (import.meta.env.DEV) {
+    console.log('🔍 MetaTrendCard 디버깅:', {
+      carryChampionName,
+      carryChampion: carryChampion ? {
+        name: carryChampion.name,
+        tileIcon: carryChampion.tileIcon,
+        image_url: carryChampion.image_url
+      } : null
+    });
+  }
+  
+  const carryChampionImageUrl = carryChampion ? safeProcessImagePath(carryChampion.tileIcon || carryChampion.image_url) : 'https://via.placeholder.com/64';
 
   const handleClick = () => {
     navigate('/tierlist');

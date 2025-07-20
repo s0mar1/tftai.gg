@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../utils/fetchApi';
 import { useTFTData } from '../../context/TFTDataContext';
 import { decodeDeck } from '../../utils/deckCode';
 import Trait from '../summoner/components/Trait';
 import { Champion, Item, Trait as TraitType } from '../../types';
+import { processImagePath, safeProcessImagePath } from '../../utils/imageUtils';
 
 // Type Definitions
 interface LevelBoard {
@@ -103,9 +104,10 @@ interface GuideCardProps {
   allItems: { [key: string]: Item };
   traitMap: Map<string, string>;
   allTraits: TraitType[];
+  getChampionImageUrl: (champion: Champion) => string;
 }
 
-const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, traitMap, allTraits }) => {
+const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, traitMap, allTraits, getChampionImageUrl }) => {
   const previewBoard = guide.level_boards.find(b => b.level === guide.initialDeckLevel) || guide.level_boards.find(b => b.level === 8) || guide.level_boards[0];
   const units = previewBoard ? decodeDeck(previewBoard.board, champions, allItems) : {};
   const unitsArray: DecodedUnit[] = Object.values(units);
@@ -125,7 +127,21 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, trait
     return calculateActiveTraits(unitsArray, allTraits, koreanToApiNameMap);
   }, [unitsArray, allTraits, koreanToApiNameMap]);
 
-  const coreChampions = unitsArray.sort((a, b) => b.cost - a.cost).slice(0, 6);
+  const coreChampions = useMemo(() => {
+    // 챔피언별로 가장 높은 tier를 가진 유닛만 유지
+    const uniqueChampionsMap = new Map<string, DecodedUnit>();
+    
+    unitsArray.forEach(unit => {
+      const existing = uniqueChampionsMap.get(unit.apiName);
+      if (!existing || unit.tier > existing.tier) {
+        uniqueChampionsMap.set(unit.apiName, unit);
+      }
+    });
+    
+    return Array.from(uniqueChampionsMap.values())
+      .sort((a, b) => b.cost - a.cost)
+      .slice(0, 6);
+  }, [unitsArray]);
 
   const getCostBorderColor = (cost: number) => {
     const colorMap: { [key: number]: string } = { 1: '#808080', 2: '#1E823C', 3: '#156293', 4: '#87259E', 5: '#B89D29' };
@@ -166,11 +182,11 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, trait
         </div>
         
         <div className="flex items-start gap-2">
-          {coreChampions.map(unit => (
-            <div key={unit.apiName} className="flex flex-col items-center">
+          {coreChampions.map((unit, index) => (
+            <div key={`${unit.apiName}-${index}`} className="flex flex-col items-center">
               <div className="relative">
                 <img
-                  src={unit.image_url || unit.tileIcon}
+                  src={getChampionImageUrl(unit)}
                   alt={unit.name}
                   className="w-12 h-12 rounded-md border-2 hover:scale-105 transition-transform"
                   style={{ borderColor: getCostBorderColor(unit.cost) }}
@@ -218,6 +234,32 @@ export default function GuideListPage() {
   const [sortBy, setSortBy] = useState<'recommended' | 'score' | 'newest'>('recommended');
   const tftDataResult = useTFTData();
   const { champions = [], traits: allTraits = [], traitMap = new Map(), allItems = [] } = tftDataResult || {};
+
+  // 공통 함수: 챔피언 이미지 URL 생성
+  const getChampionImageUrl = useCallback((champion: Champion): string => {
+    // 1순위: 백엔드에서 처리된 절대 URL 그대로 사용
+    if (champion.image_url && champion.image_url.startsWith('http')) {
+      return champion.image_url;
+    }
+    
+    // 2순위: image_url이 상대 경로인 경우 안전하게 처리
+    if (champion.image_url) {
+      return safeProcessImagePath(champion.image_url);
+    }
+    
+    // 3순위: tileIcon 사용
+    if (champion.tileIcon) {
+      return safeProcessImagePath(champion.tileIcon);
+    }
+    
+    // 4순위: icon 사용
+    if (champion.icon) {
+      return safeProcessImagePath(champion.icon);
+    }
+    
+    // 최후의 수단: 빈 문자열
+    return '';
+  }, []);
 
   useEffect(() => {
     const fetchGuides = async () => {
@@ -392,25 +434,53 @@ export default function GuideListPage() {
                       className="grid gap-1.5"
                       style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
                     >
-                      {champions.map(champion => (
-                        <button
-                          key={champion.apiName}
-                          onClick={() => setSelectedChampion(selectedChampion?.apiName === champion.apiName ? null : champion)}
-                          className={`relative w-10 h-10 rounded-md border-2 hover:scale-105 transition-all ${
-                            selectedChampion?.apiName === champion.apiName 
-                              ? 'ring-2 ring-brand-mint shadow-lg' 
-                              : 'hover:ring-2 hover:ring-gray-300'
-                          }`}
-                          style={{ borderColor: getCostBorderColor(cost) }}
-                          title={champion.name}
-                        >
-                          <img
-                            src={champion.image_url}
-                            alt={champion.name}
-                            className="w-full h-full rounded-sm object-cover"
-                          />
-                        </button>
-                      ))}
+                      {champions.map(champion => {
+                        // 디버깅: 실제 URL 확인 (모든 코스트의 첫 번째 챔피언)
+                        if (champions.indexOf(champion) === 0) {
+                          const testImageUrl = getChampionImageUrl(champion);
+                          console.log(`🔍 Champion Image URL Debug (${cost}코스트):`, {
+                            name: champion.name,
+                            apiName: champion.apiName,
+                            original_image_url: champion.image_url,
+                            tileIcon: champion.tileIcon,
+                            icon: champion.icon,
+                            processed_url: processImagePath(champion.image_url),
+                            safe_processed_url: safeProcessImagePath(champion.image_url),
+                            final_url: testImageUrl,
+                            url_type: champion.image_url?.startsWith('http') ? 'absolute' : 'relative'
+                          });
+                          
+                          // 임시 테스트: 알려진 정상 URL로도 시도
+                          console.log('🧪 Test URL:', `https://raw.communitydragon.org/latest/game/assets/characters/tft14_drmundo/hud/tft14_drmundo_square.png`);
+                        }
+
+                        const imageUrl = getChampionImageUrl(champion);
+
+                        return (
+                          <button
+                            key={champion.apiName}
+                            onClick={() => setSelectedChampion(selectedChampion?.apiName === champion.apiName ? null : champion)}
+                            className={`relative w-10 h-10 rounded-md border-2 hover:scale-105 transition-all ${
+                              selectedChampion?.apiName === champion.apiName 
+                                ? 'ring-2 ring-brand-mint shadow-lg' 
+                                : 'hover:ring-2 hover:ring-gray-300'
+                            }`}
+                            style={{ borderColor: getCostBorderColor(cost) }}
+                            title={champion.name}
+                          >
+                            <img
+                              src={imageUrl}
+                              alt={champion.name}
+                              className="w-full h-full rounded-sm object-cover"
+                              onError={(e) => {
+                                console.error(`❌ Image load failed for ${champion.name}:`, imageUrl);
+                                // 이미지 로드 실패 시 투명하게 처리
+                                e.currentTarget.style.opacity = '0.3';
+                              }}
+                            />
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -456,9 +526,13 @@ export default function GuideListPage() {
         {selectedChampion && (
           <div className="flex items-center gap-2 p-3 bg-brand-mint/10 rounded-md mt-4">
             <img 
-              src={selectedChampion.image_url} 
+              src={getChampionImageUrl(selectedChampion)} 
               alt={selectedChampion.name}
               className="w-8 h-8 rounded-md"
+              onError={(e) => {
+                console.error(`❌ Selected champion image load failed for ${selectedChampion.name}`);
+                e.currentTarget.style.opacity = '0.3';
+              }}
             />
             <span className="text-text-primary dark:text-dark-text-primary font-medium">
               {selectedChampion.name} 포함 덱만 표시
@@ -483,6 +557,7 @@ export default function GuideListPage() {
               allItems={allItems}
               traitMap={traitMap}
               allTraits={allTraits}
+              getChampionImageUrl={getChampionImageUrl}
             />
           ))}
         </div>

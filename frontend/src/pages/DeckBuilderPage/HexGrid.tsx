@@ -3,6 +3,7 @@ import { useDrop, useDrag } from 'react-dnd';
 import { ItemTypes } from '../../constants';
 import { useTFTData } from '../../context/TFTDataContext';
 import { Champion, Item } from '../../types';
+import { safeProcessImagePath } from '../../utils/imageUtils';
 
 // 타입 정의
 export interface Position {
@@ -247,9 +248,13 @@ const PlacedUnit: React.FC<PlacedUnitProps> = ({
           }}
         >
           <img
-            src={unit.tileIcon}
+            src={safeProcessImagePath(unit.tileIcon || unit.image_url || unit.icon)}
             alt={unit.name}
             className="w-full h-full object-cover pointer-events-none"
+            onError={(e) => {
+              console.error(`❌ PlacedUnit image load failed for ${unit.name}:`, unit.tileIcon);
+              e.currentTarget.style.opacity = '0.3';
+            }}
           />
         </div>
       </div>
@@ -273,10 +278,14 @@ const PlacedUnit: React.FC<PlacedUnitProps> = ({
               item.icon && (
                 <img
                   key={idx}
-                  src={item.icon}
+                  src={safeProcessImagePath(item.icon)}
                   alt={item.name}
                   className="w-5 h-5 rounded-sm"
                   title={item.name}
+                  onError={(e) => {
+                    console.error(`❌ Item icon load failed:`, item.name, item.icon);
+                    e.currentTarget.style.opacity = '0.3';
+                  }}
                 />
               ),
           )}

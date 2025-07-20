@@ -11,6 +11,7 @@
     "dev:win": "nodemon src/server.ts",
     "dev:unix": "nodemon --exec \"npx tsx src/server.ts\"",
     "build": "npx tsc",
+    "build:render": "pnpm install --frozen-lockfile && pnpm build",
     "start": "node --expose-gc dist/server.js",
     "start:prod": "NODE_ENV=production node --expose-gc dist/server.js",
     "start:dev": "npx tsx src/server.ts",
@@ -25,7 +26,8 @@
     "migrate:up": "npm run migrate up",
     "migrate:down": "npm run migrate down --force",
     "migrate:dry-run": "npm run migrate dry-run",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "echo 'Backend dependencies installed successfully'"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

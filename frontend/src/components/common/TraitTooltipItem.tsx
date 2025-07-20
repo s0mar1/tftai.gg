@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTFTData } from '../../context/TFTDataContext';
 import TraitHexIcon from '../../pages/summoner/components/TraitHexIcon';
+import { processImagePath } from '../../utils/imageUtils';
 
 interface TraitTooltipItemProps {
   traitName: string;
@@ -16,27 +17,34 @@ const TraitTooltipItem: React.FC<TraitTooltipItemProps> = ({ traitName }) => {
   const { traits, krNameMap } = useTFTData();
 
   const traitData = useMemo((): TraitDataWithDisplay | null => {
-    if (!traits || !krNameMap || !traitName) return null;
+    if (!traits || !traitName) return null;
 
-    // 1. 한국어 특성명 → API명 변환
-    let apiName: string | null = null;
+    // 1. 먼저 traits 배열에서 직접 한국어 이름으로 찾기
+    let trait = traits.find(t => t.name === traitName);
     
-    // krNameMap에서 역방향 검색 (한국어 → API명)
-    const entries = krNameMap instanceof Map ? krNameMap.entries() : Object.entries(krNameMap);
-    for (const [key, value] of entries) {
-      if (value === traitName) {
-        apiName = key;
-        break;
+    // 2. 찾지 못한 경우 API명으로 찾기 시도
+    if (!trait) {
+      trait = traits.find(t => t.apiName === traitName);
+    }
+    
+    // 3. 여전히 찾지 못한 경우 krNameMap 사용
+    if (!trait && krNameMap) {
+      let apiName: string | null = null;
+      
+      // krNameMap에서 역방향 검색 (한국어 → API명)
+      const entries = krNameMap instanceof Map ? krNameMap.entries() : Object.entries(krNameMap);
+      for (const [key, value] of entries) {
+        if (value === traitName) {
+          apiName = key;
+          break;
+        }
+      }
+      
+      if (apiName) {
+        trait = traits.find(t => t.apiName === apiName);
       }
     }
 
-    // API명을 찾지 못한 경우 원본 이름으로 시도
-    if (!apiName) {
-      apiName = traitName;
-    }
-
-    // 2. API명으로 특성 데이터 조회
-    const trait = traits.find(t => t.apiName === apiName);
     if (!trait) return null;
 
     return {
@@ -66,7 +74,7 @@ const TraitTooltipItem: React.FC<TraitTooltipItemProps> = ({ traitName }) => {
       }}>
         <TraitHexIcon variant="bronze" size={16} />
         <img 
-          src={traitData.icon} 
+          src={processImagePath(traitData.icon)} 
           alt={traitData.displayName} 
           style={{ 
             position: 'absolute', 

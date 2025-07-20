@@ -6,13 +6,15 @@ set -e
 
 echo "🚀 Cloudflare Pages 빌드 시작..."
 
-# 종속성 설치 (npm 사용)
+# 종속성 설치 (pnpm 사용 - 프로젝트 통일)
 echo "📦 종속성 설치 중..."
-npm install
+cd ..
+pnpm install --frozen-lockfile
 
-# 프론트엔드 빌드
+# 프론트엔드 빌드 (Turborepo 사용)
 echo "🎨 프론트엔드 빌드 중..."
-npm run build
+turbo build --filter=@tft-meta-analyzer/frontend...
+cd frontend
 
 # 5. Cloudflare Pages용 라우팅 파일 복사
 echo "🌐 Cloudflare Pages 설정 복사 중..."

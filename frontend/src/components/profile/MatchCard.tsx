@@ -1,6 +1,8 @@
 // frontend/src/components/profile/MatchCard.tsx
 // ... (생략) ...
 
+import { getTraitIconUrl } from '../../utils/imageUtils';
+
 type CostColors = {
   [key: number]: string;
 };
@@ -121,16 +123,13 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, userPuuid, isExpanded }) =
                   {/* 시너지 등급 아이콘 (백엔드에서 받은 등급별 URL 시도) */}
                   {/* onError를 추가하여 등급별 아이콘이 없을 경우 기본 아이콘으로 대체 */}
                   <img
-                    src={trait.image_url}
+                    src={getTraitIconUrl(trait.apiName || '')}
                     alt={trait.name || 'Unknown'}
                     className="w-4 h-4"
                     onError={(e) => {
-                      // 등급별 아이콘이 없을 경우 기본 아이콘 URL로 대체 (백엔드에서 기본 아이콘 URL도 같이 넘겨주는 것이 좋음)
-                      // 현재 백엔드는 등급별 아이콘만 시도하므로, 없을 경우 이미지가 깨질 수 있습니다.
-                      // 여기서는 임시로 기본 아이콘의 경로를 유추하여 대체합니다.
+                      // 기본 아이콘으로 fallback
                       if (trait.apiName) {
-                        const baseIconName = trait.apiName.toLowerCase().replace('set11_', '').replace('.tex', '').replace('.png', '');
-                        e.target.src = `https://raw.communitydragon.org/latest/game/assets/traits/icon_tft11_${baseIconName}.png`; // 기본 아이콘 URL 예시
+                        e.target.src = getTraitIconUrl(trait.apiName, 'tft14');
                       }
                       e.target.onerror = null; // 무한 루프 방지
                     }}

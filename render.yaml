@@ -8,15 +8,15 @@ services:
     runtime: node
     region: singapore
     plan: starter
-    buildCommand:  < /dev/null | 
-      cd backend && npm ci && npm run build
-    startCommand: cd backend && npm start
+    buildCommand: |
+      corepack enable &&
+      pnpm install --frozen-lockfile &&
+      turbo build --filter=@tft-meta-analyzer/backend...
+    startCommand: cd backend && pnpm start
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 4001
       # 환경변수들은 Render 대시보드에서 직접 설정
       # - RIOT_API_KEY (필수)
       - key: RIOT_API_KEY
@@ -30,6 +30,9 @@ services:
       # - GEMINI_API_KEY (선택사항)
       - key: GEMINI_API_KEY
         sync: false # 수동으로 설정해야 함
+      # CORS 설정 - Cloudflare Pages 도메인 허용
+      - key: ALLOWED_ORIGINS
+        value: https://tft-meta-analyzer-frontend.pages.dev,https://tftai.gg
       # MongoDB 연결 설정
       - key: MONGODB_TIMEOUT
         value: 10000
@@ -60,7 +63,7 @@ services:
     # 자동 배포 설정
     autoDeploy: true
     branch: main
-    repo: https://github.com/your-username/tft-meta-analyzer.git
+    repo: https://github.com/s0mar1/tftai.gg.git
     rootDir: /
     buildFilter:
       paths:

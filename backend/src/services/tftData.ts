@@ -355,7 +355,50 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
     });
 
     const champions: Champion[] = enSetData?.champions || []
-      ?.filter((champ: any) => champ.cost > 0 && champ.traits?.length > 0 && !champ.apiName.includes('Tutorial'))
+      ?.filter((champ: any) => {
+        const apiName = champ.apiName.toLowerCase();
+        
+        // 디버깅 로그 추가
+        if (apiName.includes('bluegolem') || apiName.includes('crab') || apiName.includes('krug')) {
+          logger.info(`[DEBUG] 중성 유닛 필터링 테스트: ${champ.apiName} - cost: ${champ.cost}, traits: ${champ.traits?.length || 0}`);
+        }
+        
+        // 1. 중성 유닛 및 시스템 유닛 먼저 제외 (최우선)
+        const excludePatterns = [
+          'tft_bluegolem',     // 골렘
+          'tft_krug',          // 크룩
+          'tft9_slime_crab',   // 바위 게 
+          'tft_wolf',          // 늑대
+          'tft_murkwolf',      // 늑대 (추가)
+          'tft_razorbeak',     // 칼날 부리
+          'tft_dragon',        // 드래곤
+          'tft_baron',         // 바론
+          'tft_trainingdummy', // 훈련용 더미
+          'tft_voidspawn',     // 공허 소환물
+          'tft_riftherald',    // 전령
+          'tft_placeholder',   // 플레이스홀더
+          'tft_debug',         // 디버그 유닛
+          'tft_test',          // 테스트 유닛
+          'tutorial',          // 튜토리얼
+        ];
+        
+        // 제외 패턴에 해당하는 경우 즉시 false
+        if (excludePatterns.some(pattern => apiName.includes(pattern))) {
+          return false;
+        }
+        
+        // 2. TFT14_ 패턴만 허용 (대소문자 구분 없음)
+        if (!apiName.includes('tft14_')) {
+          return false;
+        }
+        
+        // 3. 기본 조건 강화 - traits 배열이 실제로 존재하고 비어있지 않아야 함
+        if (champ.cost <= 0 || !champ.traits || !Array.isArray(champ.traits) || champ.traits.length === 0) {
+          return false;
+        }
+        
+        return true;
+      })
       ?.map((enChamp: any) => {
           const champName = localeChampionNames.get(enChamp.apiName) || enChamp.name || enChamp.apiName || '미확인 챔피언';
           if (!localeChampionNames.has(enChamp.apiName) && language === 'ko') {
@@ -522,6 +565,13 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
       currentSet: `Set${currentSetKey}`,
       language: language,
       locale: locale,
+      // 프론트엔드 호환성을 위해 krNameMap도 추가 (API명 -> 한국어 이름만)
+      krNameMap: new Map([
+        // API명 -> 한국어 이름 매핑 (소문자 변환)
+        ...Array.from(localeChampionNames.entries()).map(([key, value]: [string, string]) => [key.toLowerCase(), value]),
+        ...Array.from(localeTraitNames.entries()).map(([key, value]: [string, string]) => [key.toLowerCase(), value]),
+        ...Array.from(localeItemNames.entries()).map(([key, value]: [string, string]) => [key.toLowerCase(), value])
+      ] as any),
       nameMap: new Map([
         // 기존 매핑: apiName -> 한국어 이름
         ...Array.from(localeChampionNames.entries()).map(([key, value]: [string, string]) => [key.toLowerCase(), value]),
