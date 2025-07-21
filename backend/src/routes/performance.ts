@@ -1,7 +1,7 @@
 // 성능 모니터링 API 라우트
 import express from 'express';
 import logger from '../config/logger';
-import systemOptimizer from '../services/system';
+import systemOptimizer from '../services/system/index';
 const { performanceOptimizer, memoryOptimizer, resourceOptimizer } = systemOptimizer;
 // import scalabilityManager from '../services/system/scalabilityManager';
 import aggregationService from '../services/aggregationService';
