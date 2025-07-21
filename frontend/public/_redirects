@@ -1,8 +1,8 @@
 # Cloudflare Pages Redirects Configuration
 # 
 # API 요청을 백엔드 서버로 프록시
-# :splat은 /api/ 뒤의 모든 경로를 캡처하여 전달
-/api/* https://tft-meta-analyzer-backend.onrender.com/api/:splat 200
+# 모든 API 요청은 api.tftai.gg 서브도메인으로 프록시
+/api/* https://api.tftai.gg/api/:splat 200
 
 # 모든 나머지 요청은 React 앱의 index.html로 (SPA 라우팅)
 /* /index.html 200

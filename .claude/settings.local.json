@@ -39,7 +39,8 @@
       "Bash(RENDER=true npm install --prefix backend)",
       "Bash(RENDER=true npm install)",
       "Bash(git add:*)",
-      "Bash(PORT=4002 node test-routes.js)"
+      "Bash(PORT=4002 node test-routes.js)",
+      "mcp__playwright__browser_wait_for"
     ],
     "deny": []
   }

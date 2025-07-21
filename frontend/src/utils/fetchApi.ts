@@ -55,8 +55,19 @@ async function fetchWithTimeout(
     // 절대 URL은 그대로 사용
     fullUrl = url;
   } else if (url.startsWith('/')) {
-    // 슬래시로 시작하는 경로는 baseURL과 결합
-    fullUrl = baseURL ? `${baseURL}${url}` : url;
+    // 배포 환경에서 특정 API는 api.tftai.gg 서브도메인으로 라우팅
+    if (import.meta.env.PROD && !baseURL) {
+      // static-data와 tierlist API는 api 서브도메인 사용
+      if (url.includes('/api/tierlist') || url.includes('/api/static-data')) {
+        fullUrl = `https://api.tftai.gg${url}`;
+      } else {
+        // 나머지 API는 그대로
+        fullUrl = url;
+      }
+    } else {
+      // 개발 환경 또는 baseURL이 설정된 경우
+      fullUrl = baseURL ? `${baseURL}${url}` : url;
+    }
   } else {
     // 상대 경로는 baseURL과 슬래시를 포함하여 결합
     fullUrl = baseURL ? `${baseURL}/${url}` : `/${url}`;

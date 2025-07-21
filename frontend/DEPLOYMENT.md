@@ -56,6 +56,12 @@ CORS_ORIGINS=https://tftai.gg,https://your-cloudflare-pages.pages.dev
   2. 백엔드 서버가 실행 중인지 확인
   3. CORS 설정 확인
 
+#### API 서브도메인 설정
+TFTai.gg는 API 요청을 `api.tftai.gg` 서브도메인으로 처리합니다:
+- `fetchApi.ts`에서 프로덕션 환경일 때 자동으로 api 서브도메인 사용
+- `_redirects` 파일도 api.tftai.gg로 프록시 설정
+- 백엔드 서버는 실제로 api.tftai.gg에서 호스팅됨
+
 #### 405 Method Not Allowed 에러
 - 원인: 존재하지 않는 API 엔드포인트 호출
 - 해결: 
