@@ -69,13 +69,49 @@ async function fetchWithTimeout(
       let errorMessage = `HTTP Error: ${response.status}`;
       let errorData: any = {};
       
+      // Content-Type 헤더 확인
+      const contentType = response.headers.get('content-type');
+      const isJsonResponse = contentType && contentType.includes('application/json');
+      
       try {
-        errorData = await response.json();
-        errorMessage = errorData.error || errorData.message || errorMessage;
-      } catch {
+        // JSON 응답인 경우만 파싱 시도
+        if (isJsonResponse) {
+          errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } else {
+          // HTML이나 다른 형태의 응답 처리
+          const responseText = await response.text();
+          
+          // HTML 응답 감지
+          if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
+            if (import.meta.env.DEV) {
+              console.error('HTML 응답 수신:', {
+                url: fullUrl,
+                status: response.status,
+                contentType,
+                responsePreview: responseText.substring(0, 200) + '...'
+              });
+            }
+            
+            // 더 구체적인 에러 메시지 제공
+            if (response.status === 404) {
+              errorMessage = `API 엔드포인트를 찾을 수 없습니다: ${url}`;
+            } else {
+              errorMessage = `서버에서 예상치 못한 응답을 받았습니다 (HTML 페이지)`;
+            }
+          } else {
+            // 다른 텍스트 응답
+            errorMessage = responseText || errorMessage;
+          }
+        }
+      } catch (parseError) {
         // JSON 파싱 실패 시 기본 메시지 사용
+        if (import.meta.env.DEV) {
+          console.error('응답 파싱 실패:', parseError);
+        }
+        
         if (response.status === 404) {
-          errorMessage = 'Resource not found';
+          errorMessage = `API 엔드포인트를 찾을 수 없습니다: ${url}`;
         } else if (response.status === 500) {
           errorMessage = 'Internal server error';
         } else if (response.status === 429) {
@@ -103,6 +139,42 @@ async function fetchWithTimeout(
       undefined,
       undefined
     );
+  }
+}
+
+// 응답 검증 및 JSON 파싱을 위한 공통 함수
+async function parseJsonResponse<T>(response: Response, url: string): Promise<T> {
+  // Content-Type 검증
+  const contentType = response.headers.get('content-type');
+  const isJsonResponse = contentType && contentType.includes('application/json');
+  
+  if (!isJsonResponse) {
+    const responseText = await response.text();
+    
+    // HTML 응답 감지 및 에러 처리
+    if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
+      if (import.meta.env.DEV) {
+        console.error('예상치 못한 HTML 응답:', {
+          url,
+          contentType,
+          responsePreview: responseText.substring(0, 200) + '...'
+        });
+      }
+      throw new FetchError(`API가 HTML 페이지를 반환했습니다. 엔드포인트를 확인해주세요: ${url}`);
+    }
+    
+    // JSON이 아닌 다른 응답 타입
+    throw new FetchError(`예상된 JSON 응답이 아닙니다. Content-Type: ${contentType || 'unknown'}`);
+  }
+  
+  try {
+    const rawData = await response.json();
+    return extractData<T>(rawData);
+  } catch (parseError) {
+    if (import.meta.env.DEV) {
+      console.error('JSON 파싱 실패:', parseError);
+    }
+    throw new FetchError('서버 응답을 파싱할 수 없습니다. JSON 형식이 올바르지 않습니다.');
   }
 }
 
@@ -147,8 +219,8 @@ export const api = {
       ...options,
       method: 'GET',
     });
-    const rawData = await response.json();
-    return extractData<T>(rawData);
+    
+    return parseJsonResponse<T>(response, url);
   },
 
   post: async <T = unknown>(
@@ -161,8 +233,8 @@ export const api = {
       body: data ? JSON.stringify(data) : undefined,
       ...options,  // options를 나중에 spread하여 timeout 등의 설정을 덮어쓸 수 있게 함
     });
-    const rawData = await response.json();
-    return extractData<T>(rawData);
+    
+    return parseJsonResponse<T>(response, url);
   },
 
   put: async <T = unknown>(
@@ -175,8 +247,8 @@ export const api = {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     });
-    const rawData = await response.json();
-    return extractData<T>(rawData);
+    
+    return parseJsonResponse<T>(response, url);
   },
 
   delete: async <T = unknown>(url: string, options?: FetchOptions): Promise<T> => {
@@ -184,8 +256,8 @@ export const api = {
       ...options,
       method: 'DELETE',
     });
-    const rawData = await response.json();
-    return extractData<T>(rawData);
+    
+    return parseJsonResponse<T>(response, url);
   },
 };
 

@@ -276,7 +276,13 @@ router.get('/decks/:language', checkDBConnection, async (_req: Request, _res: Re
     // 지원하지 않는 언어일 경우 기본값 'ko' 사용
     const lang = (language && supportedLanguages.includes(language)) ? language : 'ko';
 
-    logger.info(`[GET /api/tierlist/${language}] 요청 처리 시작`);
+    logger.info(`[GET /api/tierlist/decks/${language}] 요청 처리 시작`, {
+      originalLanguage: language,
+      resolvedLanguage: lang,
+      userAgent: _req.get('User-Agent'),
+      ip: _req.ip,
+      timestamp: new Date().toISOString()
+    });
     
     // 개발 모드에서는 DB 조회를 건너뛰고 바로 모의 데이터 반환
     if (process.env.DEVELOPMENT_MODE === 'true') {
@@ -452,8 +458,31 @@ router.get('/decks/:language', checkDBConnection, async (_req: Request, _res: Re
 
     sendSuccess(_res, formattedData, `티어 데이터 조회 완료 (${lang})`);
     
-  } catch (_error) {
-    logger.error(`[GET /api/tierlist/:language] - 언어: ${_req.params.language}, 오류:`, _error);
+  } catch (_error: any) {
+    const errorContext = {
+      method: 'GET',
+      endpoint: `/api/tierlist/decks/${_req.params.language}`,
+      language: _req.params.language,
+      userAgent: _req.get('User-Agent'),
+      ip: _req.ip,
+      timestamp: new Date().toISOString(),
+      errorName: _error?.name,
+      errorMessage: _error?.message,
+      stack: _error?.stack
+    };
+    
+    logger.error(`[GET /api/tierlist/decks/${_req.params.language}] 오류 발생`, errorContext);
+    
+    // 개발 환경에서 추가 디버깅 정보
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('[Tierlist Error Debug]', {
+        ...errorContext,
+        params: _req.params,
+        query: _req.query,
+        headers: _req.headers
+      });
+    }
+    
     _next(_error);
   }
 });
