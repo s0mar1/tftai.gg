@@ -9,6 +9,12 @@ import { sendSuccess, sendError } from '../utils/responseHelper';
 
 const router = express.Router();
 
+// 라우터 초기화 로깅 (배포 환경 디버깅용)
+logger.info('[staticData Router] 라우터 초기화 완료', {
+  timestamp: new Date().toISOString(),
+  environment: process.env.NODE_ENV
+});
+
 // CommonJS 방식으로 __dirname 사용
 const itemsDataPath = path.join(__dirname, '..', 'data', 'tft14_items_index.json');
 
@@ -338,6 +344,14 @@ router.get('/items-by-category/:language?', async (_req: Request, _res: Response
     
     return _next(error);
   }
+});
+
+// 라우터 export 전 최종 확인 로깅
+logger.info('[staticData Router] 라우터 export 준비 완료', {
+  routerType: typeof router,
+  hasStackProperty: 'stack' in router,
+  routerConstructorName: router.constructor?.name || 'unknown',
+  timestamp: new Date().toISOString()
 });
 
 export default router;

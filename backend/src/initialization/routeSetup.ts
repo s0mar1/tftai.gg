@@ -87,6 +87,17 @@ const setupMiddlewares = (app: Application): void => {
 const setupApiRoutes = (app: Application): string[] => {
   logger.info('[Route Setup] API 라우트 등록 중...');
   
+  // 배포 환경에서 라우터 초기화 로깅 추가
+  const config = getServerConfig();
+  if (config.isProduction) {
+    logger.info('[Route Setup] 프로덕션 환경에서 라우터 등록 시작');
+    logger.info('[Route Setup] 정적 데이터 라우터 초기화 확인:', {
+      staticDataRoutesLoaded: !!staticDataRoutes,
+      staticDataRoutesType: typeof staticDataRoutes,
+      staticDataRoutesStackLength: staticDataRoutes?.stack?.length || 'undefined'
+    });
+  }
+  
   const routes = [
     { path: '/api-docs', router: swaggerUi.serve, name: 'Swagger UI' },
     { path: '/health', router: healthRoutes, name: 'Health Check' },
@@ -123,8 +134,26 @@ const setupApiRoutes = (app: Application): string[] => {
       app.use(path, router);
       registeredRoutes.push(path);
       logger.info(`  ✓ ${name} 라우트 등록: ${path}`);
+      
+      // Static Data 라우터에 대한 추가 로깅 (배포 환경)
+      if (path === '/api/static-data' && config.isProduction) {
+        logger.info('[Route Setup] Static Data 라우터 등록 세부사항:', {
+          routerType: typeof router,
+          isRouter: router && typeof router === 'function',
+          hasStackProperty: router && 'stack' in router,
+          routerConstructorName: router?.constructor?.name || 'unknown'
+        });
+      }
     } catch (_error: any) {
       logger.error(`  ✗ ${name} 라우트 등록 실패: ${_error.message}`);
+      if (path === '/api/static-data') {
+        logger.error('[Route Setup] Static Data 라우터 등록 실패 상세:', {
+          error: _error.message,
+          stack: _error.stack,
+          routerType: typeof router,
+          routerKeys: router ? Object.keys(router) : 'router is null/undefined'
+        });
+      }
     }
   });
   
