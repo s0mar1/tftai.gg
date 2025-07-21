@@ -3,7 +3,6 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next'; // i18next 추가
 import { useDeckTiers, useCacheInvalidation } from '../../hooks/useQuery';
 import { useTFTData } from '../../context/TFTDataContext';
-import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 import ResponsiveContainer from '../../components/common/ResponsiveContainer';
 import { TierListPageSkeleton } from '../../components/common/TFTSkeletons';
 import Trait from '../summoner/components/Trait';

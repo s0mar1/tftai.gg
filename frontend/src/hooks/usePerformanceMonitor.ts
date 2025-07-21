@@ -193,19 +193,14 @@ export const useMemoryMonitor = () => {
   }, []);
 };
 
-// 성능 메트릭 리포팅
+// 성능 메트릭 리포팅 (서버 전송 비활성화)
 const reportPerformanceMetric = async (metric: PerformanceMetric): Promise<void> => {
-  try {
-    await fetch('/api/performance-metrics', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(metric),
-    });
-  } catch (error) {
-    console.error('Failed to report performance metric:', error);
+  // 백엔드에 /api/performance-metrics 엔드포인트가 없으므로 로컬 로깅만 수행
+  if (import.meta.env.MODE === 'development') {
+    console.log('[Performance Metric]', metric);
   }
+  // 서버 전송 비활성화: 405 에러 방지
+  // TODO: 필요시 백엔드에 performance-metrics 엔드포인트 구현 후 활성화
 };
 
 // 네트워크 상태 모니터링
