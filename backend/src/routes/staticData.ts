@@ -95,42 +95,180 @@ router.get('/tft-data/:language?', async (_req: Request, _res: Response, _next: 
 router.get('/items-by-category/:language?', async (_req: Request, _res: Response, _next: NextFunction) => {
   try {
     const language = _req.params.language || 'ko'; // 언어 파라미터, 기본값 'ko'
+    logger.info(`[items-by-category] API 호출 시작 - 언어: ${language}`);
     
     // 1. tftData.ts로부터 최신 "마스터 데이터베이스"를 특정 언어로 가져옵니다.
+    logger.info(`[items-by-category] getTFTDataWithLanguage 호출 중...`);
     const tft = await getTFTDataWithLanguage(language);
-    if (!tft || !tft.items) {
+    
+    // 응답 데이터 검증 강화
+    if (!tft) {
+      logger.error(`[items-by-category] getTFTDataWithLanguage 반환값이 null/undefined - 언어: ${language}`);
+      throw new Error(`TFT 데이터를 '${language}' 언어로 가져올 수 없습니다.`);
+    }
+    
+    if (!tft.items) {
+      logger.error(`[items-by-category] tft.items가 존재하지 않음`, {
+        language,
+        tftKeys: Object.keys(tft),
+        itemsValue: tft.items
+      });
       throw new Error(`TFT 아이템 데이터를 서비스에서 '${language}' 언어로 가져올 수 없습니다.`);
     }
-    const allItemsFromService = Object.values(tft.items).flat();
+    
+    logger.info(`[items-by-category] TFT 데이터 검증 완료`, {
+      language,
+      itemsKeys: Object.keys(tft.items),
+      itemsType: typeof tft.items
+    });
+    
+    // 안전한 Object.values() 처리
+    let allItemsFromService: any[] = [];
+    try {
+      const itemValues = Object.values(tft.items);
+      logger.info(`[items-by-category] Object.values(tft.items) 결과:`, {
+        valuesLength: itemValues.length,
+        valuesTypes: itemValues.map(v => Array.isArray(v) ? `array[${v.length}]` : typeof v)
+      });
+      
+      allItemsFromService = itemValues.flat();
+      logger.info(`[items-by-category] flat() 후 아이템 개수: ${allItemsFromService.length}`);
+    } catch (flatError) {
+      logger.error(`[items-by-category] Object.values().flat() 처리 실패:`, flatError);
+      throw new Error(`아이템 데이터 구조 처리 중 오류가 발생했습니다.`);
+    }
 
     // 2. 이름의 미세한 차이를 극복하기 위한 정규화 함수를 정의합니다.
-    const normalizeName = (name: string): string => {
-      return (name || '').toLowerCase().replace(/[\s.'']/g, '');
+    const normalizeName = (name: string | null | undefined): string => {
+      if (!name || typeof name !== 'string') {
+        logger.warn(`[items-by-category] 정규화 대상이 유효하지 않음:`, { name, type: typeof name });
+        return '';
+      }
+      return name.toLowerCase().replace(/[\s.'']/g, '');
     };
 
     // 3. "정규화된 이름"을 Key로 사용���는 마스터 Map을 생성합니다.
     const masterItemMap = new Map<string, any>();
+    let processedItemsCount = 0;
+    let skippedItemsCount = 0;
+    
     for (const item of allItemsFromService) {
+      if (!item || typeof item !== 'object') {
+        skippedItemsCount++;
+        logger.warn(`[items-by-category] 유효하지 않은 아이템 스킵:`, { item, type: typeof item });
+        continue;
+      }
+      
       const normalizedKey = normalizeName(item.name);
       if (normalizedKey && !masterItemMap.has(normalizedKey)) {
         masterItemMap.set(normalizedKey, item);
+        processedItemsCount++;
+      } else if (!normalizedKey) {
+        skippedItemsCount++;
+        logger.warn(`[items-by-category] 정규화된 키가 비어있는 아이템:`, { 
+          itemName: item.name, 
+          itemKeys: Object.keys(item) 
+        });
       }
     }
     
+    logger.info(`[items-by-category] 마스터 맵 생성 완료`, {
+      totalItems: allItemsFromService.length,
+      processedItems: processedItemsCount,
+      skippedItems: skippedItemsCount,
+      masterMapSize: masterItemMap.size
+    });
+    
     // 4. 우리가 직접 관리하는 JSON 파일(분류 기준)을 읽어옵니다.
     // 이 파일은 'korean_name'을 기준으로 매칭하므로, 언어와 상관없이 동일하게 사용됩니다.
-    const itemsData = JSON.parse(fs.readFileSync(itemsDataPath, 'utf8'));
+    logger.info(`[items-by-category] JSON 파일 읽기 시작: ${itemsDataPath}`);
+    
+    // 파일 존재 여부 확인
+    if (!fs.existsSync(itemsDataPath)) {
+      logger.error(`[items-by-category] JSON 파일이 존재하지 않음: ${itemsDataPath}`);
+      throw new Error(`아이템 분류 데이터 파일을 찾을 수 없습니다.`);
+    }
+    
+    let itemsData: any;
+    try {
+      const fileContent = fs.readFileSync(itemsDataPath, 'utf8');
+      logger.info(`[items-by-category] 파일 읽기 완료, 크기: ${fileContent.length} bytes`);
+      
+      itemsData = JSON.parse(fileContent);
+      logger.info(`[items-by-category] JSON 파싱 완료`, {
+        categories: Object.keys(itemsData),
+        categoriesCount: Object.keys(itemsData).length
+      });
+    } catch (fileError: unknown) {
+      const error = fileError instanceof Error ? fileError : new Error(String(fileError));
+      logger.error(`[items-by-category] JSON 파일 읽기/파싱 실패:`, {
+        filePath: itemsDataPath,
+        error: error.message,
+        stack: error.stack
+      });
+      throw new Error(`아이템 분류 데이터 파일 처리 중 오류가 발생했습니다.`);
+    }
+    
     const categorizedItems: Record<string, any[]> = {};
     
     // 5. JSON 파일의 카테고리를 순회합니다.
+    logger.info(`[items-by-category] 카테고리별 매칭 시작`);
+    let totalMatchAttempts = 0;
+    let successfulMatches = 0;
+    let failedMatches = 0;
+    
     for (const category in itemsData) {
       if (Object.hasOwnProperty.call(itemsData, category)) {
         categorizedItems[category] = [];
+        logger.info(`[items-by-category] 카테고리 처리 중: ${category}`);
+        
+        // 카테고리 데이터 검증
+        if (!Array.isArray(itemsData[category])) {
+          logger.error(`[items-by-category] 카테고리 '${category}'의 데이터가 배열이 아님:`, {
+            category,
+            dataType: typeof itemsData[category],
+            dataValue: itemsData[category]
+          });
+          continue;
+        }
         
         // 6. 각 카테고리에 속한 아이템 목록을 순회합니다.
         for (const itemFromJson of itemsData[category]) {
+          totalMatchAttempts++;
+          
+          // JSON 아이템 데이터 검증
+          if (!itemFromJson || typeof itemFromJson !== 'object') {
+            failedMatches++;
+            logger.warn(`[items-by-category] 유효하지 않은 JSON 아이템:`, { 
+              category, 
+              item: itemFromJson, 
+              type: typeof itemFromJson 
+            });
+            continue;
+          }
+          
+          if (!itemFromJson.korean_name) {
+            failedMatches++;
+            logger.warn(`[items-by-category] korean_name이 없는 JSON 아이템:`, { 
+              category, 
+              item: itemFromJson,
+              keys: Object.keys(itemFromJson)
+            });
+            continue;
+          }
+          
           // 7. JSON 파일의 'korean_name'을 정규화하여 Key로 사용합니다.
           const normalizedKeyFromJson = normalizeName(itemFromJson.korean_name);
+          
+          if (!normalizedKeyFromJson) {
+            failedMatches++;
+            logger.warn(`[items-by-category] 정규화 실패:`, { 
+              category, 
+              koreanName: itemFromJson.korean_name,
+              normalizedKey: normalizedKeyFromJson
+            });
+            continue;
+          }
           
           // 8. 정규화된 Key로 마스터 Map에서 최신 아이템 정보를 찾습니다.
           const liveItemData = masterItemMap.get(normalizedKeyFromJson);
@@ -138,15 +276,29 @@ router.get('/items-by-category/:language?', async (_req: Request, _res: Response
           if (liveItemData) {
             // 매칭에 성공하면 최종 목록에 추가합니다.
             categorizedItems[category].push(liveItemData);
+            successfulMatches++;
           } else {
+            failedMatches++;
             // 'ko' 언어일 때만 경고를 로깅하여 중복 경고를 피합니다.
             if (language === 'ko') {
-              logger.warn(`[매칭 실패] JSON 아이템 '${itemFromJson.korean_name}'을(를) 마스터 데이터베이스에서 찾을 수 없습니다.`);
+              logger.warn(`[매칭 실패] JSON 아이템 '${itemFromJson.korean_name}'을(를) 마스터 데이터베이스에서 찾을 수 없습니다.`, {
+                normalizedKey: normalizedKeyFromJson,
+                availableKeys: Array.from(masterItemMap.keys()).slice(0, 5) // 처음 5개만 샘플로
+              });
             }
           }
         }
+        
+        logger.info(`[items-by-category] 카테고리 '${category}' 처리 완료: ${categorizedItems[category].length}개 매칭`);
       }
     }
+    
+    logger.info(`[items-by-category] 전체 매칭 결과`, {
+      totalAttempts: totalMatchAttempts,
+      successful: successfulMatches,
+      failed: failedMatches,
+      successRate: totalMatchAttempts > 0 ? (successfulMatches / totalMatchAttempts * 100).toFixed(2) + '%' : '0%'
+    });
     
     // 응답 전 카테고리 정보 로깅
     const categoryInfo = Object.entries(categorizedItems).map(([category, items]) => ({
@@ -155,12 +307,36 @@ router.get('/items-by-category/:language?', async (_req: Request, _res: Response
     }));
     
     logger.info(`[items-by-category] 카테고리별 아이템 정보:`, categoryInfo);
+    logger.info(`[items-by-category] API 성공적으로 완료 - 언어: ${language}, 총 카테고리: ${categoryInfo.length}`);
     
     return sendSuccess(_res, categorizedItems, `카테고리별 아이템 데이터 (${language}) 조회 완료`);
 
-  } catch (_error) {
-    logger.error("[items-by-category] 에러 발생:", _error);
-    return _next(_error);
+  } catch (_error: unknown) {
+    const error = _error instanceof Error ? _error : new Error(String(_error));
+    const errorDetails = {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      language: _req.params.language || 'ko',
+      timestamp: new Date().toISOString(),
+      requestUrl: _req.url,
+      userAgent: _req.get('User-Agent')
+    };
+    
+    logger.error("[items-by-category] 상세 에러 정보:", errorDetails);
+    
+    // 에러 유형별 분류
+    if (error.message.includes('TFT 데이터를') || error.message.includes('getTFTDataWithLanguage')) {
+      logger.error("[items-by-category] TFT 데이터 서비스 관련 에러 - 외부 API 또는 캐시 문제일 가능성");
+    } else if (error.message.includes('파일')) {
+      logger.error("[items-by-category] 파일 시스템 관련 에러 - JSON 파일 접근 문제");
+    } else if (error.message.includes('데이터 구조')) {
+      logger.error("[items-by-category] 데이터 구조 관련 에러 - 예상과 다른 데이터 형식");
+    } else {
+      logger.error("[items-by-category] 예상치 못한 에러 유형");
+    }
+    
+    return _next(error);
   }
 });
 
