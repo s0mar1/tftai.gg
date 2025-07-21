@@ -5,6 +5,94 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /meta:
+ *   get:
+ *     summary: 메타 분석 API 정보를 조회합니다.
+ *     description: |
+ *       메타 분석 API의 사용 가능한 엔드포인트와 기능을 안내합니다.
+ *       - 챔피언 및 아이템 픽률 통계
+ *       - 챔피언 및 아이템 승률 통계
+ *       - 최신 메타 트렌드 분석
+ *     tags: [Meta]
+ *     responses:
+ *       200:
+ *         description: API 정보 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 service:
+ *                   type: string
+ *                   example: "TFT Meta Analysis API"
+ *                 version:
+ *                   type: string
+ *                   example: "1.0.0"
+ *                 description:
+ *                   type: string
+ *                   example: "TFT 메타 분석을 위한 챔피언 및 아이템 통계를 제공합니다."
+ *                 endpoints:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       method:
+ *                         type: string
+ *                         example: "GET"
+ *                       path:
+ *                         type: string
+ *                         example: "/api/meta/pick-rates"
+ *                       description:
+ *                         type: string
+ *                         example: "챔피언 및 아이템 픽률 통계 조회"
+ *                 features:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: [
+ *                     "실시간 픽률 통계 분석",
+ *                     "승률 기반 티어 평가",
+ *                     "특성(시너지) 분석",
+ *                     "최근 게임 데이터 기반 통계"
+ *                   ]
+ *                 lastUpdated:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2024-07-15T10:30:00.000Z"
+ */
+router.get('/', (_req: Request, _res: Response) => {
+  _res.json({
+    success: true,
+    service: 'TFT Meta Analysis API',
+    version: '1.0.0',
+    description: 'TFT 메타 분석을 위한 챔피언 및 아이템 통계를 제공합니다.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/api/meta/pick-rates',
+        description: '챔피언 및 아이템 픽률 통계 조회'
+      },
+      {
+        method: 'GET',
+        path: '/api/meta/win-rates',
+        description: '챔피언 및 아이템 승률 통계 조회'
+      }
+    ],
+    features: [
+      '실시간 픽률 통계 분석',
+      '승률 기반 티어 평가',
+      '특성(시너지) 분석',
+      '최근 게임 데이터 기반 통계'
+    ],
+    lastUpdated: new Date().toISOString()
+  });
+});
+
+/**
+ * @swagger
  * /meta/pick-rates:
  *   get:
  *     summary: 챔피언 및 아이템 픽률 통계를 조회합니다.

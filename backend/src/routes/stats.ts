@@ -7,6 +7,155 @@ import CursorPagination from '../utils/cursorPagination';
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /stats:
+ *   get:
+ *     summary: 통계 API 정보를 조회합니다.
+ *     description: |
+ *       통계 API의 사용 가능한 엔드포인트와 기능을 안내합니다.
+ *       - 아이템 통계 조회 및 분석
+ *       - 특성 통계 조회 및 분석
+ *       - 커서 기반 페이지네이션 지원
+ *       - 상세 통계 분석 기능
+ *     tags: [Stats]
+ *     responses:
+ *       200:
+ *         description: API 정보 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 service:
+ *                   type: string
+ *                   example: "TFT Statistics API"
+ *                 version:
+ *                   type: string
+ *                   example: "1.0.0"
+ *                 description:
+ *                   type: string
+ *                   example: "TFT 아이템 및 특성 통계를 제공합니다."
+ *                 endpoints:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       method:
+ *                         type: string
+ *                         example: "GET"
+ *                       path:
+ *                         type: string
+ *                         example: "/api/stats/items"
+ *                       description:
+ *                         type: string
+ *                         example: "아이템 통계 조회"
+ *                 features:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: [
+ *                     "아이템 승률/픽률 통계",
+ *                     "특성 승률/픽률 통계",
+ *                     "커서 기반 페이지네이션",
+ *                     "상세 통계 분석",
+ *                     "필터링 및 정렬 기능",
+ *                     "최소 게임 수 기반 필터링"
+ *                   ]
+ *                 queryParameters:
+ *                   type: object
+ *                   properties:
+ *                     type:
+ *                       type: string
+ *                       description: "통계 타입 필터"
+ *                     sortBy:
+ *                       type: string
+ *                       description: "정렬 기준 (winRate, pickRate 등)"
+ *                     order:
+ *                       type: string
+ *                       description: "정렬 순서 (asc, desc)"
+ *                     limit:
+ *                       type: string
+ *                       description: "결과 제한 수"
+ *                     minGames:
+ *                       type: string
+ *                       description: "최소 게임 수 필터"
+ *                 lastUpdated:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2024-07-15T10:30:00.000Z"
+ */
+router.get('/', (_req: Request, _res: Response) => {
+  _res.json({
+    success: true,
+    service: 'TFT Statistics API',
+    version: '1.0.0',
+    description: 'TFT 아이템 및 특성 통계를 제공합니다.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/api/stats/items',
+        description: '아이템 통계 조회'
+      },
+      {
+        method: 'GET',
+        path: '/api/stats/traits',
+        description: '특성 통계 조회'
+      },
+      {
+        method: 'GET',
+        path: '/api/stats/items/cursor',
+        description: '아이템 통계 (커서 페이지네이션)'
+      },
+      {
+        method: 'GET',
+        path: '/api/stats/traits/cursor',
+        description: '특성 통계 (커서 페이지네이션)'
+      },
+      {
+        method: 'GET',
+        path: '/api/stats/items/{itemId}',
+        description: '특정 아이템 상세 통계'
+      },
+      {
+        method: 'GET',
+        path: '/api/stats/traits/{traitId}',
+        description: '특정 특성 상세 통계'
+      },
+      {
+        method: 'POST',
+        path: '/api/stats/analyze',
+        description: '통계 분석 실행'
+      },
+      {
+        method: 'GET',
+        path: '/api/stats/summary',
+        description: '통계 요약 조회'
+      }
+    ],
+    features: [
+      '아이템 승률/픽률 통계',
+      '특성 승률/픽률 통계',
+      '커서 기반 페이지네이션',
+      '상세 통계 분석',
+      '필터링 및 정렬 기능',
+      '최소 게임 수 기반 필터링'
+    ],
+    queryParameters: {
+      type: '통계 타입 필터',
+      sortBy: '정렬 기준 (winRate, pickRate 등)',
+      order: '정렬 순서 (asc, desc)',
+      limit: '결과 제한 수',
+      minGames: '최소 게임 수 필터',
+      cursor: '커서 페이지네이션용 커서'
+    },
+    lastUpdated: new Date().toISOString()
+  });
+});
+
 interface StatsQuery {
   type?: string;
   sortBy?: string;

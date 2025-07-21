@@ -9,6 +9,115 @@ import { AIRequestBody, QnARequestBody } from '../types/ai';
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /ai:
+ *   get:
+ *     summary: AI API 정보를 조회합니다.
+ *     description: |
+ *       AI API의 사용 가능한 엔드포인트와 기능을 안내합니다.
+ *       - AI 기반 TFT 매치 분석
+ *       - AI 질문 답변 서비스
+ *       - 게임 플레이 개선 제안
+ *       - 실시간 메타 조언
+ *     tags: [AI]
+ *     responses:
+ *       200:
+ *         description: API 정보 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 service:
+ *                   type: string
+ *                   example: "TFT AI Analysis API"
+ *                 version:
+ *                   type: string
+ *                   example: "1.0.0"
+ *                 description:
+ *                   type: string
+ *                   example: "AI 기반 TFT 분석 및 조언 서비스를 제공합니다."
+ *                 endpoints:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       method:
+ *                         type: string
+ *                         example: "POST"
+ *                       path:
+ *                         type: string
+ *                         example: "/api/ai/analyze"
+ *                       description:
+ *                         type: string
+ *                         example: "AI 기반 매치 분석"
+ *                 features:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: [
+ *                     "매치 데이터 심층 분석",
+ *                     "덱 구성 최적화 제안",
+ *                     "아이템 선택 효율성 평가",
+ *                     "포지셔닝 및 경제 관리 조언",
+ *                     "TFT 관련 질문에 대한 AI 답변",
+ *                     "대화 기록 유지로 연속 대화 지원"
+ *                   ]
+ *                 aiModels:
+ *                   type: object
+ *                   properties:
+ *                     analysis:
+ *                       type: string
+ *                       example: "GPT-4 based match analysis"
+ *                     qna:
+ *                       type: string
+ *                       example: "GPT-4 based Q&A service"
+ *                 lastUpdated:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2024-07-15T10:30:00.000Z"
+ */
+router.get('/', (_req: Request, _res: Response) => {
+  _res.json({
+    success: true,
+    service: 'TFT AI Analysis API',
+    version: '1.0.0',
+    description: 'AI 기반 TFT 분석 및 조언 서비스를 제공합니다.',
+    endpoints: [
+      {
+        method: 'POST',
+        path: '/api/ai/analyze',
+        description: 'AI 기반 매치 분석',
+        requiredParams: ['matchId', 'userPuuid']
+      },
+      {
+        method: 'POST',
+        path: '/api/ai/qna',
+        description: 'AI 질문 답변 서비스',
+        requiredParams: ['question'],
+        optionalParams: ['history']
+      }
+    ],
+    features: [
+      '매치 데이터 심층 분석',
+      '덱 구성 최적화 제안',
+      '아이템 선택 효율성 평가',
+      '포지셔닝 및 경제 관리 조언',
+      'TFT 관련 질문에 대한 AI 답변',
+      '대화 기록 유지로 연속 대화 지원'
+    ],
+    aiModels: {
+      analysis: 'GPT-4 based match analysis',
+      qna: 'GPT-4 based Q&A service'
+    },
+    lastUpdated: new Date().toISOString()
+  });
+});
+
 // 서비스 인스턴스 lazy initialization
 let aiAnalysisService: AIAnalysisService | null = null;
 let qnaService: QnAService | null = null;

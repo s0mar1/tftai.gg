@@ -14,6 +14,32 @@ import { sendSuccess, sendError } from '../utils/responseHelper';
 
 const router = express.Router();
 
+// API 루트 경로 - 사용 가능한 엔드포인트 정보 제공
+router.get('/', (_req, _res) => {
+  return sendSuccess(_res, {
+    message: 'Performance Monitoring API',
+    version: '1.0.0',
+    endpoints: [
+      { path: '/metrics', method: 'GET', description: 'Get comprehensive performance metrics' },
+      { path: '/optimization-status', method: 'GET', description: 'Get current optimization status' },
+      { path: '/enhanced-stats', method: 'GET', description: 'Get enhanced performance statistics' },
+      { path: '/optimization-report', method: 'GET', description: 'Get detailed optimization report' },
+      { path: '/slow-operations', method: 'GET', description: 'Get slow queries and requests' },
+      { path: '/db-status', method: 'GET', description: 'Get database connection status' },
+      { path: '/realtime-monitoring', method: 'GET', description: 'Get real-time monitoring data' },
+      { path: '/system/resources', method: 'GET', description: 'Get system resource information' },
+      { path: '/recommendations', method: 'GET', description: 'Get performance optimization recommendations' },
+      { path: '/cache/warmup', method: 'POST', description: 'Warmup application cache' },
+      { path: '/cache/invalidate', method: 'POST', description: 'Invalidate cache patterns' },
+      { path: '/memory/optimize', method: 'POST', description: 'Trigger memory optimization' },
+      { path: '/test/load', method: 'POST', description: 'Run load testing' },
+      { path: '/test/aggregation', method: 'POST', description: 'Test aggregation queries' },
+      { path: '/db-test', method: 'POST', description: 'Test database connection' },
+      { path: '/reset-stats', method: 'POST', description: 'Reset performance statistics' }
+    ]
+  }, 'Performance API 정보 조회 성공');
+});
+
 /**
  * 전체 성능 메트릭 조회
  */

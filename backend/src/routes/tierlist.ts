@@ -8,6 +8,111 @@ const router = express.Router();
 
 /**
  * @swagger
+ * /tierlist:
+ *   get:
+ *     summary: 티어리스트 API 정보를 조회합니다.
+ *     description: |
+ *       티어리스트 API의 사용 가능한 엔드포인트와 기능을 안내합니다.
+ *       - 덱 구성별 티어 랭킹
+ *       - 승률 및 평균 순위 기반 평가
+ *       - 다국어 지원 (ko, en, ja, zh)
+ *     tags: [Tierlist]
+ *     responses:
+ *       200:
+ *         description: API 정보 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 service:
+ *                   type: string
+ *                   example: "TFT Tierlist API"
+ *                 version:
+ *                   type: string
+ *                   example: "1.0.0"
+ *                 description:
+ *                   type: string
+ *                   example: "TFT 덱 구성별 티어 랭킹을 제공합니다."
+ *                 endpoints:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       method:
+ *                         type: string
+ *                         example: "GET"
+ *                       path:
+ *                         type: string
+ *                         example: "/api/tierlist/decks/{language}"
+ *                       description:
+ *                         type: string
+ *                         example: "덱 티어리스트 데이터 조회"
+ *                       params:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                         example: [{"name": "language", "type": "string", "required": true, "values": ["ko", "en", "ja", "zh"]}]
+ *                 features:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: [
+ *                     "S, A, B, C 티어 랭킹 시스템",
+ *                     "승률 및 평균 순위 기반 평가",
+ *                     "핵심 유닛 및 특성 정보",
+ *                     "다국어 지원 (4개 언어)",
+ *                     "최대 50개 덱 제한"
+ *                   ]
+ *                 supportedLanguages:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["ko", "en", "ja", "zh"]
+ *                 lastUpdated:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2024-07-15T10:30:00.000Z"
+ */
+router.get('/', (_req: Request, _res: Response) => {
+  _res.json({
+    success: true,
+    service: 'TFT Tierlist API',
+    version: '1.0.0',
+    description: 'TFT 덱 구성별 티어 랭킹을 제공합니다.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/api/tierlist/decks/{language}',
+        description: '덱 티어리스트 데이터 조회',
+        params: [
+          {
+            name: 'language',
+            type: 'string',
+            required: true,
+            values: ['ko', 'en', 'ja', 'zh'],
+            description: '언어 코드 (미지원 언어는 ko로 처리)'
+          }
+        ]
+      }
+    ],
+    features: [
+      'S, A, B, C 티어 랭킹 시스템',
+      '승률 및 평균 순위 기반 평가',
+      '핵심 유닛 및 특성 정보',
+      '다국어 지원 (4개 언어)',
+      '최대 50개 덱 제한'
+    ],
+    supportedLanguages: ['ko', 'en', 'ja', 'zh'],
+    lastUpdated: new Date().toISOString()
+  });
+});
+
+/**
+ * @swagger
  * /tierlist/decks/{language}:
  *   get:
  *     summary: 덱 티어리스트 데이터를 조회합니다.

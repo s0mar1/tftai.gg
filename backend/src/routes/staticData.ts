@@ -18,6 +18,44 @@ logger.info('[staticData Router] 라우터 초기화 완료', {
 // ESM 호환 방식으로 data 파일 경로 생성
 const itemsDataPath = getDataFilePath(import.meta.url, 'tft14_items_index.json');
 
+// API 루트 경로 - 사용 가능한 엔드포인트 정보 제공
+router.get('/', (_req: Request, _res: Response) => {
+  return sendSuccess(_res, {
+    message: 'TFT Static Data API',
+    version: '1.0.0',
+    endpoints: [
+      {
+        path: '/tft-data/:language?',
+        method: 'GET',
+        description: 'Get complete TFT data including champions, traits, items, and augments',
+        parameters: {
+          language: {
+            type: 'string',
+            optional: true,
+            default: 'ko',
+            description: 'Language code (ko, en, etc.)'
+          }
+        },
+        example: '/api/static-data/tft-data/ko'
+      },
+      {
+        path: '/items-by-category/:language?',
+        method: 'GET', 
+        description: 'Get items organized by categories (component, completed, etc.)',
+        parameters: {
+          language: {
+            type: 'string',
+            optional: true,
+            default: 'ko',
+            description: 'Language code (ko, en, etc.)'
+          }
+        },
+        example: '/api/static-data/items-by-category/ko'
+      }
+    ]
+  }, 'Static Data API 정보 조회 성공');
+});
+
 // 표준 TFT 데이터 API (다국어 지원)
 // 예: /api/static/tft-data/en, /api/static/tft-data/ko
 // :language 파라미터가 없으면 'ko'로 기본 설정하여 하위 호환성 유지

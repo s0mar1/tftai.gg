@@ -7,6 +7,129 @@ import { sendSuccess, sendError } from '../utils/responseHelper';
 const router = Router();
 
 /**
+ * @swagger
+ * /security:
+ *   get:
+ *     summary: 보안 API 정보를 조회합니다.
+ *     description: |
+ *       보안 API의 사용 가능한 엔드포인트와 기능을 안내합니다.
+ *       - 보안 상태 모니터링
+ *       - 보안 메트릭 수집
+ *       - 보안 권장사항 제공
+ *       - 실시간 위협 탐지
+ *     tags: [Security]
+ *     responses:
+ *       200:
+ *         description: API 정보 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 service:
+ *                   type: string
+ *                   example: "TFT Security API"
+ *                 version:
+ *                   type: string
+ *                   example: "1.0.0"
+ *                 description:
+ *                   type: string
+ *                   example: "TFT Meta Analyzer 보안 모니터링 및 보호 서비스를 제공합니다."
+ *                 endpoints:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       method:
+ *                         type: string
+ *                         example: "GET"
+ *                       path:
+ *                         type: string
+ *                         example: "/api/security/status"
+ *                       description:
+ *                         type: string
+ *                         example: "보안 상태 조회"
+ *                 features:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: [
+ *                     "실시간 보안 메트릭 수집",
+ *                     "레이트 리미팅 모니터링",
+ *                     "보안 헤더 검증",
+ *                     "위협 탐지 및 차단",
+ *                     "보안 권장사항 제공",
+ *                     "CORS 및 인증 관리"
+ *                   ]
+ *                 securityFeatures:
+ *                   type: object
+ *                   properties:
+ *                     helmet:
+ *                       type: string
+ *                       example: "enabled"
+ *                     cors:
+ *                       type: string
+ *                       example: "enabled"
+ *                     rateLimit:
+ *                       type: string
+ *                       example: "enabled"
+ *                     compression:
+ *                       type: string
+ *                       example: "enabled"
+ *                 lastUpdated:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2024-07-15T10:30:00.000Z"
+ */
+router.get('/', (_req: Request, _res: Response) => {
+  sendSuccess(_res, {
+    service: 'TFT Security API',
+    version: '1.0.0',
+    description: 'TFT Meta Analyzer 보안 모니터링 및 보호 서비스를 제공합니다.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/api/security/status',
+        description: '보안 상태 조회'
+      },
+      {
+        method: 'GET',
+        path: '/api/security/metrics',
+        description: '보안 메트릭 조회'
+      },
+      {
+        method: 'GET',
+        path: '/api/security/threats',
+        description: '위협 목록 조회'
+      },
+      {
+        method: 'POST',
+        path: '/api/security/scan',
+        description: '보안 스캔 실행'
+      }
+    ],
+    features: [
+      '실시간 보안 메트릭 수집',
+      '레이트 리미팅 모니터링',
+      '보안 헤더 검증',
+      '위협 탐지 및 차단',
+      '보안 권장사항 제공',
+      'CORS 및 인증 관리'
+    ],
+    securityFeatures: {
+      helmet: 'enabled',
+      cors: 'enabled',
+      rateLimit: 'enabled',
+      compression: 'enabled'
+    },
+    lastUpdated: new Date().toISOString()
+  }, 'Security API 정보 조회 성공');
+});
+
+/**
  * 보안 상태 조회 엔드포인트
  * GET /api/security/status
  */

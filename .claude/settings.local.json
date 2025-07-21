@@ -38,7 +38,8 @@
       "Bash(CI=true npm install)",
       "Bash(RENDER=true npm install --prefix backend)",
       "Bash(RENDER=true npm install)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(PORT=4002 node test-routes.js)"
     ],
     "deny": []
   }

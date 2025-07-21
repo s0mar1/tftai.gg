@@ -6,6 +6,151 @@ import { getDirname } from '../utils/pathUtils';
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /translation:
+ *   get:
+ *     summary: 번역 API 정보를 조회합니다.
+ *     description: |
+ *       번역 API의 사용 가능한 엔드포인트와 기능을 안내합니다.
+ *       - UI 텍스트 다국어 번역
+ *       - 번역 캐시 관리
+ *       - 지원 언어: 한국어(ko), 영어(en), 일본어(ja), 중국어(zh)
+ *     tags: [Translation]
+ *     responses:
+ *       200:
+ *         description: API 정보 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 service:
+ *                   type: string
+ *                   example: "TFT Translation API"
+ *                 version:
+ *                   type: string
+ *                   example: "1.0.0"
+ *                 description:
+ *                   type: string
+ *                   example: "TFT UI 텍스트 다국어 번역 서비스를 제공합니다."
+ *                 endpoints:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       method:
+ *                         type: string
+ *                         example: "POST"
+ *                       path:
+ *                         type: string
+ *                         example: "/api/translation/ui"
+ *                       description:
+ *                         type: string
+ *                         example: "UI 텍스트 번역"
+ *                 features:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: [
+ *                     "UI 텍스트 자동 번역",
+ *                     "4개 언어 지원 (ko, en, ja, zh)",
+ *                     "번역 캐시 관리",
+ *                     "강제 업데이트 지원",
+ *                     "일괄 번역 기능",
+ *                     "Google Translate API 기반"
+ *                   ]
+ *                 supportedLanguages:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       code:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                   example: [
+ *                     {"code": "ko", "name": "한국어"},
+ *                     {"code": "en", "name": "English"},
+ *                     {"code": "ja", "name": "日本語"},
+ *                     {"code": "zh", "name": "中文"}
+ *                   ]
+ *                 cacheInfo:
+ *                   type: object
+ *                   properties:
+ *                     enabled:
+ *                       type: boolean
+ *                       example: true
+ *                     ttl:
+ *                       type: string
+ *                       example: "24 hours"
+ *                 lastUpdated:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2024-07-15T10:30:00.000Z"
+ */
+router.get('/', (_req: Request, _res: Response) => {
+  _res.json({
+    success: true,
+    service: 'TFT Translation API',
+    version: '1.0.0',
+    description: 'TFT UI 텍스트 다국어 번역 서비스를 제공합니다.',
+    endpoints: [
+      {
+        method: 'POST',
+        path: '/api/translation/ui',
+        description: 'UI 텍스트 번역',
+        requiredParams: ['targetLanguage'],
+        optionalParams: ['forceUpdate']
+      },
+      {
+        method: 'POST',
+        path: '/api/translation/ui/all',
+        description: '모든 언어 일괄 번역'
+      },
+      {
+        method: 'GET',
+        path: '/api/translation/cache/status',
+        description: '번역 캐시 상태 확인'
+      },
+      {
+        method: 'POST',
+        path: '/api/translation/cache/invalidate',
+        description: '캐시 무효화',
+        optionalParams: ['targetLanguage']
+      },
+      {
+        method: 'GET',
+        path: '/api/translation/status',
+        description: '번역 파일 상태 확인'
+      }
+    ],
+    features: [
+      'UI 텍스트 자동 번역',
+      '4개 언어 지원 (ko, en, ja, zh)',
+      '번역 캐시 관리',
+      '강제 업데이트 지원',
+      '일괄 번역 기능',
+      'Google Translate API 기반'
+    ],
+    supportedLanguages: [
+      { code: 'ko', name: '한국어' },
+      { code: 'en', name: 'English' },
+      { code: 'ja', name: '日本語' },
+      { code: 'zh', name: '中文' }
+    ],
+    cacheInfo: {
+      enabled: true,
+      ttl: '24 hours',
+      description: '번역 결과를 24시간 동안 캐시하여 성능 최적화'
+    },
+    lastUpdated: new Date().toISOString()
+  });
+});
+
 interface UITranslationBody {
   targetLanguage: string;
   forceUpdate?: boolean;
