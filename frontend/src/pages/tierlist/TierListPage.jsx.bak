@@ -229,7 +229,7 @@ function TierListPage() {
     const fetchTierData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/api/deck-tiers');
+        const response = await axios.get('/api/tierlist/decks/ko');
         setTierData(response.data);
       } catch (err) { 
         setError('덱 티어 정보를 불러오는 데 실패했습니다. 서버를 확인해 주세요.'); 
