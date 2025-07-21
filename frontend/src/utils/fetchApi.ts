@@ -17,15 +17,12 @@ class FetchError extends Error {
   }
 }
 
-// 강제로 올바른 포트 사용 (환경변수 캐싱 문제 해결)
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001';
-
-// 잘못된 포트 4002 사용 방지
-const CORRECTED_API_URL = API_BASE_URL.replace('4002', '4001');
+// API Base URL 환경변수 사용
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4001';
 
 const defaultOptions: FetchOptions = {
   timeout: 30000,
-  baseURL: CORRECTED_API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',

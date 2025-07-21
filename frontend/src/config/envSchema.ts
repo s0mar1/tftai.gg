@@ -11,7 +11,7 @@ import { commonEnvSchema, envUtils, createSafeValidator, type EnvValidationResul
  */
 const frontendSpecificSchema = z.object({
   // Vite 환경 변수
-  VITE_API_URL: z.string().url('올바른 API URL을 입력하세요').default('http://localhost:4001'),
+  VITE_API_BASE_URL: z.string().url('올바른 API URL을 입력하세요').default('http://localhost:4001'),
   VITE_API_VERSION: z.string().default('v1'),
   
   // 프론트엔드 기능 토글
@@ -112,7 +112,7 @@ export function createFrontendEnvAccessors(config: FrontendEnvConfig) {
   return {
     // API 설정
     getApiConfig: () => ({
-      baseUrl: config.VITE_API_URL,
+      baseUrl: config.VITE_API_BASE_URL,
       version: config.VITE_API_VERSION,
       timeout: config.VITE_API_TIMEOUT,
       enableMockData: config.VITE_ENABLE_MOCK_DATA
@@ -166,7 +166,7 @@ export function createFrontendEnvAccessors(config: FrontendEnvConfig) {
  */
 declare global {
   interface ImportMetaEnv {
-    readonly VITE_API_URL: string;
+    readonly VITE_API_BASE_URL: string;
     readonly VITE_API_VERSION: string;
     readonly VITE_ENABLE_ANALYTICS: string;
     readonly VITE_ENABLE_DEBUG_MODE: string;

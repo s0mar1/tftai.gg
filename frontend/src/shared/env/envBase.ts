@@ -14,7 +14,6 @@ export const commonEnvSchema = z.object({
   
   // 서비스 URL 설정
   FRONTEND_URL: z.string().default('http://localhost:3000,http://localhost:5173'),
-  BACKEND_URL: z.string().default('http://localhost:4001'),
   
   // API 기본 설정
   API_VERSION: z.string().default('v1'),
@@ -132,7 +131,6 @@ export function logEnvInfo(config: CommonEnvConfig): void {
   console.log(`   API_VERSION: ${config.API_VERSION}`);
   console.log(`   API_TIMEOUT: ${config.API_TIMEOUT}ms`);
   console.log(`   FRONTEND_URLs: ${envUtils.parseUrls(config.FRONTEND_URL).join(', ')}`);
-  console.log(`   BACKEND_URL: ${config.BACKEND_URL}`);
 }
 
 export default {
