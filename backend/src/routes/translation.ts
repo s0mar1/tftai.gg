@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { translateUITexts, translateAllLanguages } from '../services/translationService';
 import cacheManager from '../services/cacheManager';
 import asyncHandler from '../utils/asyncHandler';
+import { getDirname } from '../utils/pathUtils';
 
 const router = express.Router();
 
@@ -88,8 +89,8 @@ router.get('/status', asyncHandler(async (_req: Request, _res: Response) => {
   const fs = await import('fs');
   const path = await import('path');
   
-  // CommonJS 환경에서는 __dirname이 자동으로 사용 가능
-  const localesDir = path.join(__dirname, '../../..', 'frontend/public/locales');
+  // ESM 호환 방식으로 경로 생성
+  const localesDir = path.join(getDirname(import.meta.url), '../../..', 'frontend/public/locales');
   const languages = ['ko', 'en', 'ja', 'zh'];
   
   const status: Record<string, any> = {};

@@ -4,9 +4,10 @@ import path from 'path';
 import cacheManager from './cacheManager';
 import dotenv from 'dotenv';
 import { AI_CONFIG, envGuards } from '../config/env';
+import { getDirname } from '../utils/pathUtils';
 
-// CommonJS 환경에서는 __dirname이 자동으로 사용 가능
-dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env') });
+// ESM 호환 방식으로 환경 변수 파일 경로 생성
+dotenv.config({ path: path.resolve(getDirname(import.meta.url), '..', '..', '.env') });
 
 interface TranslationInstructions {
   name: string;
@@ -171,8 +172,9 @@ ${JSON.stringify(jsonToTranslate, null, 2)}
  */
 export async function translateUITexts(targetLanguage: string, forceUpdate: boolean = false): Promise<TranslationResult> {
   try {
-    const koFilePath = path.join(__dirname, '../../..', 'frontend/public/locales/ko/translation.json');
-    const targetFilePath = path.join(__dirname, '../../..', `frontend/public/locales/${targetLanguage}/translation.json`);
+    const currentDir = getDirname(import.meta.url);
+    const koFilePath = path.join(currentDir, '../../..', 'frontend/public/locales/ko/translation.json');
+    const targetFilePath = path.join(currentDir, '../../..', `frontend/public/locales/${targetLanguage}/translation.json`);
     
     // 캐시 체크 (강제 업데이트가 아닌 경우)
     if (!forceUpdate && !cacheManager.needsTranslation(targetLanguage)) {

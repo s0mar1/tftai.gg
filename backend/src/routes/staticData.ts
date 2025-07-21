@@ -3,9 +3,9 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { getTFTDataWithLanguage } from '../services/tftData';
 import fs from 'fs';
-import path from 'path';
 import logger from '../config/logger';
 import { sendSuccess, sendError } from '../utils/responseHelper';
+import { getDataFilePath } from '../utils/pathUtils';
 
 const router = express.Router();
 
@@ -15,8 +15,8 @@ logger.info('[staticData Router] 라우터 초기화 완료', {
   environment: process.env.NODE_ENV
 });
 
-// CommonJS 방식으로 __dirname 사용
-const itemsDataPath = path.join(__dirname, '..', 'data', 'tft14_items_index.json');
+// ESM 호환 방식으로 data 파일 경로 생성
+const itemsDataPath = getDataFilePath(import.meta.url, 'tft14_items_index.json');
 
 // 표준 TFT 데이터 API (다국어 지원)
 // 예: /api/static/tft-data/en, /api/static/tft-data/ko
@@ -191,8 +191,14 @@ router.get('/items-by-category/:language?', async (_req: Request, _res: Response
     
     // 파일 존재 여부 확인
     if (!fs.existsSync(itemsDataPath)) {
-      logger.error(`[items-by-category] JSON 파일이 존재하지 않음: ${itemsDataPath}`);
-      throw new Error(`아이템 분류 데이터 파일을 찾을 수 없습니다.`);
+      logger.error(`[items-by-category] JSON 파일이 존재하지 않음: ${itemsDataPath}`, {
+        currentWorkingDirectory: process.cwd(),
+        nodeEnv: process.env.NODE_ENV,
+        isDistEnvironment: itemsDataPath.includes('/dist/'),
+        expectedPath: itemsDataPath,
+        suggestedSolution: 'npm run build를 실행하여 data 폴더가 dist/에 복사되었는지 확인하세요.'
+      });
+      throw new Error(`아이템 분류 데이터 파일을 찾을 수 없습니다. 경로: ${itemsDataPath}`);
     }
     
     let itemsData: any;

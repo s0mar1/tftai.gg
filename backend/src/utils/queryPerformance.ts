@@ -6,8 +6,9 @@ import { EventEmitter } from 'events';
 import fs from 'fs';
 import path from 'path';
 import { performance } from 'perf_hooks';
+import { getDirname } from './pathUtils';
 
-// CommonJS 환경에서는 __dirname이 자동으로 사용 가능
+// ESM 호환 방식
 
 /**
  * 통합된 쿼리 성능 모니터링 시스템
@@ -90,7 +91,7 @@ export class QueryPerformanceTracker extends EventEmitter {
   constructor(config: Partial<QueryPerformanceConfig> = {}) {
     super();
     this.config = { ...DEFAULT_CONFIG, ...config };
-    this.logFilePath = path.join(__dirname, '../logs/query-performance.log');
+    this.logFilePath = path.join(getDirname(import.meta.url), '../logs/query-performance.log');
     this.ensureLogDirectory();
   }
 
