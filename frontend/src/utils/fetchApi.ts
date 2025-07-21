@@ -18,7 +18,9 @@ class FetchError extends Error {
 }
 
 // API Base URL 환경변수 사용
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4001';
+// 배포 환경에서는 상대 경로를 사용하여 _redirects가 처리하도록 함
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.PROD ? '' : 'http://localhost:4001');
 
 const defaultOptions: FetchOptions = {
   timeout: 30000,
@@ -31,7 +33,11 @@ const defaultOptions: FetchOptions = {
 
 // 환경 변수 디버깅 (개발 환경에서만)
 if (import.meta.env.DEV) {
-  console.log('fetchApi 모드:', import.meta.env.MODE);
+  console.log('fetchApi 설정:', {
+    mode: import.meta.env.MODE,
+    baseURL: API_BASE_URL,
+    isProd: import.meta.env.PROD
+  });
 }
 
 async function fetchWithTimeout(
@@ -43,7 +49,18 @@ async function fetchWithTimeout(
     ...options,
   };
 
-  const fullUrl = url.startsWith('http') ? url : `${baseURL}${url}`;
+  // URL 처리 로직 개선
+  let fullUrl: string;
+  if (url.startsWith('http')) {
+    // 절대 URL은 그대로 사용
+    fullUrl = url;
+  } else if (url.startsWith('/')) {
+    // 슬래시로 시작하는 경로는 baseURL과 결합
+    fullUrl = baseURL ? `${baseURL}${url}` : url;
+  } else {
+    // 상대 경로는 baseURL과 슬래시를 포함하여 결합
+    fullUrl = baseURL ? `${baseURL}/${url}` : `/${url}`;
+  }
 
   // URL 디버깅 (개발 환경에서만)
   if (import.meta.env.DEV) {
