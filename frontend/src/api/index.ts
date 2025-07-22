@@ -1,5 +1,6 @@
 // src/api/index.ts
 import { SummonerData, ApiResponse, Match, Deck } from '../types';
+import { api } from '../utils/fetchApi';
 
 export const fetchSummonerDataAPI = async (region: string, rawName: string): Promise<ApiResponse<SummonerData>> => {
   const [gameName, tagLine] = rawName.split('#');
@@ -25,12 +26,8 @@ export const fetchMatchHistoryAPI = async (region: string, puuid: string): Promi
 };
 
 export const fetchDeckTiersAPI = async (language: string = 'ko'): Promise<ApiResponse<Deck[]>> => {
-  const response = await fetch(`/api/tierlist/decks/${language}`);
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to fetch tier list');
-  }
-  return response.json();
+  const data = await api.get<Deck[]>(`/api/tierlist/decks/${language}`);
+  return { data }; // ApiResponse 형태로 래핑
 };
 
 export const fetchRankingAPI = async (region?: string): Promise<ApiResponse<Ranker[]>> => {
