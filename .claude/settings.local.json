@@ -57,7 +57,10 @@
       "mcp__playwright__browser_take_screenshot",
       "Bash(pgrep:*)",
       "mcp__playwright__browser_snapshot",
-      "Bash(MONGODB_URI= npm run start:tsx)"
+      "Bash(MONGODB_URI= npm run start:tsx)",
+      "Bash(export PORT=3001)",
+      "Bash(PORT=3001 npx tsx src/server.ts)",
+      "WebFetch(domain:raw.communitydragon.org)"
     ],
     "deny": []
   }

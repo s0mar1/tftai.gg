@@ -5,7 +5,7 @@ export interface IItemStats extends Document {
   itemId: string;
   itemName: string;
   itemIcon?: string;
-  itemType?: 'basic' | 'completed' | 'ornn' | 'radiant' | 'emblem' | 'support' | 'robot';
+  itemType?: 'basic' | 'completed' | 'ornn' | 'radiant' | 'emblem';
   totalGames: number;
   totalTop4: number;
   totalWins: number;
@@ -32,7 +32,7 @@ const ItemStatsSchema = new Schema<IItemStats>({
   itemIcon: String,
   itemType: {
     type: String,
-    enum: ['basic', 'completed', 'ornn', 'radiant', 'emblem', 'support', 'robot']
+    enum: ['basic', 'completed', 'ornn', 'radiant', 'emblem']
   },
   totalGames: {
     type: Number,

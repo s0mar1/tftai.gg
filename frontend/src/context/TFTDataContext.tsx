@@ -22,14 +22,13 @@ interface TooltipState {
   position: { x: number; y: number };
 }
 
-// 아이템 카테고리 타입 (Set 15 - Support 아이템 제거됨)
+// 아이템 카테고리 타입 (Set 15 - Support/Robot 아이템 제거됨)
 interface ItemsByCategory {
   basic: Item[];
   completed: Item[];
   ornn: Item[];
   radiant: Item[];
   emblem: Item[];
-  robot: Item[];
   unknown: Item[];
 }
 

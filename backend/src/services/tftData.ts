@@ -506,10 +506,32 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
     const ornnItems: Item[] = [];
     const radiantItems: Item[] = [];
     const emblemItems: Item[] = [];
-    const supportItems: Item[] = [];
-    const robotItems: Item[] = [];
     const processedAugments: Augment[] = [];
     const unknownItems: Item[] = [];
+
+    // Set 15 기본 컴포넌트 아이템 정의 (정확한 apiName 리스트)
+    const SET15_BASIC_ITEMS = [
+      'TFT_Item_BFSword',           // B.F. Sword
+      'TFT_Item_ChainVest',         // Chain Vest  
+      'TFT_Item_FryingPan',         // Frying Pan
+      'TFT_Item_GiantsBelt',        // Giant's Belt
+      'TFT_Item_NeedlesslyLargeRod', // Needlessly Large Rod
+      'TFT_Item_NegatronCloak',     // Negatron Cloak
+      'TFT_Item_RecurveBow',        // Recurve Bow
+      'TFT_Item_SparringGloves',    // Sparring Gloves
+      'TFT_Item_Spatula',           // Spatula
+      'TFT_Item_TearOfTheGoddess'   // Tear of the Goddess
+    ];
+
+    // Set 15 래디언트 아이템 식별자
+    const RADIANT_IDENTIFIERS = ['radiant', 'blessed', 'royal', 'rosethorn', 'spear_of_hirana', 'bulwarks_oath'];
+
+    // Set 15 상징(emblem) 아이템 특성 목록
+    const SET15_TRAITS_FOR_EMBLEMS = [
+      'battleacademia', 'bastion', 'crystalgambit', 'duelist', 'edgelord', 
+      'executioner', 'luchador', 'prodigy', 'protector', 'sniper', 
+      'starguardian', 'soulfighter', 'strategist', 'supremecells', 'wraith'
+    ];
 
     enData.items.forEach(item => {
         const apiName = item.apiName?.toLowerCase();
@@ -537,30 +559,53 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
             return;
         }
 
-        if (iconPath.includes('items/components/')) {
+        // Set 15 아이템 분류 로직 (정확도 개선)
+        
+        // 1. 기본 컴포넌트 아이템 확인 (정확한 apiName 매칭)
+        if (SET15_BASIC_ITEMS.includes(item.apiName)) {
             basicItems.push(processedItem);
-        } else if (iconPath.includes('items/radiant/')) {
-            radiantItems.push(processedItem);
-        } else if (iconPath.includes('items/artifacts/') || apiName.includes('ornn') || apiName.includes('artifact')) {
-            ornnItems.push(processedItem);
-        } else if (iconPath.includes('items/emblems/') || (item.associatedTraits && item.associatedTraits.length > 0)) {
-            emblemItems.push(processedItem);
-        } else if (iconPath.includes('items/special/support/')) {
-            supportItems.push(processedItem);
-        } else if (
-            apiName.includes('corruptedchassis') || apiName.includes('cybercoil') || apiName.includes('fluxcapacitor') ||
-            apiName.includes('holobow') || apiName.includes('hyperfangs') || apiName.includes('pulsestabilizer') ||
-            apiName.includes('repulsorlantern') || apiName.includes('tft_item_corruptedchassis') || apiName.includes('tft_item_cybercoil') ||
-            apiName.includes('tft_item_fluxcapacitor') || apiName.includes('tft_item_holobow') || apiName.includes('tft_item_hyperfangs') ||
-            apiName.includes('tft_item_pulsestabilizer') || apiName.includes('tft_item_repulsorlantern')
+        }
+        // 2. 래디언트 아이템 확인 (아이콘 경로 + API 이름 + 식별자)
+        else if (
+            iconPath.includes('items/radiant/') || 
+            iconPath.includes('/radiant/') ||
+            RADIANT_IDENTIFIERS.some(identifier => apiName.includes(identifier)) ||
+            apiName.includes('tft5_item_') || // 래디언트 아이템의 일반적 패턴
+            item.name?.toLowerCase().includes('radiant') ||
+            item.name?.toLowerCase().includes('blessed')
         ) {
-            robotItems.push(processedItem);
-        } else if (item.composition && item.composition.length > 0) {
+            radiantItems.push(processedItem);
+        }
+        // 3. 아티팩트/오른 아이템 확인
+        else if (
+            iconPath.includes('items/artifacts/') || 
+            iconPath.includes('/artifacts/') ||
+            apiName.includes('ornn') || 
+            apiName.includes('artifact') ||
+            item.goldValue === 0 && item.composition && item.composition.length === 0 && !SET15_BASIC_ITEMS.includes(item.apiName)
+        ) {
+            ornnItems.push(processedItem);
+        }
+        // 4. 상징(emblem) 아이템 확인 (개선된 로직)
+        else if (
+            iconPath.includes('items/emblems/') || 
+            iconPath.includes('/emblems/') ||
+            (item.associatedTraits && item.associatedTraits.length > 0) ||
+            SET15_TRAITS_FOR_EMBLEMS.some(trait => apiName.includes(trait)) ||
+            apiName.includes('emblem') ||
+            (item.name && item.name.toLowerCase().includes('emblem'))
+        ) {
+            emblemItems.push(processedItem);
+        }
+        // 5. 완성 아이템 확인 (composition이 있거나 골드 가치가 있는 일반 아이템)
+        else if (
+            (item.composition && item.composition.length > 0) ||
+            (apiName.startsWith('tft_item_') && !apiName.includes('_component_') && item.goldValue > 0) ||
+            (item.goldValue > 0 && !SET15_BASIC_ITEMS.includes(item.apiName))
+        ) {
             completedItems.push(processedItem);
         }
-        else if (apiName.startsWith('tft_item_') && !apiName.includes('_component_') && item.goldValue > 0) {
-            completedItems.push(processedItem);
-        }
+        // 6. 기타 아이템
         else {
             unknownItems.push(processedItem);
         }
@@ -573,9 +618,6 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
         ornn: ornnItems,
         radiant: radiantItems,
         emblem: emblemItems,
-        // support 아이템은 Set 15에서 제거됨
-        support: [],
-        robot: robotItems,
         unknown: unknownItems,
       },
       augments: processedAugments,
@@ -620,7 +662,7 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
     });
     
     const totalItemCount = basicItems.length + completedItems.length + ornnItems.length + 
-                           radiantItems.length + emblemItems.length + supportItems.length + robotItems.length + unknownItems.length;
+                           radiantItems.length + emblemItems.length + unknownItems.length;
     logger.info(`TFT 데이터 초기화 완료! (언어: ${language}, 로케일: ${locale}, 시즌: ${localizedTftData.currentSet}, 챔피언 ${localizedTftData.champions.length}개, 아이템 ${totalItemCount}개, 증강체 ${localizedTftData.augments.length}개)`);
     
     // 2. 성공 시 캐시에 저장

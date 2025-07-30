@@ -24,8 +24,6 @@ interface ItemsByCategory {
   ornn: Item[];
   radiant: Item[];
   emblem: Item[];
-  support: Item[];
-  robot: Item[];
   unknown: Item[];
 }
 
