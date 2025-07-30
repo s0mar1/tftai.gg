@@ -10,8 +10,6 @@ export interface TFTData {
     ornn: Item[];
     radiant: Item[];
     emblem: Item[];
-    support: Item[];
-    robot: Item[];
     unknown: Item[];
   };
   augments: Augment[];
@@ -248,9 +246,6 @@ const createFallbackData = (language: string = 'ko'): TFTData => {
       ornn: [],
       radiant: [],
       emblem: [],
-      // support 아이템은 Set 15에서 제거됨
-      support: [],
-      robot: [],
       unknown: []
     },
     augments: [],
@@ -537,11 +532,26 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
         const apiName = item.apiName?.toLowerCase();
         const iconPath = item.icon?.toLowerCase();
 
+        // Set 15 아이템 필터링 강화
         if (
             !item.icon ||
             iconPath.includes('_placeholder') || iconPath.includes('_debug') || iconPath.includes('_test') ||
             apiName.includes('_debug_') || apiName.includes('_test_') || apiName.includes('_placeholder_') ||
             apiName.includes('trainingdummy') ||
+            // Set 15가 아닌 모든 TFT 세트 아이템 제외 (강화된 필터링)
+            (apiName.match(/^tft\d+_/) && !apiName.includes('tft15_')) ||
+            (apiName.match(/^tft[1-9][0-4]?_/) && !apiName.includes('tft15_')) ||
+            // 특정 이전 세트 패턴들 제외
+            apiName.includes('tft6_merc') || 
+            apiName.includes('tft7_') ||
+            apiName.includes('tft8_') ||
+            apiName.includes('tft9_') ||
+            apiName.includes('tft10_') ||
+            apiName.includes('tft11_') ||
+            apiName.includes('tft12_') ||
+            apiName.includes('tft13_') ||
+            apiName.includes('tft14_') ||
+            // 기존 세트 필터링 로직 유지
             (apiName.includes('_set') && !apiName.includes('_set' + currentSetKey + '_') && !item.composition?.length && item.type !== 'Augment' && !item.isUnique && !(item.associatedTraits && item.associatedTraits.length > 0))
         ) {
             return;

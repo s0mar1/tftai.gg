@@ -60,7 +60,8 @@
       "Bash(MONGODB_URI= npm run start:tsx)",
       "Bash(export PORT=3001)",
       "Bash(PORT=3001 npx tsx src/server.ts)",
-      "WebFetch(domain:raw.communitydragon.org)"
+      "WebFetch(domain:raw.communitydragon.org)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

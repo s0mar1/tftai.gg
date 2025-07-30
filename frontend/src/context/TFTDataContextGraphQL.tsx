@@ -55,7 +55,7 @@ const defaultTFTDataValue: TFTDataContextValue = {
   champions: [],
   items: { 
     basic: [], completed: [], ornn: [], radiant: [], 
-    emblem: [], support: [], robot: [], unknown: [] 
+    emblem: [], unknown: [] 
   },
   augments: [],
   traits: [],
@@ -64,7 +64,7 @@ const defaultTFTDataValue: TFTDataContextValue = {
   currentSet: '',
   itemsByCategory: {
     basic: [], completed: [], ornn: [], radiant: [],
-    emblem: [], support: [], robot: [], unknown: []
+    emblem: [], unknown: []
   },
   allItems: [],
   loading: true,
@@ -147,8 +147,6 @@ export const TFTDataGraphQLProvider: React.FC<TFTDataGraphQLProviderProps> = ({ 
     ornn: [],
     radiant: [],
     emblem: [],
-    support: [],
-    robot: [],
     unknown: []
   }), []);
 

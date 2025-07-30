@@ -62,7 +62,7 @@ const defaultTFTDataValue: TFTDataContextValue = {
   champions: [],
   items: { 
     basic: [], completed: [], ornn: [], radiant: [], 
-    emblem: [], robot: [], unknown: [] 
+    emblem: [], unknown: [] 
   },
   augments: [],
   traits: [],
@@ -71,7 +71,7 @@ const defaultTFTDataValue: TFTDataContextValue = {
   currentSet: '',
   itemsByCategory: {
     basic: [], completed: [], ornn: [], radiant: [],
-    emblem: [], robot: [], unknown: []
+    emblem: [], unknown: []
   },
   allItems: [],
   loading: true,

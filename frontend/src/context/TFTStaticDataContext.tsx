@@ -52,7 +52,7 @@ const defaultTFTStaticDataValue: TFTStaticDataContextValue = {
   champions: [],
   items: { 
     basic: [], completed: [], ornn: [], radiant: [], 
-    emblem: [], robot: [], unknown: [] 
+    emblem: [], unknown: [] 
   },
   augments: [],
   traits: [],
@@ -61,7 +61,7 @@ const defaultTFTStaticDataValue: TFTStaticDataContextValue = {
   currentSet: '',
   itemsByCategory: {
     basic: [], completed: [], ornn: [], radiant: [],
-    emblem: [], robot: [], unknown: []
+    emblem: [], unknown: []
   },
   allItems: [],
   loading: true,
@@ -117,14 +117,14 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
   
   const [itemsByCategory, setItemsByCategory] = useState<ItemsByCategory>({
     basic: [], completed: [], ornn: [], radiant: [],
-    emblem: [], robot: [], unknown: []
+    emblem: [], unknown: []
   });
   
   const [tftData, setTftData] = useState<TFTStaticData>({
     champions: [],
     items: { 
       basic: [], completed: [], ornn: [], radiant: [],
-      emblem: [], robot: [], unknown: []
+      emblem: [], unknown: []
     },
     augments: [],
     traits: [],
