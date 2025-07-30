@@ -66,10 +66,9 @@ const ChampionTooltip = React.memo<ChampionTooltipProps>(function ChampionToolti
     return {
       name: champion.ability?.name || 'Unknown Ability',
       mana: champion.stats?.mana ? `${champion.stats.mana}` : 'N/A',
-        description: champion.ability?.desc || 'No description available',
-        values: []
-      };
-    }
+      description: champion.ability?.desc || 'No description available',
+      values: []
+    };
   }, [champion]);
     
   return (
