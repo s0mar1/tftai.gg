@@ -326,8 +326,8 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
       
       // 3. 부분 매칭 시도 (API 이름에서 접두사 제거)
       const cleanApiName = traitNameOrApiName.toLowerCase()
-        .replace(/^tft\d+_/, '')  // tft14_ 같은 접두사 제거
-        .replace(/^set\d+_/, ''); // set14_ 같은 접두사 제거
+        .replace(/^tft\d+_/, '')  // tft15_ 같은 접두사 제거
+        .replace(/^set\d+_/, ''); // set15_ 같은 접두사 제거
       
       trait = targetTraits.find(t => 
         t.apiName?.toLowerCase().includes(cleanApiName) ||

@@ -75,7 +75,7 @@ function getChampionImageUrl(championId: string, tftData?: TFTData): string {
     if (champ.name === championId) return true;
     if (champ.name?.toLowerCase() === championId.toLowerCase()) return true;
     
-    // 5. Set 번호 차이를 고려한 매칭 (예: TFT14_Ahri vs TFT11_Ahri)
+    // 5. Set 번호 차이를 고려한 매칭 (예: TFT15_Ahri vs TFT11_Ahri)
     const championBase = championId.replace(/TFT\d+_/i, '');
     const champApiBase = champ.apiName?.replace(/TFT\d+_/i, '');
     if (champApiBase?.toLowerCase() === championBase.toLowerCase()) return true;
