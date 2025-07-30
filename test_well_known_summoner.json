@@ -1,0 +1,8 @@
+{
+  "query": "query GetSummonerIntegrated($name: String!, $region: String, $matchCount: Int) { summonerIntegrated(name: $name, region: $region, matchCount: $matchCount) { success message data { summoner { puuid name } recentMatches { gameId traits { name level style } units { championId name image_url tier items } } } } }",
+  "variables": {
+    "name": "Hide on bush",
+    "region": "kr",
+    "matchCount": 1
+  }
+}

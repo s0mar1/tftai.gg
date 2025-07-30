@@ -53,6 +53,43 @@ const meta: Meta<typeof Card> = {
 ## 특징
 - 4가지 변형: default, outlined, elevated, filled
 - 3가지 크기: sm, md, lg
+- 인터랙티브 상태: hover, clickable
+- 다크모드 완전 지원
+- 복합 컴포넌트: CardHeader, CardContent, CardFooter
+- 특수 카드: ImageCard, StatCard, ListCard
+
+## 사용법
+\`\`\`tsx
+// 기본 카드
+<Card>내용</Card>
+
+// 변형과 크기
+<Card variant="elevated" size="lg">큰 그림자 카드</Card>
+
+// 인터랙티브 카드
+<Card clickable>클릭 가능한 카드</Card>
+
+// 복합 카드
+<Card>
+  <CardHeader title="제목" subtitle="부제목" />
+  <CardContent>내용</CardContent>
+  <CardFooter>푸터</CardFooter>
+</Card>
+
+// 통계 카드
+<StatCard 
+  title="총 게임 수"
+  value="1,234"
+  change={{ value: "+12%", type: "increase" }}
+  icon={<ChartIcon />}
+/>
+\`\`\`
+        `
+다양한 콘텐츠를 담을 수 있는 카드 컴포넌트입니다.
+
+## 특징
+- 4가지 변형: default, outlined, elevated, filled
+- 3가지 크기: sm, md, lg
 - 호버 효과 및 클릭 가능 옵션
 - 구성 요소: CardHeader, CardContent, CardFooter
 - 특화 카드: ImageCard, StatCard, ListCard
@@ -582,6 +619,205 @@ export const ResponsiveGrid: Story = {
     docs: {
       description: {
         story: '반응형 그리드에서 동작하는 카드들입니다. 화면 크기에 따라 열 수가 조정됩니다.'
+      }
+    }
+  }
+};
+
+// TFT 특화 카드들
+export const TFTSpecificCards: Story = {
+  render: () => (
+    <div className="space-y-8">
+      {/* 덱 카드 예시 */}
+      <div>
+        <h4 className="text-lg font-semibold mb-4 text-text-primary dark:text-dark-text-primary">
+          메타 덱 카드
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card variant="default" hover>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-text-primary dark:text-dark-text-primary">
+                    하이롤 텍사이
+                  </h3>
+                  <p className="text-sm text-text-secondary dark:text-dark-text-secondary">
+                    빌드업 컴프
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <span 
+                    className="px-2 py-1 rounded text-xs font-bold text-white" 
+                    style={{ backgroundColor: '#E13434' }}
+                  >
+                    S
+                  </span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-secondary dark:text-dark-text-secondary">승률</span>
+                  <span className="font-medium text-green-600">64.2%</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-secondary dark:text-dark-text-secondary">평균 순위</span>
+                  <span className="font-medium text-brand-mint">3.8</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-secondary dark:text-dark-text-secondary">픽률</span>
+                  <span className="font-medium">12.5%</span>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" size="sm">
+                상세 보기
+              </Button>
+              <Button variant="primary" size="sm">
+                덱 빌더
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card variant="default" hover>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-text-primary dark:text-dark-text-primary">
+                    리롤 컴프
+                  </h3>
+                  <p className="text-sm text-text-secondary dark:text-dark-text-secondary">
+                    초반 강세
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <span 
+                    className="px-2 py-1 rounded text-xs font-bold text-white" 
+                    style={{ backgroundColor: '#B45AF3' }}
+                  >
+                    A
+                  </span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-secondary dark:text-dark-text-secondary">승률</span>
+                  <span className="font-medium text-green-600">58.7%</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-secondary dark:text-dark-text-secondary">평균 순위</span>
+                  <span className="font-medium text-brand-mint">4.1</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-secondary dark:text-dark-text-secondary">픽률</span>
+                  <span className="font-medium">8.9%</span>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" size="sm">
+                상세 보기
+              </Button>
+              <Button variant="primary" size="sm">
+                덱 빌더
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
+
+      {/* 플레이어 스탯 카드 */}
+      <div>
+        <h4 className="text-lg font-semibold mb-4 text-text-primary dark:text-dark-text-primary">
+          플레이어 스탯 카드
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <StatCard
+            title="현재 랭크"
+            value="다이아 II"
+            change={{ value: "↑", type: "increase" }}
+            icon={<TrophyIcon />}
+            description="3,456 LP"
+          />
+          <StatCard
+            title="최근 10게임"
+            value="7승 3패"
+            change={{ value: "+12 LP", type: "increase" }}
+            icon={<ChartIcon />}
+            description="70% 승률"
+          />
+          <StatCard
+            title="평균 순위"
+            value="3.2"
+            change={{ value: "-0.3", type: "decrease" }}
+            icon={<StarIcon />}
+            description="최근 20게임"
+          />
+          <StatCard
+            title="주 포지션"
+            value="캐리"
+            icon={<UserIcon />}
+            description="하이롤 특화"
+          />
+        </div>
+      </div>
+
+      {/* 매치 히스토리 카드 */}
+      <div>
+        <h4 className="text-lg font-semibold mb-4 text-text-primary dark:text-dark-text-primary">
+          매치 히스토리 카드
+        </h4>
+        <Card variant="default">
+          <CardHeader title="최근 매치" />
+          <CardContent>
+            <div className="space-y-3">
+              {[
+                { rank: 1, comp: "하이롤 텍사이", time: "2분 전", lp: "+28" },
+                { rank: 4, comp: "리롤 컴프", time: "15분 전", lp: "+8" },
+                { rank: 8, comp: "빌드업 컴프", time: "1시간 전", lp: "-24" },
+              ].map((match, idx) => (
+                <div key={idx} className="flex items-center justify-between py-2 border-b border-border-light dark:border-dark-border-light last:border-b-0">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                      match.rank <= 4 ? 'bg-green-500' : 'bg-red-500'
+                    }`}>
+                      {match.rank}
+                    </div>
+                    <div>
+                      <div className="font-medium text-text-primary dark:text-dark-text-primary">
+                        {match.comp}
+                      </div>
+                      <div className="text-xs text-text-secondary dark:text-dark-text-secondary">
+                        {match.time}
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`text-sm font-medium ${
+                    match.lp.startsWith('+') ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {match.lp} LP
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" fullWidth>
+              전체 기록 보기
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'TFT Meta Analyzer에서 실제로 사용되는 특화된 카드 패턴들입니다.'
       }
     }
   }

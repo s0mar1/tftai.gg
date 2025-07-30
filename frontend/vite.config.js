@@ -46,7 +46,10 @@ export default defineConfig(({ mode }) => {
         '@tanstack/react-query',
         'i18next',
         'react-i18next',
-        'classnames'
+        'classnames',
+        '@apollo/client/core',
+        '@apollo/client/react',
+        'graphql'
       ],
       exclude: [
         // 개발 시에만 필요한 도구들
@@ -94,7 +97,10 @@ export default defineConfig(({ mode }) => {
     
     rollupOptions: {
       // 외부 종속성 (CDN 사용 시)
-      external: isProd ? [] : [],
+      external: isProd ? [
+        // Apollo Client의 선택적 의존성들 (사용하지 않음)
+        'subscriptions-transport-ws'
+      ] : [],
       
       output: {
         // 파일 이름 형식 최적화
@@ -129,6 +135,16 @@ export default defineConfig(({ mode }) => {
             // React Query (데이터 패칭)
             if (id.includes('@tanstack/react-query')) {
               return 'query';
+            }
+            
+            // Apollo Client & GraphQL (새로 추가된 GraphQL 스택)
+            if (id.includes('@apollo/client') || id.includes('graphql')) {
+              return 'graphql';
+            }
+            
+            // WebSocket (GraphQL Subscriptions용)
+            if (id.includes('graphql-ws') || id.includes('ws')) {
+              return 'websocket';
             }
             
             // HTTP 클라이언트

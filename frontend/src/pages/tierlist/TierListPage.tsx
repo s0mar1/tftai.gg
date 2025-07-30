@@ -8,6 +8,7 @@ import { TierListPageSkeleton } from '../../components/common/TFTSkeletons';
 import Trait from '../summoner/components/Trait';
 import { useTraitProcessing } from '../../hooks/useTraitProcessing';
 import PageErrorMessage from '../../components/common/PageErrorMessage';
+import { fixChampionImageUrl, createImageErrorHandler } from '../../utils/imageUtils';
 
 // --- 상수 ---
 
@@ -71,7 +72,14 @@ const UnitWithItems: React.FC<UnitWithItemsProps> = ({ unit, showItems, lang }) 
     ? unit.name 
     : (unit.name?.[lang] || unit.name?.ko || unit.apiName);
 
-  if (!unit || !unit.image_url) {
+  // 이미지 URL 처리: 백엔드 데이터가 없으면 TFT 정적 데이터에서 가져오기
+  let imageUrl = unit.image_url;
+  if (!imageUrl && unit.apiName && champions.length > 0) {
+    const championData = champions.find(c => c.apiName === unit.apiName);
+    imageUrl = championData?.tileIcon || championData?.image_url || '';
+  }
+
+  if (!unit || !imageUrl) {
     return <div className="w-12 h-12" />;
   }
 
@@ -103,11 +111,12 @@ const UnitWithItems: React.FC<UnitWithItemsProps> = ({ unit, showItems, lang }) 
       
       {/* 챔피언 이미지 (서머너 매치카드와 동일) */}
       <img
-        src={unit.image_url}
+        src={fixChampionImageUrl(imageUrl)}
         alt={unitName}
         title={unitName}
         className="w-full h-12 rounded-md block object-cover"
         style={{ border: `2px solid ${costBorderColor}` }}
+        onError={createImageErrorHandler('champion')}
       />
       
       {/* 아이템 표시 (서머너 매치카드와 동일) */}
@@ -134,8 +143,10 @@ interface DeckCardProps {
     top4Count: number;
     winCount: number;
     averagePlacement: number;
-    deckName: string | Record<string, string>;
-    units: Array<{
+    deckName?: string | Record<string, string>;
+    carryChampionName?: any;
+    mainTraitName?: any;
+    coreUnits?: Array<{
       name: string | Record<string, string>;
       image_url: string;
       apiName: string;
@@ -146,10 +157,11 @@ interface DeckCardProps {
         name: string;
       }>;
     }>;
-    traits: Array<{
+    traits?: Array<{
       name: string;
       tier_current: number;
-      style: number;
+      style: string | number;
+      styleOrder?: number;
       image_url: string;
       apiName: string;
     }>;
@@ -188,10 +200,10 @@ const DeckCard: React.FC<DeckCardProps> = ({ deck, lang }) => {
     });
   }, [deck.coreUnits, champions]);
 
-  // useTraitProcessing 훅 사용 (서머너 매치카드와 동일)
+  // useTraitProcessing 훅 사용 (홈페이지 MetaTrendCard와 동일)
   const { processedTraits } = useTraitProcessing(unitsWithTraits);
   
-  // 활성화된 특성만 필터링 및 정렬 (서머너 매치카드와 동일)
+  // 활성화된 특성만 필터링 및 정렬 (홈페이지 MetaTrendCard와 동일)
   const displayedTraits = processedTraits
     .filter(trait => trait.isActive)
     .sort((a, b) => b.styleOrder - a.styleOrder);
@@ -219,54 +231,137 @@ const DeckCard: React.FC<DeckCardProps> = ({ deck, lang }) => {
   });
 
   return (
-    <div className="flex items-center gap-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md border-l-4" style={{ borderLeftColor: tierColor }}>
-      <div className="flex items-center gap-4 flex-shrink-0 w-64">
-        <div className="flex items-center justify-center w-10 h-10 rounded-md text-white text-2xl font-bold" style={{ backgroundColor: tierColor }}>
-          {deck.tierRank}
-        </div>
-        <div>
-          <h3 className="font-bold text-lg text-gray-800 dark:text-gray-100 flex items-center gap-2">
-            {mainTraitName} {carryChampionName}
-          </h3>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md border-l-4 overflow-hidden" style={{ borderLeftColor: tierColor }}>
+      {/* 모바일 레이아웃 (md 미만) */}
+      <div className="block md:hidden">
+        <div className="p-4 space-y-4">
+          {/* 상단: 티어 + 제목 */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-md text-white text-lg sm:text-2xl font-bold flex-shrink-0" style={{ backgroundColor: tierColor }}>
+              {deck.tierRank}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-base sm:text-lg text-gray-800 dark:text-gray-100 truncate">
+                {mainTraitName} {carryChampionName}
+              </h3>
+            </div>
+          </div>
+
+          {/* 특성 표시 */}
+          <div className="flex flex-wrap gap-1.5">
+            {displayedTraits.slice(0, 4).map(trait => (
+              <Trait key={trait.apiName} trait={trait} showCount={true} />
+            ))}
+            {displayedTraits.length > 4 && (
+              <span className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1">
+                +{displayedTraits.length - 4}
+              </span>
+            )}
+          </div>
+
+          {/* 유닛 표시 */}
+          <div className="flex flex-wrap gap-1.5 justify-center">
+            {sortedCoreUnits.slice(0, 6).map((unit) => (
+              <UnitWithItems
+                key={unit.apiName || unit.name?.[lang]}
+                unit={unit}
+                showItems={majorUnitsToShow.has(unit.apiName)}
+                lang={lang}
+              />
+            ))}
+          </div>
+
+          {/* 통계 (2x2 그리드) */}
+          <div className="grid grid-cols-2 gap-3 text-center">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+              <p className={`font-bold text-sm ${getDynamicColor(deck.averagePlacement, 'averagePlacement')}`}>
+                {deck.averagePlacement.toFixed(2)}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('tierlist.avgPlacement')}</p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+              <p className={`font-bold text-sm ${getDynamicColor(parseFloat(top4Rate), 'top4Rate')}`}>
+                {top4Rate}%
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Top 4</p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+              <p className={`font-bold text-sm ${getDynamicColor(parseFloat(winRate), 'winRate')}`}>
+                {winRate}%
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('tierlist.winRate')}</p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
+              <p className="font-bold text-sm text-gray-800 dark:text-gray-100">{deck.totalGames}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('tierlist.games')}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col gap-2">
-        {/* 특성 표시 (서머너 매치카드와 동일한 스타일) */}
-        <div className="flex flex-wrap gap-1.5 items-center">
-          {displayedTraits.map(trait => (
-            <Trait key={trait.apiName} trait={trait} showCount={true} />
-          ))}
+      {/* 데스크톱 레이아웃 (md 이상) */}
+      <div className="hidden md:flex items-center gap-4 lg:gap-6 p-4">
+        {/* 좌측: 티어 + 제목 (반응형 너비) */}
+        <div className="flex items-center gap-3 lg:gap-4 flex-shrink-0 w-48 lg:w-64 xl:w-72">
+          <div className="flex items-center justify-center w-10 h-10 rounded-md text-white text-2xl font-bold" style={{ backgroundColor: tierColor }}>
+            {deck.tierRank}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-base lg:text-lg text-gray-800 dark:text-gray-100">
+              <div className="truncate">{mainTraitName}</div>
+              <div className="truncate text-sm lg:text-base font-medium text-gray-600 dark:text-gray-300">
+                {carryChampionName}
+              </div>
+            </h3>
+          </div>
         </div>
-        {/* 유닛 표시 (서머너 매치카드와 동일한 스타일) */}
-        <div className="flex flex-wrap gap-1.5">
-          {sortedCoreUnits.slice(0, 8).map((unit) => (
-            <UnitWithItems
-              key={unit.apiName || unit.name?.[lang]}
-              unit={unit}
-              showItems={majorUnitsToShow.has(unit.apiName)}
-              lang={lang}
-            />
-          ))}
-        </div>
-      </div>
 
-      <div className="flex-shrink-0 grid grid-cols-4 gap-3 w-80 text-center">
-        <div>
-          <p className={`font-bold text-base ${getDynamicColor(deck.averagePlacement, 'averagePlacement')}`}>{deck.averagePlacement.toFixed(2)}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('tierlist.avgPlacement')}</p>
+        {/* 중앙: 특성 + 유닛 (유연한 너비) */}
+        <div className="flex-1 min-w-0 space-y-2">
+          {/* 특성 표시 */}
+          <div className="flex flex-wrap gap-1.5 items-center">
+            {displayedTraits.map(trait => (
+              <Trait key={trait.apiName} trait={trait} showCount={true} />
+            ))}
+          </div>
+          
+          {/* 유닛 표시 */}
+          <div className="flex flex-wrap gap-1.5">
+            {sortedCoreUnits.slice(0, 8).map((unit) => (
+              <UnitWithItems
+                key={unit.apiName || unit.name?.[lang]}
+                unit={unit}
+                showItems={majorUnitsToShow.has(unit.apiName)}
+                lang={lang}
+              />
+            ))}
+          </div>
         </div>
-        <div>
-          <p className={`font-bold text-base ${getDynamicColor(parseFloat(top4Rate), 'top4Rate')}`}>{top4Rate}%</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Top 4</p>
-        </div>
-        <div>
-          <p className={`font-bold text-base ${getDynamicColor(parseFloat(winRate), 'winRate')}`}>{winRate}%</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('tierlist.winRate')}</p>
-        </div>
-        <div>
-          <p className="font-bold text-base text-gray-800 dark:text-gray-100">{deck.totalGames}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t('tierlist.games')}</p>
+
+        {/* 우측: 통계 (반응형 그리드) */}
+        <div className="flex-shrink-0 grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 w-40 lg:w-72 xl:w-80 text-center">
+          <div>
+            <p className={`font-bold text-sm lg:text-base ${getDynamicColor(deck.averagePlacement, 'averagePlacement')}`}>
+              {deck.averagePlacement.toFixed(2)}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('tierlist.avgPlacement')}</p>
+          </div>
+          <div>
+            <p className={`font-bold text-sm lg:text-base ${getDynamicColor(parseFloat(top4Rate), 'top4Rate')}`}>
+              {top4Rate}%
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Top 4</p>
+          </div>
+          <div>
+            <p className={`font-bold text-sm lg:text-base ${getDynamicColor(parseFloat(winRate), 'winRate')}`}>
+              {winRate}%
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('tierlist.winRate')}</p>
+          </div>
+          <div>
+            <p className="font-bold text-sm lg:text-base text-gray-800 dark:text-gray-100">{deck.totalGames}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('tierlist.games')}</p>
+          </div>
         </div>
       </div>
     </div>

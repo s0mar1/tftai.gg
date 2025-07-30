@@ -10,14 +10,13 @@ import { api } from '../utils/fetchApi';
  * - 언어별 캐싱
  */
 
-// 아이템 카테고리 타입
+// 아이템 카테고리 타입 (Set 15 - Support 아이템 제거됨)
 interface ItemsByCategory {
   basic: Item[];
   completed: Item[];
   ornn: Item[];
   radiant: Item[];
   emblem: Item[];
-  support: Item[];
   robot: Item[];
   unknown: Item[];
 }
@@ -49,12 +48,12 @@ interface TFTStaticDataContextValue extends TFTStaticData {
   getItemByApiName: (apiName: string) => Item | undefined;
 }
 
-// 기본값
+// 기본값 (Set 15 - Support 아이템 제거됨)
 const defaultTFTStaticDataValue: TFTStaticDataContextValue = {
   champions: [],
   items: { 
     basic: [], completed: [], ornn: [], radiant: [], 
-    emblem: [], support: [], robot: [], unknown: [] 
+    emblem: [], robot: [], unknown: [] 
   },
   augments: [],
   traits: [],
@@ -63,7 +62,7 @@ const defaultTFTStaticDataValue: TFTStaticDataContextValue = {
   currentSet: '',
   itemsByCategory: {
     basic: [], completed: [], ornn: [], radiant: [],
-    emblem: [], support: [], robot: [], unknown: []
+    emblem: [], robot: [], unknown: []
   },
   allItems: [],
   loading: true,
@@ -119,14 +118,14 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
   
   const [itemsByCategory, setItemsByCategory] = useState<ItemsByCategory>({
     basic: [], completed: [], ornn: [], radiant: [],
-    emblem: [], support: [], robot: [], unknown: []
+    emblem: [], robot: [], unknown: []
   });
   
   const [tftData, setTftData] = useState<TFTStaticData>({
     champions: [],
     items: { 
       basic: [], completed: [], ornn: [], radiant: [],
-      emblem: [], support: [], robot: [], unknown: []
+      emblem: [], robot: [], unknown: []
     },
     augments: [],
     traits: [],
@@ -160,7 +159,7 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
     );
   }, [allItems]);
 
-  // 로컬 스토리지 캐시 관리
+  // 로컬 스토리지 캐시 관리 - 개선된 버전
   const getCachedData = useCallback((key: string) => {
     try {
       const cached = localStorage.getItem(key);
@@ -169,12 +168,19 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
         const now = Date.now();
         if (now - parsed.timestamp < 30 * 60 * 1000) { // 30분 캐시
           return parsed.data;
+        } else {
+          // 만료된 캐시는 삭제
+          localStorage.removeItem(key);
         }
       }
     } catch (error) {
       if (import.meta.env.DEV) {
         console.warn(`TFTStaticDataContext: 캐시 읽기 실패 (${key}):`, error);
       }
+      // 손상된 캐시 삭제
+      try {
+        localStorage.removeItem(key);
+      } catch {} // 삭제 실패는 무시
     }
     return null;
   }, []);
@@ -185,10 +191,76 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
         data,
         timestamp: Date.now()
       };
-      localStorage.setItem(key, JSON.stringify(cacheData));
+      
+      const jsonString = JSON.stringify(cacheData);
+      
+      // 데이터 크기 확인 (5MB localStorage 한계 고려)
+      const size = new Blob([jsonString]).size;
+      if (size > 4.5 * 1024 * 1024) { // 4.5MB 이상이면 저장하지 않음
+        if (import.meta.env.DEV) {
+          console.warn(`TFTStaticDataContext: 캐시 데이터가 너무 큼 (${key}): ${(size / 1024 / 1024).toFixed(2)}MB`);
+        }
+        return;
+      }
+      
+      localStorage.setItem(key, jsonString);
     } catch (error) {
       if (import.meta.env.DEV) {
         console.warn(`TFTStaticDataContext: 캐시 저장 실패 (${key}):`, error);
+      }
+      
+      // LocalStorage 용량 초과 시 오래된 캐시 정리 시도
+      if (error instanceof Error && error.name === 'QuotaExceededError') {
+        try {
+          // 모든 TFT 관련 캐시들 정리
+          const keysToRemove: string[] = [];
+          const now = Date.now();
+          
+          for (let i = 0; i < localStorage.length; i++) {
+            const storageKey = localStorage.key(i);
+            if (storageKey && (
+              storageKey.startsWith('tft-') || 
+              storageKey.startsWith('items-') ||
+              storageKey.includes('cache') ||
+              storageKey.includes('data')
+            )) {
+              try {
+                const item = localStorage.getItem(storageKey);
+                if (item) {
+                  const parsed = JSON.parse(item);
+                  // 10분 이상 된 데이터는 삭제 대상
+                  if (!parsed.timestamp || now - parsed.timestamp > 10 * 60 * 1000) {
+                    keysToRemove.push(storageKey);
+                  }
+                }
+              } catch {
+                // 파싱 실패한 항목도 삭제 대상
+                keysToRemove.push(storageKey);
+              }
+            }
+          }
+          
+          // 오래된 것부터 삭제
+          keysToRemove.forEach(keyToDelete => {
+            localStorage.removeItem(keyToDelete);
+          });
+          
+          if (import.meta.env.DEV) {
+            console.log(`TFTStaticDataContext: LocalStorage 정리 완료 (${keysToRemove.length}개 항목 제거)`);
+          }
+          
+          // 정리 후 다시 시도
+          if (keysToRemove.length > 0) {
+            try {
+              localStorage.setItem(key, jsonString);
+              return; // 성공하면 종료
+            } catch {} // 실패하면 계속 진행
+          }
+        } catch (cleanupError) {
+          if (import.meta.env.DEV) {
+            console.error('TFTStaticDataContext: LocalStorage 정리 실패:', cleanupError);
+          }
+        }
       }
     }
   }, []);
@@ -225,11 +297,11 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
       const tftDataCacheKey = `tft-static-data-${currentLanguage}`;
       const itemsCacheKey = `items-static-data-${currentLanguage}`;
       
-      // 캐시된 데이터 확인
-      const cachedTftData = getCachedData(tftDataCacheKey);
-      const cachedItemsData = getCachedData(itemsCacheKey);
+      // 캐시된 데이터 확인 - 임시로 비활성화하여 강제 API 호출
+      const cachedTftData = null; // getCachedData(tftDataCacheKey);
+      const cachedItemsData = null; // getCachedData(itemsCacheKey);
       
-      if (cachedTftData && cachedItemsData) {
+      if (false && cachedTftData && cachedItemsData) {
         try {
           console.log('🔄 TFTStaticDataContext: 캐시된 데이터 복원 시도');
           
@@ -272,7 +344,7 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
               return false;
             }
             
-            if (!apiName.includes('tft14_')) {
+            if (!apiName.includes('tft15_')) {
               return false;
             }
             
@@ -287,15 +359,38 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
           const mappedChampions = filteredChampions.map((champ: any) => {
             const koreanName = rehydratedKrNameMap.get(champ.apiName?.toLowerCase());
             
-            // traits 배열도 한국어로 변환
+            // traits 배열도 한국어로 변환 (개선된 매핑 로직)
             const koreanTraits = champ.traits?.map((traitName: string) => {
-              // traitMap에서 해당 특성의 한국어 이름 찾기
+              // 1. 이미 한국어인 경우 그대로 반환
+              if (rehydratedTraitMap.has(traitName.toLowerCase())) {
+                const trait = rehydratedTraitMap.get(traitName.toLowerCase());
+                if (trait) {
+                  console.log(`✅ 캐시 특성 직접 매핑: "${traitName}" -> "${trait.name}"`);
+                  return trait.name;
+                }
+              }
+              
+              // 2. nameMap을 통한 역방향 매핑 시도 (한국어 -> API 이름)
+              const apiName = rehydratedKrNameMap.get(traitName);
+              if (apiName) {
+                const trait = rehydratedTraitMap.get(apiName.toLowerCase());
+                if (trait) {
+                  console.log(`🔄 캐시 특성 nameMap 매핑: "${traitName}" -> "${trait.name}"`);
+                  return trait.name;
+                }
+              }
+              
+              // 3. traitMap에서 해당 특성의 한국어 이름 찾기 (기존 로직)
               const traitEntry = Array.from(rehydratedTraitMap.entries()).find(([key, trait]) => {
-                // 1. 설명에서 해당 특성 이름이 언급되는지 확인
+                // 3-1. 특성 이름이 정확히 일치하는지 확인
+                if (trait.name === traitName || trait.koreanName === traitName || trait.englishName === traitName) {
+                  return true;
+                }
+                // 3-2. 설명에서 해당 특성 이름이 언급되는지 확인
                 if (trait.desc?.includes(traitName)) {
                   return true;
                 }
-                // 2. API명에 특성 이름이 포함되는지 확인 (소문자 변환)
+                // 3-3. API명에 특성 이름이 포함되는지 확인 (소문자 변환)
                 const cleanTraitName = traitName.toLowerCase().replace(/\s+/g, '');
                 const cleanApiName = key.toLowerCase().replace(/^tft\d+_/, '');
                 if (cleanApiName.includes(cleanTraitName) || cleanTraitName.includes(cleanApiName)) {
@@ -308,7 +403,7 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
                 console.log(`🔄 캐시 특성 매핑: "${traitName}" -> "${traitEntry[1].name}"`);
                 return traitEntry[1].name;
               } else {
-                console.warn(`⚠️ 캐시 특성 매핑 실패: "${traitName}"`);
+                console.warn(`⚠️ 캐시 특성 매핑 실패: "${traitName}" - 원본 이름으로 대체`);
                 return traitName; // 매핑 실패 시 원본 사용
               }
             }) || [];
@@ -416,25 +511,13 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
           krNameMapSample: Array.from(rehydratedKrNameMap.entries()).slice(0, 5)
         });
 
-        // Golden Ox와 Bruiser를 직접 검색해보자
-        console.log('🔍 Golden Ox 직접 검색:', {
-          traitMapHasGoldenOx: rehydratedTraitMap.has('Golden Ox'),
-          traitMapHasGoldenox: rehydratedTraitMap.has('goldenox'),
-          traitMapHasTft14GoldenOx: rehydratedTraitMap.has('tft14_goldenox'),
-          extractedTraitsWithGolden: extractedTraits.filter(t => 
-            t.apiName?.toLowerCase().includes('golden') || 
-            t.name?.toLowerCase().includes('golden') ||
-            t.name?.includes('황소') ||
-            t.name?.includes('골든')
-          ),
-          extractedTraitsWithBruiser: extractedTraits.filter(t => 
-            t.apiName?.toLowerCase().includes('bruiser') || 
-            t.name?.toLowerCase().includes('bruiser') ||
-            t.name?.includes('투사') ||
-            t.name?.includes('파괴')
-          ),
-          allTraitApiNames: Array.from(rehydratedTraitMap.keys()).slice(0, 10),
-          allTraitNames: extractedTraits.slice(0, 10).map(t => t.name)
+        // Set 15 특성 매핑 확인
+        console.log('🔍 Set 15 특성 매핑 확인:', {
+          traitMapSize: rehydratedTraitMap.size,
+          sampleTraits: extractedTraits.slice(0, 5).map(t => ({
+            apiName: t.apiName,
+            name: t.name
+          }))
         });
 
         // 임시 클라이언트 사이드 필터링 (백엔드 필터링이 작동하지 않을 때 사용)
@@ -452,8 +535,8 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
             return false;
           }
           
-          // TFT14만 허용
-          if (!apiName.includes('tft14_')) {
+          // TFT15만 허용
+          if (!apiName.includes('tft15_')) {
             return false;
           }
           
@@ -469,15 +552,38 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
         const mappedChampions = filteredChampions.map((champ: any) => {
           const koreanName = rehydratedKrNameMap.get(champ.apiName?.toLowerCase());
           
-          // traits 배열도 한국어로 변환
+          // traits 배열도 한국어로 변환 (개선된 매핑 로직)
           const koreanTraits = champ.traits?.map((traitName: string) => {
-            // traitMap에서 해당 특성의 한국어 이름 찾기
+            // 1. 이미 한국어인 경우 그대로 반환
+            if (rehydratedTraitMap.has(traitName.toLowerCase())) {
+              const trait = rehydratedTraitMap.get(traitName.toLowerCase());
+              if (trait) {
+                console.log(`✅ 특성 직접 매핑: "${traitName}" -> "${trait.name}"`);
+                return trait.name;
+              }
+            }
+            
+            // 2. nameMap을 통한 역방향 매핑 시도 (한국어 -> API 이름)
+            const apiName = rehydratedKrNameMap.get(traitName);
+            if (apiName) {
+              const trait = rehydratedTraitMap.get(apiName.toLowerCase());
+              if (trait) {
+                console.log(`🔄 특성 nameMap 매핑: "${traitName}" -> "${trait.name}"`);
+                return trait.name;
+              }
+            }
+            
+            // 3. traitMap에서 해당 특성의 한국어 이름 찾기 (기존 로직)
             const traitEntry = Array.from(rehydratedTraitMap.entries()).find(([key, trait]) => {
-              // 1. 설명에서 해당 특성 이름이 언급되는지 확인
+              // 3-1. 특성 이름이 정확히 일치하는지 확인
+              if (trait.name === traitName || trait.koreanName === traitName || trait.englishName === traitName) {
+                return true;
+              }
+              // 3-2. 설명에서 해당 특성 이름이 언급되는지 확인
               if (trait.desc?.includes(traitName)) {
                 return true;
               }
-              // 2. API명에 특성 이름이 포함되는지 확인 (소문자 변환)
+              // 3-3. API명에 특성 이름이 포함되는지 확인 (소문자 변환)
               const cleanTraitName = traitName.toLowerCase().replace(/\s+/g, '');
               const cleanApiName = key.toLowerCase().replace(/^tft\d+_/, '');
               if (cleanApiName.includes(cleanTraitName) || cleanTraitName.includes(cleanApiName)) {
@@ -490,7 +596,7 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
               console.log(`🔄 특성 매핑: "${traitName}" -> "${traitEntry[1].name}"`);
               return traitEntry[1].name;
             } else {
-              console.warn(`⚠️ 특성 매핑 실패: "${traitName}"`);
+              console.warn(`⚠️ 특성 매핑 실패: "${traitName}" - 원본 이름으로 대체`);
               return traitName; // 매핑 실패 시 원본 사용
             }
           }) || [];
@@ -510,6 +616,7 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
           krNameMap: rehydratedKrNameMap,
         };
         
+        console.log('🎯 TFTStaticDataContext: 데이터 로딩 완료, 상태 업데이트 시작');
         setTftData(finalTftData);
         setItemsByCategory(itemsData);
         
@@ -518,6 +625,7 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
         setCachedData(itemsCacheKey, itemsData);
         
         setRetryCount(0);
+        console.log('✅ TFTStaticDataContext: 모든 상태 업데이트 완료');
 
       } catch (err: unknown) {
         console.error('TFTStaticDataContext: 오류 발생', err);
@@ -533,12 +641,14 @@ export const TFTStaticDataProvider: React.FC<TFTStaticDataProviderProps> = ({ ch
           setError(`${errorMessage} (재시도 ${MAX_RETRIES}회 실패)`);
         }
       } finally {
+        console.log('🔧 TFTStaticDataContext: setLoading(false) 호출');
         setLoading(false);
+        console.log('🔧 TFTStaticDataContext: setLoading(false) 완료');
       }
     };
     
     fetchData();
-  }, [i18n.language, retryCount, getCachedData, setCachedData, retryFetch]); // 의존성 배열 최적화
+  }, [i18n.language, retryCount]); // 의존성 배열 단순화
 
   const value = useMemo(() => ({
     ...tftData,

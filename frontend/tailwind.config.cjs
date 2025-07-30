@@ -6,8 +6,20 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    // PC 환경 최적화를 위한 커스텀 breakpoint
+    screens: {
+      'xs': '475px',    // Extra small mobile
+      'sm': '640px',    // Small mobile
+      'md': '768px',    // Tablet
+      'lg': '1024px',   // Small desktop
+      'xl': '1280px',   // Desktop
+      '2xl': '1536px',  // Large desktop
+      '3xl': '1920px',  // Full HD
+      '4xl': '2560px',  // QHD/4K
+    },
     extend: {
       colors: {
+        // 기존 색상 유지 (Breaking change 방지)
         'brand-mint': '#3ED2B9',
         'background-base': '#FAFFFF',
         'background-card': '#FFFFFF',
@@ -39,6 +51,46 @@ module.exports = {
         'dark-tft-white': '#1E1E1E',
         'dark-tft-loading': '#A0AEC0',
         'dark-background-page': '#252525',
+        
+        // 새로운 Semantic 색상 Alias (점진적 마이그레이션용)
+        // Brand
+        'brand': {
+          DEFAULT: '#3ED2B9',
+          'hover': 'rgba(62, 210, 185, 0.9)',
+        },
+        
+        // Surface (배경)
+        'surface': {
+          'base': '#FAFFFF',
+          'card': '#FFFFFF',
+          'panel': '#FFFFFF',
+        },
+        
+        // Neutral (회색 계열)
+        'neutral': {
+          100: '#F3F4F6',
+          200: '#E5E7EB',
+          700: '#4B5563',
+          900: '#1f2937',
+        },
+        
+        // Semantic colors
+        'primary': {
+          DEFAULT: '#2E2E2E',
+          'dark': '#E0E0E0',
+        },
+        'secondary': {
+          DEFAULT: '#6E6E6E',
+          'dark': '#A0AEC0',
+        },
+        'error': {
+          DEFAULT: '#E74C3C',
+          'hover': '#d63c2e',
+        },
+        'border': {
+          DEFAULT: '#E6E6E6',
+          'dark': '#333333',
+        },
       },
       fontFamily: {
         sans: ['Inter', 'Roboto', '"Noto Sans KR"', 'sans-serif'],

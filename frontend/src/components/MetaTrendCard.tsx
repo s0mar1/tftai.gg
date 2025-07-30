@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTFTData } from '../context/TFTDataContext';
 import { useTraitProcessing } from '../hooks/useTraitProcessing';
 import Trait from '../pages/summoner/components/Trait'; // Trait 컴포넌트 임포트
-import { safeProcessImagePath } from '../utils/imageUtils';
+import { safeProcessImagePath, createImageErrorHandler } from '../utils/imageUtils';
 
 // Deck prop의 타입을 정의하는 인��페이스
 interface Deck {
@@ -84,6 +84,7 @@ const MetaTrendCard: React.FC<{ deck: Deck }> = ({ deck }) => {
           src={carryChampionImageUrl} 
           alt={carryChampionName} 
           className="w-16 h-16 rounded-full border-2 border-brand-mint"
+          onError={createImageErrorHandler('champion')}
         />
       </div>
       <div className="flex-grow">

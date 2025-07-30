@@ -1,7 +1,7 @@
 // frontend/src/components/profile/MatchCard.tsx
 // ... (생략) ...
 
-import { getTraitIconUrl } from '../../utils/imageUtils';
+import { getTraitIconUrl, createImageErrorHandler, fixChampionImageUrl } from '../../utils/imageUtils';
 
 type CostColors = {
   [key: number]: string;
@@ -56,14 +56,22 @@ const Unit: React.FC<UnitProps> = ({ unit }) => {
                 </div>
             )}
             <img
-                src={unit.image_url}
+                src={fixChampionImageUrl(unit.image_url)}
                 alt={unit.name}
                 title={unit.name}
                 style={{ ...styles.unitImage, ...getCostBorderStyle(unit.cost) }}
+                onError={createImageErrorHandler('champion')}
             />
             <div style={styles.unitItems}>
                 {unit.items && unit.items.slice(0, 3).map((item, index) =>
-                    item.image_url && <img key={index} src={item.image_url} alt={item.name} title={item.name} style={styles.unitItemImage} />
+                    item.image_url && <img 
+                      key={index} 
+                      src={fixChampionImageUrl(item.image_url)} 
+                      alt={item.name} 
+                      title={item.name} 
+                      style={styles.unitItemImage} 
+                      onError={createImageErrorHandler('item')}
+                    />
                 )}
             </div>
             {/* 기물 아래 한국어 이름 표시 */}
@@ -129,7 +137,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, userPuuid, isExpanded }) =
                     onError={(e) => {
                       // 기본 아이콘으로 fallback
                       if (trait.apiName) {
-                        e.target.src = getTraitIconUrl(trait.apiName, 'tft14');
+                        e.target.src = getTraitIconUrl(trait.apiName, 'tft15');
                       }
                       e.target.onerror = null; // 무한 루프 방지
                     }}

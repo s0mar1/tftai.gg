@@ -6,8 +6,6 @@
  * 사용: 서버 시작 시 initialization/coreModules.ts에서 호출
  */
 
-import dotenv from 'dotenv';
-import path from 'path';
 import logger from '../config/logger';
 import { safeValidateEnv, createEnvAccessors, maskSensitiveData, type EnvConfig } from '../config/envSchema';
 
@@ -24,21 +22,15 @@ let globalEnvConfig: EnvConfig | null = null;
 let globalEnvAccessors: ReturnType<typeof createEnvAccessors> | null = null;
 
 /**
- * 환경 변수를 로드하고 검증합니다.
+ * 환경 변수를 검증합니다. (로드는 server.ts에서 최우선 처리됨)
  * @returns 환경 변수 검증 결과
  */
 export const loadAndValidateEnv = (): EnvValidationResult => {
-  logger.info('[ENV LOADER] 환경 변수 로드를 시작합니다...');
+  logger.info('[ENV LOADER] 환경 변수 검증을 시작합니다...');
   
-  // .env 파일 로드
-  const envPath = path.resolve(process.cwd(), '.env');
-  const result = dotenv.config({ path: envPath });
-  
-  if (result.error) {
-    logger.warn(`[ENV LOADER] .env 파일을 찾을 수 없습니다. 시스템 환경 변수를 사용합니다. (경로: ${envPath})`);
-  } else {
-    logger.info('[ENV LOADER] .env 파일을 성공적으로 로드했습니다.');
-  }
+  // 🚀 Phase 2: 환경변수 로드는 server.ts에서 최우선으로 처리됨
+  // .env 파일은 이미 server.ts 최상단에서 로드되었으므로 검증 작업만 수행
+  logger.info('[ENV LOADER] ✅ 환경변수는 이미 server.ts에서 로드됨 - 검증 작업 수행');
   
   // Zod 스키마를 사용한 환경 변수 검증
   const validationResult = safeValidateEnv(process.env);

@@ -36,7 +36,7 @@ const UserDeckSchema = new Schema<IUserDeck>({
   description: { type: String }, // 덱 설명 및 공략
   coreUnits: [{ type: String }], // 이 덱의 핵심 유닛 apiName 목록
   placements: [UnitPlacementSchema], // 유닛 배치 정보
-  version: { type: String, default: "Set14" }, // TFT 시즌 정보
+  version: { type: String, default: "Set15" }, // TFT 시즌 정보
   isPublic: { type: Boolean, default: true }, // 공개/비공개 여부
 }, { timestamps: true });
 

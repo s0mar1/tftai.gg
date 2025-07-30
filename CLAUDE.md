@@ -18,8 +18,7 @@
 
 # 대규모 코드베이스 분석을 위한 Gemini CLI 사용
 
-컨텍스트 제한을 초과할 수 있는 대규모 코드베이스나 여러 파일을 분석할 때는 대규모 기능을 갖춘 Gemini CLI를 사용하세요.
-컨텍스트 창. Google Gemini의 대용량 컨텍스트 기능을 활용하려면 `gemini -p`를 사용하세요.
+컨텍스트 제한을 초과할 수 있는 대규모 코드베이스나 여러 파일을 분석할 때는 대규모 컨텍스트 기능을 갖춘 Gemini CLI를 사용하세요. Google Gemini의 대용량 컨텍스트 기능을 활용하려면 `gemini -p`를 사용하세요.
 
 ## ✅ Gemini CLI 설정 완료
 
@@ -105,50 +104,53 @@ gemini --all_files -p "성능 병목점과 최적화 방안을 제안해주세�
 gemini -p "@backend/src/middlewares/ @backend/src/config/ 보안 설정과 미들웨어를 검토해주세요"
 ```
 
-구현 검증 예
+## 구현 검증 예시
 
-기능이 구현되었는지 확인하세요.
-gemini -p "@src/ @lib/ 이 코드베이스에 다크 모드가 구현되어 있나요? 관련 파일과 함수를 보여주세요"
+### 기능 구현 확인
+```bash
+# 다크 모드 구현 확인
+gemini -p "@frontend/src/context/ @frontend/src/components/ 다크 모드가 구현되어 있나요? 관련 파일과 함수를 보여주세요"
 
-인증 구현 확인:
-gemini -p "@src/ @middleware/ JWT 인증이 구현되어 있습니까? 모든 인증 관련 엔드포인트와 미들웨어를 나열합니다."
+# 인증 구현 확인
+gemini -p "@backend/src/middlewares/ @backend/src/routes/ JWT 인증이 구현되어 있습니까? 모든 인증 관련 엔드포인트와 미들웨어를 나열합니다."
 
-특정 패턴을 확인하세요:
-gemini -p "@src/ WebSocket 연결을 처리하는 React 훅이 있나요? 파일 경로와 함께 나열하세요"
+# 특정 패턴 확인
+gemini -p "@frontend/src/hooks/ WebSocket 연결을 처리하는 React 훅이 있나요? 파일 경로와 함께 나열하세요"
 
-오류 처리 확인:
-gemini -p "@src/ @api/ 모든 API 엔드포인트에 대해 적절한 오류 처리가 구현되어 있습니까? try-catch 블록의 예를 보여주세요"
+# 오류 처리 확인
+gemini -p "@backend/src/routes/ @backend/src/middlewares/ 모든 API 엔드포인트에 대해 적절한 오류 처리가 구현되어 있습니까? try-catch 블록의 예를 보여주세요"
 
-속도 제한을 확인하세요:
-gemini -p "@backend/ @middleware/ API에 속도 제한이 구현되어 있습니까? 구현 세부 정보를 표시합니다."
+# Rate Limiting 확인
+gemini -p "@backend/src/middlewares/ API에 속도 제한이 구현되어 있습니까? 구현 세부 정보를 표시합니다."
 
-캐싱 전략 확인:
-gemini -p "@src/ @lib/ @services/ Redis 캐싱이 구현되어 있나요? 캐시 관련 함수와 사용법을 모두 나열하세요"
+# 캐싱 전략 확인
+gemini -p "@backend/src/services/ Redis 캐싱이 구현되어 있나요? 캐시 관련 함수와 사용법을 모두 나열하세요"
 
-특정 보안 조치를 확인하세요.
-gemini -p "@src/ @api/ SQL 주입 보호 기능이 구현되어 있나요? 사용자 입력이 어떻게 정제되는지 보여주세요"
+# 보안 조치 확인
+gemini -p "@backend/src/middlewares/ @backend/src/utils/ 입력 검증과 보안 조치가 구현되어 있나요? 사용자 입력이 어떻게 정제되는지 보여주세요"
 
-기능에 대한 테스트 범위를 확인하세요.
-gemini -p "@src/payment/ @tests/ 결제 처리 모듈이 완전히 테스트되었습니까? 모든 테스트 케이스를 나열하세요"
+# 테스트 커버리지 확인
+gemini -p "@backend/src/__tests__/ @frontend/src/__tests__/ 주요 기능들이 완전히 테스트되었습니까? 모든 테스트 케이스를 나열하세요"
+```
 
-Gemini CLI를 사용해야 하는 경우
+## Gemini CLI를 사용해야 하는 경우
 
 다음과 같은 경우 gemini -p를 사용하세요:
 - 전체 코드베이스 또는 대규모 디렉토리 분석
 - 여러 개의 대용량 파일 비교
 - 프로젝트 전반의 패턴이나 아키텍처를 이해해야 함
-- 현재 컨텍스트 창이 작업에 충분하지 않습니다.
+- 현재 컨텍스트 창이 작업에 충분하지 않습니다
 - 총 100KB가 넘는 파일 작업
 - 특정 기능, 패턴 또는 보안 조치가 구현되었는지 확인
 - 전체 코드베이스에서 특정 코딩 패턴의 존재 여부 확인
 
-중요 참고 사항
+## 중요 참고 사항
 
-- @ 구문의 경로는 gemini를 호출할 때 현재 작업 디렉토리를 기준으로 합니다.
-- CLI는 파일 내용을 컨텍스트에 직접 포함합니다.
-- 읽기 전용 분석에는 --yolo 플래그가 필요하지 않습니다.
-- Gemini의 컨텍스트 창은 Claude의 컨텍스트를 오버플로할 수 있는 전체 코드베이스를 처리할 수 있습니다.
-- 구현을 확인할 때 정확한 결과를 얻기 위해 무엇을 찾고 있는지 구체적으로 설명하십시오.
+- @ 구문의 경로는 gemini를 호출할 때 현재 작업 디렉토리를 기준으로 합니다
+- CLI는 파일 내용을 컨텍스트에 직접 포함합니다
+- 읽기 전용 분석에는 --yolo 플래그가 필요하지 않습니다
+- Gemini의 컨텍스트 창은 Claude의 컨텍스트를 오버플로할 수 있는 전체 코드베이스를 처리할 수 있습니다
+- 구현을 확인할 때 정확한 결과를 얻기 위해 무엇을 찾고 있는지 구체적으로 설명하십시오
 
 ---
 
@@ -360,7 +362,7 @@ claude "이전에 작업한 AI 분석 서비스와 연동되는 새로운 API를
 ### 디렉토리별 MCP 서버 관리
 ```bash
 # 프로젝트 루트에서 전체 관리
-cd /mnt/c/Users/jiseo/Desktop/tft-meta-analyzer-full/tft-meta-analyzer
+cd /home/jiseo/tft-meta-analyzer
 claude mcp list
 
 # 백엔드 디렉토리에서 백엔드 전용 설정

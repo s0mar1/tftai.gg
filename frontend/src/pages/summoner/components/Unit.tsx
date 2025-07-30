@@ -2,7 +2,7 @@ import React from 'react';
 import Item from './Item';
 import { useTFTData } from '../../../context/TFTDataContext';
 import { useDarkMode } from '../../../hooks/useDarkMode';
-import { processImagePath } from '../../../utils/imageUtils';
+import { fixChampionImageUrl, createImageErrorHandler } from '../../../utils/imageUtils';
 
 interface UnitItem {
   name: string;
@@ -37,11 +37,24 @@ const Unit: React.FC<UnitProps> = ({ unit, isCompact = false }) => {
       <div className="absolute top-[-8px] left-1/2 -translate-x-1/2 flex text-sm font-bold text-white z-10" style={{ color: costBorderColor, textShadow: textShadowStyle }}>
         {'★'.repeat(unit.tier)}
       </div>
-      <img src={processImagePath(unit.image_url)} alt={unit.name} className="w-full h-12 rounded-md block object-cover" style={{ border: `2px solid ${costBorderColor}` }} title={unit.name} />
+      <img 
+        src={fixChampionImageUrl(unit.image_url)} 
+        alt={unit.name} 
+        className="w-full h-12 rounded-md block object-cover" 
+        style={{ border: `2px solid ${costBorderColor}` }} 
+        title={unit.name} 
+        onError={createImageErrorHandler('champion')}
+      />
       {!isCompact && (
         <div className="flex justify-center gap-px mt-0.5">
           {unit.items.map((item, index) => item.image_url && (
-            <img key={index} src={processImagePath(item.image_url)} alt={item.name} className="w-4 h-4 rounded-sm" />
+            <img 
+              key={index} 
+              src={fixChampionImageUrl(item.image_url)} 
+              alt={item.name} 
+              className="w-4 h-4 rounded-sm" 
+              onError={createImageErrorHandler('item')}
+            />
           ))}
         </div>
       )}

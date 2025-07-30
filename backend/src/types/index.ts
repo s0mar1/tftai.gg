@@ -2,6 +2,25 @@
 export * from './express';
 export * from './models';
 
+// 공유 타입들 re-export (Set 15 타입 포함) - 백엔드용 네임스페이스로 구분
+export type { 
+  Champion as SharedChampion, 
+  Item as SharedItem, 
+  Trait as SharedTrait, 
+  Augment as SharedAugment, 
+  PowerSnax, 
+  PowerUp, 
+  PowerUpEffect,
+  ChampionAbility,
+  ChampionStats,
+  ActiveTrait as SharedActiveTrait,
+  Match,
+  Participant,
+  SummonerData,
+  LeagueEntry,
+  ApiResponse
+} from '../../../shared/src/types';
+
 // 백엔드 전용 타입들만 여기에 유지
 
 export interface RateLimitConfig {

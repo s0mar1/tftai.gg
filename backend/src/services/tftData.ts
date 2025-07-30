@@ -3,7 +3,7 @@ import { getExternalServicesConfig } from '../initialization/envLoader';
 import logger from '../config/logger';
 import { Champion, Item, Trait, Augment } from '../types/index';
 
-interface TFTData {
+export interface TFTData {
   items: {
     basic: Item[];
     completed: Item[];
@@ -248,6 +248,7 @@ const createFallbackData = (language: string = 'ko'): TFTData => {
       ornn: [],
       radiant: [],
       emblem: [],
+      // support 아이템은 Set 15에서 제거됨
       support: [],
       robot: [],
       unknown: []
@@ -256,7 +257,7 @@ const createFallbackData = (language: string = 'ko'): TFTData => {
     champions: [],
     traits: [],
     traitMap: new Map(),
-    currentSet: 'Set14',
+    currentSet: 'Set15',
     krNameMap: new Map(),
     nameMap: new Map(),
     language,
@@ -387,8 +388,8 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
           return false;
         }
         
-        // 2. TFT14_ 패턴만 허용 (대소문자 구분 없음)
-        if (!apiName.includes('tft14_')) {
+        // 2. TFT15_ 패턴만 허용 (대소문자 구분 없음)
+        if (!apiName.includes('tft15_')) {
           return false;
         }
         
@@ -442,14 +443,24 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
       });
 
     const traitMap = new Map<string, Trait>();
+    const koreanToEnglishTraitMap = new Map<string, string>(); // 한국어 -> 영어 매핑
+    
     enSetData?.traits?.forEach((trait: any) => {
         const localeName = localeTraitNames.get(trait.apiName);
         if (!localeName && language === 'ko') {
             logger.warn(`[데이터 불일치] 특성 '${trait.apiName}'의 한국어 이름을 찾지 못해 영어 이름으로 대체합니다.`);
         }
+        
+        // 원본 영어 이름 보존
+        const englishName = trait.name || trait.apiName;
+        const koreanName = localeName || trait.name || trait.apiName || '미확인 특성';
+        
         // 더 안전한 fallback 처리
-        trait.name = localeName || trait.name || trait.apiName || '미확인 특성';
+        trait.name = koreanName;
+        trait.englishName = englishName; // 영어 이름 추가 보존
+        trait.koreanName = koreanName;   // 한국어 이름 명시적 저장
         trait.icon = processImagePath(trait.icon); 
+        
         const mapKey = trait.apiName.toLowerCase();
 
         let overallStyleVariant = 'none';
@@ -461,7 +472,7 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
 
         // API 이름 기반으로 계열/직업 분류 (언어 독립적)
         const originsApiList = ['streetdemon', 'divinicorp', 'overlord', 'hotrod', 'animasquad', 'viegouniquetrait', 'netgod', 'virus', 'uniquetrait', 'cyberboss', 'mob', 'suits', 'edgerunner', 'immortal', 'ballistek'];
-        const classesApiList = ['supercharge', 'bruiser', 'thirsty', 'marksman', 'armorclad', 'swift', 'controller', 'cutter', 'strong', 'vanguard'];
+        const classesApiList = ['supercharge', 'bruiser', 'thirsty', 'marksman', 'armorclad', 'swift', 'controller', 'cutter', 'strong', 'vanguard', 'soulkiller', 'assassin', 'techie', 'sniper'];
 
         const traitApiName = trait.apiName.toLowerCase();
         if (originsApiList.some(origin => traitApiName.includes(origin))) {
@@ -474,7 +485,15 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
             logger.warn(`WARN: Unknown trait type for: ${trait.name} (${trait.apiName}). Assigned 'class' type as default.`);
         }
 
+        // 영어 API 이름을 키로 하는 매핑
         traitMap.set(mapKey, trait);
+        
+        // 한국어 이름을 키로 하는 역방향 매핑 추가
+        if (language === 'ko' && koreanName && koreanName !== trait.apiName) {
+            koreanToEnglishTraitMap.set(koreanName, englishName);
+            // 한국어 이름으로도 직접 접근 가능하도록 추가
+            traitMap.set(koreanName.toLowerCase(), trait);
+        }
     });
 
     const plainTraitMap: { [key: string]: Trait } = {};
@@ -554,7 +573,8 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
         ornn: ornnItems,
         radiant: radiantItems,
         emblem: emblemItems,
-        support: supportItems,
+        // support 아이템은 Set 15에서 제거됨
+        support: [],
         robot: robotItems,
         unknown: unknownItems,
       },
@@ -579,7 +599,9 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
         ...Array.from(localeItemNames.entries()).map(([key, value]: [string, string]) => [key.toLowerCase(), value]),
         // 역방향 매핑: 한국어 특성 이름 -> API 이름 (대소문자 유지)
         ...Array.from(localeTraitNames.entries()).map(([apiName, koreanName]: [string, string]) => [koreanName, apiName])
-      ] as any)
+      ] as any),
+      // 특성 전용 한국어 -> 영어 매핑 추가 (프론트엔드 매핑 지원)
+      // koreanToEnglishTraitMap: koreanToEnglishTraitMap  // 임시 주석 처리
     };
     
     // 데이터 구조 확인을 위한 디버깅 로그

@@ -49,6 +49,10 @@ logs/
 # TypeScript build info
 *.tsbuildinfo
 
+# Generated files
+**/src/generated/
+**/generated/
+
 # Temporary files
 *.tmp
 *.temp

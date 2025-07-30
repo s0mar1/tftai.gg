@@ -3,7 +3,7 @@ import DynamicDndProvider from '../../components/common/DynamicDndProvider';
 import { useTFTData } from '../../context/TFTDataContext';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Champion, Item } from '../../types';
+import { Champion, Item, PowerSnax, PowerUp } from '../../types';
 import { ChampionCardSkeleton } from '../../components/common/TFTSkeletons';
 
 // 직접 Context import (디버깅용)
@@ -14,6 +14,7 @@ const UnitPanel = lazy(() => import('./UnitPanel'));
 const SynergyPanel = lazy(() => import('./SynergyPanel'));
 const ItemPanel = lazy(() => import('./ItemPanel'));
 const DetailPanel = lazy(() => import('./DetailPanel'));
+const PowerSnaxPanel = lazy(() => import('./PowerSnaxPanel'));
 
 // HexGrid는 핵심 컴포넌트이므로 일반 import 유지
 import HexGrid, { Position } from './HexGrid';
@@ -95,6 +96,10 @@ export default function DeckBuilderPage() {
   }
   const [placedUnits, setPlacedUnits] = useState<PlacedUnits>({});
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [selectedPowerSnax, setSelectedPowerSnax] = useState<{ [round: string]: PowerUp | null }>({
+    '1-3': null,
+    '3-6': null
+  });
   const navigate = useNavigate();
 
   const handleUnitAction = useCallback((draggedItem: DraggedUnit, targetPos: Position) => {
@@ -216,8 +221,15 @@ export default function DeckBuilderPage() {
   }, []);
 
   const handleCreateGuide = useCallback(() => {
-    navigate('/guides/new', { state: { initialDeck: placedUnits } });
-  }, [navigate, placedUnits]);
+    navigate('/guides/new', { state: { initialDeck: placedUnits, powerSnax: selectedPowerSnax } });
+  }, [navigate, placedUnits, selectedPowerSnax]);
+
+  const handlePowerSnaxSelect = useCallback((round: '1-3' | '3-6', powerUp: PowerUp | null) => {
+    setSelectedPowerSnax(prev => ({
+      ...prev,
+      [round]: powerUp
+    }));
+  }, []);
 
   const selectedUnit = selectedKey ? placedUnits[selectedKey] : null;
   const unitsForSynergy = useMemo(() => {
@@ -296,13 +308,13 @@ export default function DeckBuilderPage() {
                 </div>
               </div>
             }>
-              <DetailPanel selectedUnit={selectedUnit} onUnitRemove={handleUnitRemove} onChangeStar={handleChangeStar} onEquip={handleEquip} onUnequip={handleUnequip} />
+              <DetailPanel selectedUnit={selectedUnit} onUnitRemove={handleUnitRemove} onChangeStar={handleChangeStar} onEquip={handleEquip} onUnequip={handleUnequip} selectedPowerSnax={selectedPowerSnax} />
             </Suspense>
           </aside>
         </div>
 
         <div className="grid grid-cols-12 gap-5">
-          <div className="col-span-8 bg-background-card dark:bg-dark-background-card p-4 rounded-lg shadow-md">
+          <div className="col-span-6 bg-background-card dark:bg-dark-background-card p-4 rounded-lg shadow-md">
             <Suspense fallback={
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
@@ -324,7 +336,7 @@ export default function DeckBuilderPage() {
               <UnitPanel />
             </Suspense>
           </div>
-          <div className="col-span-4 bg-background-card dark:bg-dark-background-card p-4 rounded-lg shadow-md">
+          <div className="col-span-3 bg-background-card dark:bg-dark-background-card p-4 rounded-lg shadow-md">
             <Suspense fallback={
               <div className="space-y-3">
                 <div className="w-20 h-6 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
@@ -336,6 +348,19 @@ export default function DeckBuilderPage() {
               </div>
             }>
               <ItemPanel />
+            </Suspense>
+          </div>
+          <div className="col-span-3 bg-background-card dark:bg-dark-background-card p-4 rounded-lg shadow-md">
+            <Suspense fallback={
+              <div className="space-y-3">
+                <div className="w-20 h-6 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                <div className="space-y-2">
+                  <div className="w-full h-12 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                  <div className="w-full h-12 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+                </div>
+              </div>
+            }>
+              <PowerSnaxPanel selectedPowerSnax={selectedPowerSnax} onPowerSnaxSelect={handlePowerSnaxSelect} />
             </Suspense>
           </div>
         </div>

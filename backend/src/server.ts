@@ -1,5 +1,45 @@
 // backend/src/server.ts - TFT Meta Analyzer
 
+// 🚀 Phase 1: 환경변수 최우선 로드 (모든 import 이전에 실행)
+import dotenv from 'dotenv';
+dotenv.config();
+console.log('✅ 환경변수 최우선 로드 완료');
+
+// 🚀 Phase 3: 필수 환경변수 즉시 검증 (서버 시작 전 조기 발견)
+const REQUIRED_ENV_VARS = [
+  'MONGODB_URI',
+  'RIOT_API_KEY',
+  'NODE_ENV',
+  'PORT'
+];
+
+console.log('🔍 필수 환경변수 즉시 검증 시작...');
+const missingVars = REQUIRED_ENV_VARS.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  console.error('❌ 필수 환경변수가 누락되었습니다:');
+  missingVars.forEach(varName => {
+    console.error(`  - ${varName}: 미설정`);
+  });
+  console.error('');
+  console.error('💡 해결 방법:');
+  console.error('  1. .env 파일이 존재하는지 확인하세요');
+  console.error('  2. 위의 필수 환경변수들이 .env 파일에 설정되어 있는지 확인하세요');
+  console.error('  3. .env 파일이 프로젝트 루트 디렉토리에 있는지 확인하세요');
+  console.error('');
+  console.error('🚨 서버를 시작할 수 없습니다. 프로세스를 종료합니다.');
+  process.exit(1);
+}
+
+console.log('✅ 필수 환경변수 즉시 검증 완료');
+REQUIRED_ENV_VARS.forEach(varName => {
+  const value = process.env[varName];
+  const displayValue = ['MONGODB_URI', 'RIOT_API_KEY'].includes(varName) 
+    ? value!.substring(0, 4) + '...' + value!.slice(-4)
+    : value;
+  console.log(`  ✓ ${varName}: ${displayValue}`);
+});
+
 console.log('=== 서버 시작 ===');
 console.log('Node.js 버전:', process.version);
 console.log('환경변수 PORT:', process.env.PORT);
@@ -8,19 +48,22 @@ console.log('환경변수 MONGODB_URI 존재:', !!process.env.MONGODB_URI);
 
 import 'express-async-errors';
 import express from 'express';
-import dotenv from 'dotenv';
+import http from 'http';
 import logger from './config/logger';
 import { initializeCoreModules } from './initialization/coreModules';
-import { setupRoutes } from './initialization/routeSetup';
+import { setupRoutes, setup404Handler } from './initialization/routeSetup';
 import { loadAndValidateEnv } from './initialization/envLoader';
+import { setupGraphQL, isGraphQLEnabled, logGraphQLInfo } from './initialization/graphqlSetup';
+import RealtimeEventService from './services/realtimeEvents';
 
 console.log('모든 import 완료');
 
-dotenv.config();
-console.log('dotenv.config() 실행 완료');
+// dotenv.config(); // 🚀 Phase 1: 최상단으로 이동됨 (기존 호출 보존)
+console.log('환경변수 설정 확인 완료');
 
 const app = express();
-console.log('Express 앱 생성 완료');
+const httpServer = http.createServer(app);
+console.log('Express 앱 및 HTTP 서버 생성 완료');
 
 async function setupExpressServer(): Promise<void> {
   console.log('setupExpressServer 시작');
@@ -46,6 +89,30 @@ async function setupExpressServer(): Promise<void> {
   }
   
   logger.info(`라우터 설정 완료 - 등록된 라우트: ${routeSetupResult.registeredRoutes.length}개`);
+  
+  // 3. GraphQL 설정 (Feature Flag로 제어)
+  if (isGraphQLEnabled()) {
+    console.log('GraphQL 설정 시작');
+    logGraphQLInfo();
+    
+    const graphqlSetupResult = await setupGraphQL(app, httpServer);
+    console.log('GraphQL 설정 결과:', graphqlSetupResult.success);
+    
+    if (graphqlSetupResult.success) {
+      logger.info(`GraphQL 설정 완료 - 엔드포인트: ${graphqlSetupResult.endpoint}`);
+    } else {
+      logger.warn(`GraphQL 설정 실패: ${graphqlSetupResult.message}`);
+      // GraphQL 실패는 전체 서버 시작을 중단하지 않음
+    }
+  } else {
+    logger.info('GraphQL이 비활성화되어 있습니다 (ENABLE_GRAPHQL=false)');
+  }
+  
+  // 4. 404 핸들러 설정 (모든 미들웨어와 라우트 등록 후 마지막에)
+  console.log('404 핸들러 설정 시작');
+  setup404Handler(app);
+  console.log('404 핸들러 설정 완료');
+  
   console.log('setupExpressServer 완료');
 }
 
@@ -75,9 +142,22 @@ async function startServer() {
     const port = parseInt(process.env.PORT || '4001', 10);
     console.log('서버 리스닝 시작, 포트:', port);
     
-    const server = app.listen(port, '0.0.0.0', () => {
+    const server = httpServer.listen(port, '0.0.0.0', () => {
       console.log('서버 리스닝 콜백 실행됨');
       logger.info(`🎉 SERVER IS RUNNING ON PORT ${port}`);
+      
+      // GraphQL 정보 추가 로깅
+      if (isGraphQLEnabled()) {
+        logger.info(`🚀 GraphQL Endpoint: http://localhost:${port}/graphql`);
+        logger.info(`📖 GraphiQL available at: http://localhost:${port}/graphql`);
+      }
+      logger.info(`📚 REST API Docs: http://localhost:${port}/api-docs`);
+
+      // 서버 시작 이벤트 발행 (GraphQL Subscriptions 테스트용)
+      setTimeout(() => {
+        RealtimeEventService.notifyServerStarted();
+        logger.info('📡 서버 시작 실시간 이벤트 발행 완료');
+      }, 1000);
     });
 
     server.on('error', (_error: any) => {

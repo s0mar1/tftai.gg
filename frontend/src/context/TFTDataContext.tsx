@@ -22,14 +22,13 @@ interface TooltipState {
   position: { x: number; y: number };
 }
 
-// 아이템 카테고리 타입
+// 아이템 카테고리 타입 (Set 15 - Support 아이템 제거됨)
 interface ItemsByCategory {
   basic: Item[];
   completed: Item[];
   ornn: Item[];
   radiant: Item[];
   emblem: Item[];
-  support: Item[];
   robot: Item[];
   unknown: Item[];
 }
@@ -59,12 +58,12 @@ interface TFTDataContextValue extends TFTData {
   retry: () => void;
 }
 
-// 기본값
+// 기본값 (Set 15 - Support 아이템 제거됨)
 const defaultTFTDataValue: TFTDataContextValue = {
   champions: [],
   items: { 
     basic: [], completed: [], ornn: [], radiant: [], 
-    emblem: [], support: [], robot: [], unknown: [] 
+    emblem: [], robot: [], unknown: [] 
   },
   augments: [],
   traits: [],
@@ -73,7 +72,7 @@ const defaultTFTDataValue: TFTDataContextValue = {
   currentSet: '',
   itemsByCategory: {
     basic: [], completed: [], ornn: [], radiant: [],
-    emblem: [], support: [], robot: [], unknown: []
+    emblem: [], robot: [], unknown: []
   },
   allItems: [],
   loading: true,

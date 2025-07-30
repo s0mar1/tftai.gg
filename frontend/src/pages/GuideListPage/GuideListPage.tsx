@@ -5,7 +5,7 @@ import { useTFTData } from '../../context/TFTDataContext';
 import { decodeDeck } from '../../utils/deckCode';
 import Trait from '../summoner/components/Trait';
 import { Champion, Item, Trait as TraitType } from '../../types';
-import { processImagePath, safeProcessImagePath } from '../../utils/imageUtils';
+import { fixChampionImageUrl, safeProcessImagePath, createImageErrorHandler } from '../../utils/imageUtils';
 
 // Type Definitions
 interface LevelBoard {
@@ -444,14 +444,14 @@ export default function GuideListPage() {
                             original_image_url: champion.image_url,
                             tileIcon: champion.tileIcon,
                             icon: champion.icon,
-                            processed_url: processImagePath(champion.image_url),
+                            processed_url: fixChampionImageUrl(champion.image_url),
                             safe_processed_url: safeProcessImagePath(champion.image_url),
                             final_url: testImageUrl,
                             url_type: champion.image_url?.startsWith('http') ? 'absolute' : 'relative'
                           });
                           
                           // 임시 테스트: 알려진 정상 URL로도 시도
-                          console.log('🧪 Test URL:', `https://raw.communitydragon.org/latest/game/assets/characters/tft14_drmundo/hud/tft14_drmundo_square.png`);
+                          console.log('🧪 Test URL:', `https://raw.communitydragon.org/latest/game/assets/characters/tft15_akali/hud/tft15_akali_square.png`);
                         }
 
                         const imageUrl = getChampionImageUrl(champion);

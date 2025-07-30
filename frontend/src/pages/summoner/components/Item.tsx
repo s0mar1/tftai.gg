@@ -1,6 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import { processImagePath } from '../../../utils/imageUtils';
+import { processItemImageUrl, createImageErrorHandler } from '../../../utils/imageUtils';
 
 interface ItemData {
   name: string;
@@ -23,7 +23,8 @@ const Item: React.FC<ItemProps> = ({ item, isCompact = false }) => {
 
   return (
     <img
-      src={processImagePath(item.image_url)}
+      src={processItemImageUrl(item.image_url)}
+      onError={createImageErrorHandler('item')}
       alt={item.name}
       className={imgClassNames} // 클래스 적용
       title={item.name}

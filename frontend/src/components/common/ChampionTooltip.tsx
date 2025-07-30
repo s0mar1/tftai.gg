@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { useTFTData } from '../../context/TFTDataContext';
 import TraitTooltipItem from './TraitTooltipItem';
-import { generateTooltip } from '../../utils/abilityTemplates';
+// Set 15: abilityTemplates 제거됨, 기본 능력 정보 사용
 import { Champion } from '../../types';
 import { createComponentLogger } from '../../utils/logger';
-import { getAbilityIconUrl, preloadImage, safeProcessImagePath } from '../../utils/imageUtils';
+import { getAbilityIconUrl, preloadImage, safeProcessImagePath, createImageErrorHandler } from '../../utils/imageUtils';
 
 const logger = createComponentLogger('ChampionTooltip');
 
@@ -25,7 +25,12 @@ const TraitInfo: React.FC<TraitInfoProps> = ({ traitData }) => {
   return (
     <div className="flex items-center gap-1.5">
       <div className="w-5 h-5 bg-background-card dark:bg-dark-background-card flex items-center justify-center rounded-full">
-         <img src={traitData.icon} alt={traitData.name} className="w-4 h-4" />
+         <img 
+           src={traitData.icon} 
+           alt={traitData.name} 
+           className="w-4 h-4" 
+           onError={createImageErrorHandler('trait')}
+         />
       </div>
       <span className="text-xs text-text-secondary dark:text-dark-text-secondary">{traitData.name}</span>
     </div>
@@ -56,15 +61,11 @@ const ChampionTooltip = React.memo<ChampionTooltipProps>(function ChampionToolti
   // 특성 이름을 직접 사용
   const displayTraits = traits.filter(Boolean); // null 또는 undefined 특성 제거
   
-  // 툴팁 데이터를 즉시 생성 (로딩 지연 제거)
+  // Set 15: 기본 능력 정보 사용 (템플릿 시스템 간소화)
   const tooltipData = React.useMemo(() => {
-    try {
-      return generateTooltip(champion);
-    } catch (error) {
-      logger.error('Failed to generate tooltip', error as Error, { championName: champion.name });
-      return {
-        name: champion.ability?.name || 'Unknown Ability',
-        mana: 'N/A',
+    return {
+      name: champion.ability?.name || 'Unknown Ability',
+      mana: champion.stats?.mana ? `${champion.stats.mana}` : 'N/A',
         description: champion.ability?.desc || 'No description available',
         values: []
       };
@@ -78,7 +79,12 @@ const ChampionTooltip = React.memo<ChampionTooltipProps>(function ChampionToolti
     >
       <div className="flex items-start gap-3 pb-3">
         <div className="w-12 h-12 rounded" style={{ border: `2px solid ${getCostColor(cost)}` }}>
-          <img src={safeProcessImagePath(champion.tileIcon)} alt={name} className="w-full h-full object-cover rounded-sm" />
+          <img 
+            src={safeProcessImagePath(champion.tileIcon)} 
+            alt={name} 
+            className="w-full h-full object-cover rounded-sm" 
+            onError={createImageErrorHandler('champion')}
+          />
         </div>
         <div className="flex-1">
           <h3 className="font-bold text-base" style={{ color: getCostColor(cost) }}>{name}</h3>
@@ -98,7 +104,12 @@ const ChampionTooltip = React.memo<ChampionTooltipProps>(function ChampionToolti
         <div className="py-3 border-t border-gray-700 space-y-3">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <img src={getAbilityIconUrl(ability.icon)} alt={tooltipData.name} className="w-8 h-8 rounded" />
+              <img 
+                src={getAbilityIconUrl(ability.icon)} 
+                alt={tooltipData.name} 
+                className="w-8 h-8 rounded" 
+                onError={createImageErrorHandler('champion')}
+              />
               <p className="font-bold text-text-primary dark:text-dark-text-primary text-sm">{tooltipData.name}</p>
             </div>
             <p className="text-text-secondary dark:text-dark-text-secondary text-xs font-mono">마나: {tooltipData.mana}</p>

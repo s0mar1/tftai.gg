@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { ApiResponse } from '../types';
 import logger from '../config/logger';
+import { safeStringifyForAPI } from './safeStringify';
 
 // 확장된 응답 타입 정의
 interface ExtendedApiResponse<T = any> extends ApiResponse<T> {
@@ -258,6 +259,22 @@ export const sendStreamData = (
   event: string,
   data: any
 ): void => {
-  _res.write(`event: ${event}\n`);
-  _res.write(`data: ${JSON.stringify(data)}\n\n`);
+  try {
+    _res.write(`event: ${event}\n`);
+    // 안전한 JSON 직렬화 사용 - 순환 참조 방지
+    _res.write(`data: ${safeStringifyForAPI(data)}\n\n`);
+  } catch (error) {
+    // 스트리밍 실패 시 에러 이벤트 전송
+    const errorMessage = error instanceof Error ? error.message : 'Serialization failed';
+    _res.write(`event: error\n`);
+    _res.write(`data: ${JSON.stringify({ error: errorMessage, originalEvent: event })}\n\n`);
+    
+    // 로그에도 기록
+    logger.error('스트리밍 데이터 전송 실패:', {
+      event,
+      error: errorMessage,
+      dataType: typeof data,
+      dataKeys: typeof data === 'object' && data !== null ? Object.keys(data) : []
+    });
+  }
 };

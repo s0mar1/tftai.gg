@@ -5,11 +5,15 @@
 @tailwind utilities;
 
 body {
-  @apply bg-background-base text-text-primary font-sans;
+  @apply bg-background-base dark:bg-dark-background-base text-text-primary dark:text-dark-text-primary font-sans;
   margin: 0;
   padding: 0;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+html {
+  @apply bg-background-base dark:bg-dark-background-base;
 }
 
 html, body {

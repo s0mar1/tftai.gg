@@ -22,9 +22,21 @@ export interface Champion {
   tileIcon: string;
   traits: string[];
   stats?: ChampionStats;
+  ability?: ChampionAbility;
   // 프론트엔드 호환성을 위한 추가 필드들
   tier?: number;
   recommendedItems?: Item[];
+  image_url?: string;
+  icon?: string;
+  // Set 15 추가 필드
+  role?: 'tank' | 'fighter' | 'assassin' | 'caster' | 'specialist' | 'marksman';
+}
+
+export interface ChampionAbility {
+  name: string;
+  desc: string;
+  icon?: string;
+  variables?: Record<string, number | string | boolean>;
 }
 
 export interface Item {
@@ -321,6 +333,32 @@ export interface Ranker {
   wins: number;
   losses: number;
   profileIconId: number;
+}
+
+// Set 15 Power Snax 시스템
+export interface PowerSnax {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  round: '1-3' | '3-6';
+  powerUps: PowerUp[];
+}
+
+export interface PowerUp {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  type: 'stats' | 'ability' | 'trait' | 'special';
+  effects: PowerUpEffect[];
+}
+
+export interface PowerUpEffect {
+  stat?: keyof ChampionStats;
+  value?: number | string;
+  description?: string;
+  duration?: 'permanent' | 'combat' | number;
 }
 
 // 가이드 관련 타입

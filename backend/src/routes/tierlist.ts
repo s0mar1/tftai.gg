@@ -3,8 +3,64 @@ import DeckTier from '../models/DeckTier';
 import logger from '../config/logger';
 import { sendSuccess } from '../utils/responseHelper';
 import { checkDBConnection } from '../middlewares/dbConnectionCheck';
+import { getTFTDataWithLanguage } from '../services/tftData';
+import { getTraitStyleInfo } from '../utils/tft-helpers';
 
 const router = express.Router();
+
+/**
+ * 챔피언의 특성 정보를 TFT 정적 데이터에서 가져와 보강하는 헬퍼 함수
+ */
+async function enrichTraitsFromUnits(coreUnits: any[], lang: string): Promise<any[]> {
+  try {
+    const tftData = await getTFTDataWithLanguage(lang);
+    if (!tftData) {
+      logger.error('TFT 데이터를 가져올 수 없습니다.');
+      return [];
+    }
+    const { champions } = tftData;
+    
+    // 모든 유닛의 특성을 수집
+    const traitCountMap = new Map<string, number>();
+    
+    for (const unit of coreUnits) {
+      // 챔피언 데이터에서 특성 정보 가져오기
+      const champion = champions.find((c: any) => c.apiName === unit.apiName);
+      if (champion && champion.traits) {
+        for (const traitApiName of champion.traits) {
+          // 특성 카운트 증가
+          traitCountMap.set(traitApiName, (traitCountMap.get(traitApiName) || 0) + 1);
+        }
+      }
+    }
+    
+    // 특성 정보를 프론트엔드가 기대하는 형식으로 변환
+    const enrichedTraits: any[] = [];
+    for (const [traitApiName, count] of traitCountMap.entries()) {
+      // getTraitStyleInfo 사용 (서머너 페이지와 동일한 방식)
+      const styleInfo = getTraitStyleInfo(traitApiName, count, tftData);
+      
+      if (styleInfo && styleInfo.style !== 'inactive') {
+        enrichedTraits.push({
+          apiName: styleInfo.apiName,
+          name: styleInfo.name,
+          tier_current: styleInfo.tier_current,
+          style: styleInfo.style,
+          styleOrder: styleInfo.styleOrder,
+          image_url: '' // 프론트엔드의 processTraitImageUrl이 처리하도록 빈 문자열
+        });
+      }
+    }
+    
+    // styleOrder 기준으로 정렬 (높은 것부터)
+    enrichedTraits.sort((a, b) => b.styleOrder - a.styleOrder);
+    
+    return enrichedTraits;
+  } catch (error) {
+    logger.error('특성 정보 보강 중 오류 발생:', error);
+    return [];
+  }
+}
 
 /**
  * @swagger
@@ -429,28 +485,34 @@ router.get('/decks/:language', checkDBConnection, async (_req: Request, _res: Re
     }
 
     // 언어별 필드 추출 및 프론트엔드 호환 형태로 변환
-    const formattedData = tierData.map(deck => ({
-      deckKey: deck.deckKey,
-      tierRank: deck.tierRank || 'C',
-      tierOrder: deck.tierOrder || 99,
-      // 다국어 필드에서 요청된 언어의 값을 추출 (더 안전한 fallback)
-      carryChampionName: deck.carryChampionName?.[lang as keyof typeof deck.carryChampionName] || 
-                        deck.carryChampionName?.ko || 
-                        deck.carryChampionName?.en || 
-                        deck.carryChampionName || 
-                        '미확인 챔피언',
-      mainTraitName: deck.mainTraitName?.[lang as keyof typeof deck.mainTraitName] || 
-                    deck.mainTraitName?.ko || 
-                    deck.mainTraitName?.en || 
-                    deck.mainTraitName || 
-                    '미확인 특성',
-      coreUnits: deck.coreUnits || [],
-      totalGames: deck.totalGames || 0,
-      top4Count: deck.top4Count || 0,
-      winCount: deck.winCount || 0,
-      averagePlacement: deck.averagePlacement || 0,
-      createdAt: deck.createdAt,
-      updatedAt: deck.updatedAt
+    const formattedData = await Promise.all(tierData.map(async (deck) => {
+      // 특성 정보 보강
+      const enrichedTraits = await enrichTraitsFromUnits(deck.coreUnits || [], lang);
+      
+      return {
+        deckKey: deck.deckKey,
+        tierRank: deck.tierRank || 'C',
+        tierOrder: deck.tierOrder || 99,
+        // 다국어 필드에서 요청된 언어의 값을 추출 (더 안전한 fallback)
+        carryChampionName: deck.carryChampionName?.[lang as keyof typeof deck.carryChampionName] || 
+                          deck.carryChampionName?.ko || 
+                          deck.carryChampionName?.en || 
+                          deck.carryChampionName || 
+                          '미확인 챔피언',
+        mainTraitName: deck.mainTraitName?.[lang as keyof typeof deck.mainTraitName] || 
+                      deck.mainTraitName?.ko || 
+                      deck.mainTraitName?.en || 
+                      deck.mainTraitName || 
+                      '미확인 특성',
+        coreUnits: deck.coreUnits || [],
+        traits: enrichedTraits, // 특성 정보 추가
+        totalGames: deck.totalGames || 0,
+        top4Count: deck.top4Count || 0,
+        winCount: deck.winCount || 0,
+        averagePlacement: deck.averagePlacement || 0,
+        createdAt: deck.createdAt,
+        updatedAt: deck.updatedAt
+      };
     }));
 
     logger.info(`${formattedData.length}개의 티어 데이터를 ${lang} 언어로 반환합니다.`);

@@ -12,7 +12,7 @@ export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
 // Lazy-loaded page components with priority-based loading
 // High priority pages (likely to be visited first)
 const HomePage = createLazyComponent(() => import('../../pages/HomePage'), { priority: 'high' });
-const SummonerPage = createLazyComponent(() => import('../../pages/summoner/SummonerPage'), { priority: 'high' });
+const SummonerPage = createLazyComponent(() => import('../../pages/summoner/SummonerPageGraphQL'), { priority: 'high' });
 const TierListPage = createLazyComponent(() => import('../../pages/tierlist/TierListPage'), { priority: 'high' });
 
 // Medium priority pages (commonly visited)
@@ -26,18 +26,20 @@ const GuideListPage = createLazyComponent(() => import('../../pages/GuideListPag
 const GuideDetailPage = createLazyComponent(() => import('../../pages/GuideDetailPage/GuideDetailPage'), { priority: 'low' });
 const GuideEditorPage = createLazyComponent(() => import('../../pages/GuideEditorPage/GuideEditorPage'), { priority: 'low' });
 const AboutPage = createLazyComponent(() => import('../../pages/AboutPage/AboutPage'), { priority: 'low' });
+const Set15FeaturesPage = createLazyComponent(() => import('../../pages/Set15FeaturesPage'), { priority: 'medium' });
 
 // Route preloading for better performance
 const preloadRoutes = {
   high: [
     () => import('../../pages/HomePage'),
-    () => import('../../pages/summoner/SummonerPage'),
+    () => import('../../pages/summoner/SummonerPageGraphQL'),
     () => import('../../pages/tierlist/TierListPage'),
   ],
   medium: [
     () => import('../../pages/ranking/RankingPage'),
     () => import('../../pages/DeckBuilderPage/DeckBuilderPage'),
     () => import('../../pages/stats/StatsPage'),
+    () => import('../../pages/Set15FeaturesPage'),
   ],
   low: [
     () => import('../../pages/AiQnaPage/AiQnaPage'),
@@ -127,6 +129,7 @@ export const LanguageRoutes: React.FC<LanguageRoutesProps> = ({ isDarkMode }) =>
               <Route path="/guides/:id" element={<GuideDetailPage />} />
               <Route path="/guides/new" element={<GuideEditorPage />} />
               <Route path="/stats" element={<StatsPage />} />
+              <Route path="/set15-features" element={<Set15FeaturesPage />} />
             </Routes>
           </LanguageWrapper>
         } />

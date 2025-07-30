@@ -6,6 +6,7 @@
 import logger from '../config/logger';
 import { startScheduler } from '../services/scheduler';
 import connectDB from '../config/db';
+import queryMonitor from '../utils/queryMonitor';
 
 interface ModuleInitResult {
   module: string;
@@ -39,6 +40,14 @@ export const initializeCoreModules = async (): Promise<CoreModulesStatus> => {
       module: 'MongoDB',
       status: 'initialized',
       message: 'MongoDB connected successfully'
+    });
+    
+    // MongoDB 연결 성공 후 쿼리 모니터링 시작
+    queryMonitor.startMonitoring();
+    results.push({
+      module: 'QueryMonitor',
+      status: 'initialized',
+      message: 'Query monitoring started successfully'
     });
   } catch (error) {
     logger.error('❌ MongoDB connection failed:', error);

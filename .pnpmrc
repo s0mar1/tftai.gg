@@ -1,0 +1,14 @@
+# PNPM 설정 - GraphQL 모듈 충돌 방지
+shamefully-hoist=false
+shared-workspace-lockfile=true
+prefer-workspace-packages=true
+strict-peer-dependencies=false
+
+# GraphQL 관련 패키지 호이스팅 설정
+public-hoist-pattern[]=*graphql*
+public-hoist-pattern[]=*@apollo*
+public-hoist-pattern[]=*@graphql*
+
+# 캐시 및 성능 설정
+engine-strict=false
+auto-install-peers=true

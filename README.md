@@ -44,7 +44,7 @@ tft-meta-analyzer/                      # 🏗️ 모노레포 루트
    ├── summoner.ts              # 소환사 조회 API
    ├── tierlist.ts              # 티어리스트 API
    ├── ai.ts                    # AI 분석 API
-   └── [12개 라우트 파일]
+   └── [15개+ 라우트 파일]
 🔧 services/                   # 비즈니스 로직 (핵심 로직 위치)
    ├── riotApi.ts               # Riot Games API 통신
    ├── tftData.ts               # TFT 정적 데이터 관리
@@ -52,7 +52,7 @@ tft-meta-analyzer/                      # 🏗️ 모노레포 루트
    ├── ai/                      # AI 서비스
    │   ├── AIAnalysisService.ts # AI 매치 분석
    │   └── QnAService.ts        # AI Q&A 서비스
-   └── [15개 서비스 파일]
+   └── [주요 서비스 파일들]
 📊 models/                     # MongoDB 스키마 정의
 🔗 types/                      # TypeScript 타입 정의
 🛠️  utils/                     # 유틸리티 함수
@@ -66,7 +66,7 @@ tft-meta-analyzer/                      # 🏗️ 모노레포 루트
    ├── summoner/SummonerPage.tsx     # 소환사 페이지
    ├── tierlist/TierListPage.jsx     # 티어리스트 페이지
    ├── AiQnaPage/AiQnaPage.jsx       # AI Q&A 페이지
-   └── [9개 페이지]
+   └── [주요 페이지들]
 🧩 components/                 # 재사용 가능한 컴포넌트
    ├── common/                       # 공통 컴포넌트
    ├── layout/                       # 레이아웃 컴포넌트
@@ -112,7 +112,34 @@ tft-meta-analyzer/                      # 🏗️ 모노레포 루트
 
 ---
 
-## 🚀 개발 환경 설정
+## 🚀 빠른 시작 가이드
+
+### 📋 사전 요구사항
+- **Node.js**: 18.0.0 이상 (ESM 지원)
+- **pnpm**: 9.15.0 이상 (설치: `npm install -g pnpm`)
+- **MongoDB**: 로컬 또는 Atlas 클러스터
+- **Riot API Key**: [developer.riotgames.com](https://developer.riotgames.com)에서 발급
+
+### 🔧 개발 환경 설정
+
+#### 1. 프로젝트 클론 및 의존성 설치
+```bash
+git clone https://github.com/your-username/tft-meta-analyzer.git
+cd tft-meta-analyzer
+pnpm install  # 모든 워크스페이스 패키지 자동 설치
+```
+
+#### 2. 환경변수 설정
+```bash
+# 백엔드 환경변수
+cp backend/.env.example backend/.env
+# 필수 환경변수 설정:
+# - RIOT_API_KEY
+# - MONGODB_URI
+
+# 프론트엔드 환경변수 (선택)
+cp frontend/.env.example frontend/.env
+```
 
 ### 필수 환경 변수
 ```bash
@@ -145,22 +172,20 @@ REDIS_RETRY_COUNT=3                    # Redis 연결 재시도 횟수 (기본: 
 REDIS_RETRY_DELAY=1000                 # Redis 재시도 지연 시간 (기본: 1초)
 ```
 
-### 설치 및 실행
+### 개발 서버 실행
 ```bash
-# 1. 의존성 설치 (모노레포 루트에서)
-pnpm install
+# 3. 개발 서버 실행 (루트 디렉토리에서)
+pnpm dev  # 백엔드(4001) + 프론트엔드(5173) 동시 실행
 
-# 2. 개발 서버 실행
-# 옵션 1: 통합 개발 서버 (권장)
-pnpm dev  # 백엔드 + 프론트엔드 동시 실행
-
-# 옵션 2: 개별 실행
-# 터미널 1: 백엔드 서버 (http://localhost:4001)
-cd backend && pnpm dev
-
-# 터미널 2: 프론트엔드 서버 (http://localhost:5173)  
-cd frontend && pnpm dev
+# 또는 개별 실행
+pnpm dev:backend   # 백엔드만 실행
+pnpm dev:frontend  # 프론트엔드만 실행
 ```
+
+개발 서버가 시작되면:
+- 백엔드 API: http://localhost:4001
+- 프론트엔드: http://localhost:5173
+- API 문서: http://localhost:4001/api-docs
 
 ### 빌드 및 배포
 ```bash
@@ -530,32 +555,57 @@ gemini -p "@backend/src/ @frontend/src/ AI 분석 기능이 제대로 구현되�
 
 ---
 
+## 🚀 배포 가이드
+
+### 프로덕션 배포
+- **백엔드**: [Render.com](https://render.com) - Node.js 서버
+- **프론트엔드**: [Cloudflare Pages](https://pages.cloudflare.com) - 정적 호스팅
+- **데이터베이스**: [MongoDB Atlas](https://cloud.mongodb.com)
+- **캐시**: [Upstash Redis](https://upstash.com)
+
+자세한 배포 가이드는 [DEPLOYMENT.md](./DEPLOYMENT.md)를 참조하세요.
+
+---
+
+## 📚 프로젝트 문서
+
+### 📋 핵심 문서
+- **[PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)** - 프로젝트 구조 상세 설명
+- **[DEPLOYMENT_ARCHITECTURE.md](./DEPLOYMENT_ARCHITECTURE.md)** - 배포 아키텍처 가이드
+- **[SERVICES_GUIDE.md](./SERVICES_GUIDE.md)** - API 및 서비스 문서
+- **[TECH_STACK.md](./TECH_STACK.md)** - 기술 스택 상세 설명
+- **[CLAUDE.md](./CLAUDE.md)** - AI CLI 도구 사용법
+
+### 🔧 개발 가이드
+- **[docs/adr/](./docs/adr/)** - 아키텍처 결정 기록
+- **[docs/testing-guidelines.md](./docs/testing-guidelines.md)** - 테스팅 가이드
+- **[docs/turbo-guide.md](./docs/turbo-guide.md)** - Turbo 사용 가이드
+
+---
+
 ## 📊 프로젝트 현재 상태
 
 ### ✅ 완료된 작업
-- [x] TypeScript 마이그레이션 100% 완료
-- [x] 33개 TypeScript 컴파일 에러 모두 수정
-- [x] 레거시 서버 파일 정리 완료
-- [x] ESM 모듈 시스템 적용
-- [x] AI 서비스 통합 (Gemini API)
-- [x] 국제화(i18n) 구현
-- [x] 캐싱 시스템 구축
-- [x] 포괄적인 테스트 커버리지
+- [x] **TypeScript 마이그레이션** - 100% 완료 (철의 장막 규칙 적용)
+- [x] **모노레포 구조** - pnpm Workspaces + Turbo 적용
+- [x] **ESM 모듈 시스템** - 전체 프로젝트 ESM 전환
+- [x] **AI 서비스 통합** - Google Gemini API 연동
+- [x] **국제화(i18n)** - 한/영/일/중 4개 언어 지원
+- [x] **이중 캐싱 시스템** - Redis + In-Memory 캐시
+- [x] **고급 환경설정** - 세밀한 설정 옵션 제공
+- [x] **배포 자동화** - Render + Cloudflare 자동 배포
 
-### 🚧 진행 중인 작업
-- [x] **모노레포 구조 구현** - pnpm Workspaces로 통합 개발 환경 구축
-- [x] **고급 설정 시스템** - 환경변수 기반 MongoDB/Redis/TFT 데이터 설정
-- [x] **백엔드 의존성 최적화** - 불필요한 패키지 제거 및 성능 개선
-- [ ] UI/UX 개선 및 반응형 디자인
-- [ ] 성능 최적화 및 메모리 관리
-- [ ] 추가 AI 기능 개발
-- [ ] API 확장 및 새로운 엔드포인트
+### 🚧 개발 중인 기능
+- [ ] **실시간 업데이트** - WebSocket 연동
+- [ ] **고급 데이터 시각화** - D3.js 차트
+- [ ] **PWA 지원** - 오프라인 기능
+- [ ] **성능 대시보드** - 실시간 모니터링
 
 ### 🎯 향후 계획
-- [ ] PWA 변환
-- [ ] 실시간 데이터 업데이트 (WebSocket)
-- [ ] 고급 데이터 시각화
-- [ ] 사용자 맞춤 추천 시스템
+- GraphQL API 도입 검토
+- 머신러닝 기반 메타 예측
+- 모바일 앱 개발
+- 글로벌 서비스 확장
 
 ---
 

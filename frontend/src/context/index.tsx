@@ -5,6 +5,7 @@ import { TFTStaticDataProvider } from './TFTStaticDataContext';
 import { TFTTooltipProvider } from './TFTTooltipContext';
 import { TFTLoadingProvider } from './TFTLoadingContext';
 import { TFTDataProvider } from './TFTDataContext';
+import { TFTDataGraphQLProvider } from './TFTDataContextGraphQL';
 
 /**
  * 모든 Context Provider를 조합한 최상위 Context 컴포넌트
@@ -21,11 +22,13 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       <TFTStaticDataProvider>
         <TFTTooltipProvider>
           <TFTDataProvider>
-            <DarkModeProvider>
-              <UIStateProvider>
-                {children}
-              </UIStateProvider>
-            </DarkModeProvider>
+            <TFTDataGraphQLProvider>
+              <DarkModeProvider>
+                <UIStateProvider>
+                  {children}
+                </UIStateProvider>
+              </DarkModeProvider>
+            </TFTDataGraphQLProvider>
           </TFTDataProvider>
         </TFTTooltipProvider>
       </TFTStaticDataProvider>
@@ -42,7 +45,7 @@ export {
   useTFTItems, 
   useTFTTraits 
 } from './TFTStaticDataContext';
-export { useTFTData } from './TFTDataContext';
+export { useTFTData } from './TFTDataContextGraphQL';
 export { useTFTTooltip } from './TFTTooltipContext';
 export { useTFTLoading, useAPILoading } from './TFTLoadingContext';
 

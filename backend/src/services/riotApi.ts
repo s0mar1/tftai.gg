@@ -270,8 +270,41 @@ export const getAccountByPuuid = async (puuid: string, region: Region): Promise<
 export const getSummonerByPuuid = async (puuid: string, region: Region): Promise<RiotSummonerDTO> => {
   const apiRegion = region;
   const url = `https://${apiRegion}.api.riotgames.com/tft/summoner/v1/summoners/by-puuid/${puuid}`;
-  const response = await api.get(url);
-  return response.data;
+  
+  try {
+    const response = await api.get(url);
+    const data = response.data;
+    
+    // 응답 데이터 검증
+    if (!data || typeof data !== 'object') {
+      logger.error(`[Riot API Error] getSummonerByPuuid: Invalid response data for PUUID ${puuid.substring(0, 8)}...`);
+      throw new Error('Invalid summoner data received from Riot API');
+    }
+    
+    // 필수 필드 검증 및 기본값 제공
+    const validatedData: RiotSummonerDTO = {
+      ...data,
+      id: data.id || '',
+      accountId: data.accountId || '',
+      puuid: data.puuid || puuid,
+      name: data.name || '',
+      profileIconId: data.profileIconId || 0,
+      revisionDate: data.revisionDate || Date.now(),
+      summonerLevel: data.summonerLevel || 1
+    };
+    
+    return validatedData;
+  } catch (error: any) {
+    if (error.response) {
+      logger.error(`[Riot API Error] getSummonerByPuuid Status: ${error.response.status}, PUUID: ${puuid.substring(0, 8)}...`);
+      if (error.response.status === 404) {
+        throw new Error('Summoner not found');
+      }
+    } else {
+      logger.error(`[Riot API Error] getSummonerByPuuid Network Error:`, error.message);
+    }
+    throw error;
+  }
 };
 
 export const getLeagueEntriesByPuuid = async (

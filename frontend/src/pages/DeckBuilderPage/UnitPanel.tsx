@@ -5,9 +5,43 @@ import { useTFTData } from '../../context/TFTDataContext';
 import { useTranslation } from 'react-i18next';
 import { Champion, Trait } from '../../types';
 import { ChampionCardSkeleton } from '../../components/common/TFTSkeletons';
-import { processImagePath } from '../../utils/imageUtils';
+import { fixChampionImageUrl, createImageErrorHandler } from '../../utils/imageUtils';
 
 const COST_COLORS: { [key: number]: string } = { 1: '#808080', 2: '#1E823C', 3: '#156293', 4: '#87259E', 5: '#B89D29' };
+
+// Set 15 유닛 롤 컬러 및 아이콘 매핑
+const ROLE_CONFIG: { [key: string]: { color: string; icon: string; koreanName: string } } = {
+  tank: { color: '#8B4513', icon: '🛡️', koreanName: '탱커' },
+  fighter: { color: '#DC143C', icon: '⚔️', koreanName: '파이터' },
+  assassin: { color: '#6A0DAD', icon: '🗡️', koreanName: '어쌔신' },
+  caster: { color: '#4169E1', icon: '🔮', koreanName: '캐스터' },
+  specialist: { color: '#FF8C00', icon: '⚙️', koreanName: '스페셜리스트' },
+  marksman: { color: '#228B22', icon: '🏹', koreanName: '마크스맨' }
+};
+
+// Set 15 롤 배지 컴포넌트
+interface RoleBadgeProps {
+  role: string;
+  size?: 'small' | 'medium';
+}
+
+const RoleBadge: React.FC<RoleBadgeProps> = ({ role, size = 'small' }) => {
+  const config = ROLE_CONFIG[role];
+  if (!config) return null;
+
+  const badgeSize = size === 'small' ? 'w-4 h-4 text-[8px]' : 'w-5 h-5 text-[10px]';
+  const iconSize = size === 'small' ? 'text-[6px]' : 'text-[8px]';
+
+  return (
+    <div 
+      className={`${badgeSize} rounded-full flex items-center justify-center font-bold text-white shadow-sm`}
+      style={{ backgroundColor: config.color }}
+      title={config.koreanName}
+    >
+      <span className={iconSize}>{config.icon}</span>
+    </div>
+  );
+};
 
 interface DraggableUnitProps {
   champion: Champion;
@@ -91,11 +125,22 @@ const DraggableUnit: React.FC<DraggableUnitProps> = ({ champion }) => {
       onMouseLeave={handleMouseLeave}
     >
       <div
-        className={`rounded-md overflow-hidden shadow-md cursor-grab ${isDragging ? 'opacity-50' : 'opacity-100'}`}
+        className={`relative rounded-md overflow-hidden shadow-md cursor-grab ${isDragging ? 'opacity-50' : 'opacity-100'}`}
         style={{ width: 52, height: 52, border: `2px solid ${borderColor}` }}
         title={champion.name}
       >
-        <img src={processImagePath(champion.tileIcon)} alt={champion.name} className="w-full h-full object-cover" />
+        <img 
+          src={fixChampionImageUrl(champion.tileIcon)} 
+          alt={champion.name} 
+          className="w-full h-full object-cover" 
+          onError={createImageErrorHandler('champion')}
+        />
+        {/* Set 15 롤 배지 오버레이 */}
+        {champion.role && (
+          <div className="absolute top-0 right-0 m-0.5">
+            <RoleBadge role={champion.role} size="small" />
+          </div>
+        )}
       </div>
       <span className="block w-full text-center text-[0.55rem] leading-tight truncate">
         {champion.name}
@@ -143,7 +188,7 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
   });
   const [filterTrait, setFilterTrait] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'cost' | 'origin' | 'class'>('cost');
+  const [activeTab, setActiveTab] = useState<'cost' | 'origin' | 'class' | 'role'>('cost');
 
   const filtered = useMemo(() => {
     if (!champions) return [];
@@ -165,13 +210,35 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
       });
     }
     if (filterTrait) {
-      currentChampions = currentChampions.filter(c => c.traits.includes(filterTrait));
+      if (activeTab === 'role') {
+        // 롤 필터링: champion.role이 filterTrait와 일치하는지 확인
+        currentChampions = currentChampions.filter(c => c.role === filterTrait);
+      } else {
+        // 기존 특성 필터링
+        currentChampions = currentChampions.filter(c => c.traits.includes(filterTrait));
+      }
     }
     return currentChampions;
   }, [champions, filterTrait, search, activeTab]);
 
   const origins = useMemo(() => (traits || []).filter(t => t.type === 'origin'), [traits]);
   const classes = useMemo(() => (traits || []).filter(t => t.type === 'class'), [traits]);
+  
+  // Set 15 롤 목록 생성
+  const roles = useMemo(() => {
+    const roleSet = new Set<string>();
+    champions.forEach(champ => {
+      if (champ.role) {
+        roleSet.add(champ.role);
+      }
+    });
+    return Array.from(roleSet).map(role => ({
+      id: role,
+      name: ROLE_CONFIG[role]?.koreanName || role,
+      icon: ROLE_CONFIG[role]?.icon || '❓',
+      color: ROLE_CONFIG[role]?.color || '#374151'
+    })).sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+  }, [champions]);
 
   const groupedChampions = useMemo(() => {
     if (activeTab === 'cost') return null;
@@ -180,12 +247,68 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
       activeTab,
       originsCount: origins.length,
       classesCount: classes.length,
+      rolesCount: roles.length,
       filteredCount: filtered.length,
       sampleOrigins: origins.slice(0, 3).map(t => ({ apiName: t.apiName, name: t.name })),
       sampleClasses: classes.slice(0, 3).map(t => ({ apiName: t.apiName, name: t.name })),
-      sampleChampions: filtered.slice(0, 3).map(c => ({ name: c.name, traits: c.traits }))
+      sampleRoles: roles.slice(0, 3).map(r => ({ id: r.id, name: r.name })),
+      sampleChampions: filtered.slice(0, 3).map(c => ({ name: c.name, traits: c.traits, role: c.role }))
     });
     
+    // Set 15 롤 기반 그룹핑
+    if (activeTab === 'role') {
+      const roleGroupMap = new Map<string, { role: any; champions: Champion[] }>();
+      
+      filtered.forEach(champion => {
+        if (champion.role) {
+          const roleConfig = ROLE_CONFIG[champion.role];
+          if (roleConfig) {
+            const roleKey = champion.role;
+            if (!roleGroupMap.has(roleKey)) {
+              roleGroupMap.set(roleKey, {
+                role: {
+                  apiName: roleKey,
+                  name: roleConfig.koreanName,
+                  icon: roleConfig.icon,
+                  color: roleConfig.color
+                },
+                champions: []
+              });
+            }
+            roleGroupMap.get(roleKey)?.champions.push(champion);
+          }
+        }
+      });
+      
+      // 각 그룹의 챔피언들을 정렬
+      roleGroupMap.forEach(group => {
+        group.champions.sort((a, b) => {
+          if (a.cost !== b.cost) return a.cost - b.cost;
+          const nameA = a.name || '';
+          const nameB = b.name || '';
+          return nameA.localeCompare(nameB, 'ko');
+        });
+      });
+      
+      const roleResult = Array.from(roleGroupMap.values()).sort((a, b) => {
+        const nameA = a.role.name || '';
+        const nameB = b.role.name || '';
+        return nameA.localeCompare(nameB, 'ko');
+      });
+      
+      console.log('✅ UnitPanel 롤 그룹핑 완료:', {
+        groupCount: roleResult.length,
+        groups: roleResult.map(g => ({ 
+          roleName: g.role.name, 
+          championCount: g.champions.length,
+          championNames: g.champions.map(c => c.name).slice(0, 3)
+        }))
+      });
+      
+      return roleResult;
+    }
+    
+    // 기존 특성 기반 그룹핑
     const groupMap = new Map<string, { trait: Trait; champions: Champion[] }>();
     const targetTraits = activeTab === 'origin' ? origins : classes;
     
@@ -265,7 +388,7 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
     });
     
     return result;
-  }, [filtered, activeTab, origins, classes]);
+  }, [filtered, activeTab, origins, classes, roles]);
 
   if (loading) {
     return (
@@ -311,7 +434,12 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
         <div className="grid gap-x-[2px] gap-y-1" style={{ gridTemplateColumns: 'repeat(auto-fill, 32px)' }}>
           {filtered.map((ch) => (
             <div key={ch.apiName} className="w-8 h-8 rounded-md overflow-hidden shadow-md" title={ch.name}>
-              <img src={processImagePath(ch.tileIcon)} alt={ch.name} className="w-full h-full object-cover" />
+              <img 
+                src={fixChampionImageUrl(ch.tileIcon)} 
+                alt={ch.name} 
+                className="w-full h-full object-cover" 
+                onError={createImageErrorHandler('champion')}
+              />
             </div>
           ))}
         </div>
@@ -329,9 +457,11 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
         <button onClick={() => { setActiveTab('cost'); setFilterTrait(null); }} className={`px-4 py-2 text-sm font-semibold ${activeTab === 'cost' ? 'text-brand-mint border-b-2 border-brand-mint' : 'text-text-secondary dark:text-dark-text-secondary hover:text-text-primary'}`}>{t('deckBuilder.cost')}</button>
         <button onClick={() => setActiveTab('origin')} className={`px-4 py-2 text-sm font-semibold ${activeTab === 'origin' ? 'text-brand-mint border-b-2 border-brand-mint' : 'text-text-secondary dark:text-dark-text-secondary hover:text-text-primary'}`}>{t('stats.traitTypes.origin')}</button>
         <button onClick={() => setActiveTab('class')} className={`px-4 py-2 text-sm font-semibold ${activeTab === 'class' ? 'text-brand-mint border-b-2 border-brand-mint' : 'text-text-secondary dark:text-dark-text-secondary hover:text-text-primary'}`}>{t('stats.traitTypes.class')}</button>
+        <button onClick={() => setActiveTab('role')} className={`px-4 py-2 text-sm font-semibold ${activeTab === 'role' ? 'text-brand-mint border-b-2 border-brand-mint' : 'text-text-secondary dark:text-dark-text-secondary hover:text-text-primary'}`}>롤</button>
       </div>
       {activeTab === 'origin' && <div className="space-y-2"><FilterGroup title={t('stats.traitTypes.origin')} items={origins} selected={filterTrait} onSelect={setFilterTrait} /></div>}
       {activeTab === 'class' && <div className="space-y-2"><FilterGroup title={t('stats.traitTypes.class')} items={classes} selected={filterTrait} onSelect={setFilterTrait} /></div>}
+      {activeTab === 'role' && <div className="space-y-2"><RoleFilterGroup title="롤" items={roles} selected={filterTrait} onSelect={setFilterTrait} /></div>}
       {activeTab === 'cost' ? (
         <div className="grid gap-x-[3px] gap-y-2 pt-2" style={{ gridTemplateColumns: 'repeat(auto-fill, 52px)' }}>
           {filtered.map((ch) => (<DraggableUnit key={ch.apiName} champion={ch} />))}
@@ -339,10 +469,27 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
       ) : (
         <div className="space-y-4 pt-2">
           {groupedChampions && groupedChampions.map(group => (
-            <div key={group.trait.apiName}>
+            <div key={group.trait ? group.trait.apiName : group.role.apiName}>
               <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-                {group.trait.icon && <img src={group.trait.icon} alt={group.trait.name} className="w-6 h-6" />}
-                {group.trait.name}
+                {/* 롤 그룹의 경우 */}
+                {group.role && (
+                  <>
+                    <div 
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                      style={{ backgroundColor: group.role.color }}
+                    >
+                      {group.role.icon}
+                    </div>
+                    {group.role.name}
+                  </>
+                )}
+                {/* 특성 그룹의 경우 */}
+                {group.trait && (
+                  <>
+                    {group.trait.icon && <img src={group.trait.icon} alt={group.trait.name} className="w-6 h-6" />}
+                    {group.trait.name}
+                  </>
+                )}
               </h3>
               <div className="grid gap-x-[3px] gap-y-2" style={{ gridTemplateColumns: 'repeat(auto-fill, 52px)' }}>
                 {group.champions.map((ch) => (<DraggableUnit key={ch.apiName} champion={ch} />))}
@@ -373,6 +520,40 @@ const FilterGroup: React.FC<FilterGroupProps> = ({ items, selected, onSelect }) 
             onClick={() => onSelect(isSelected ? null : item.name)}
             className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors duration-200 ${isSelected ? 'bg-brand-mint text-white' : 'bg-background-base dark:bg-dark-background-base hover:bg-background-card dark:hover:bg-dark-background-card text-text-primary dark:text-dark-text-primary hover:text-text-primary'}`}>
             {item.icon && <img src={item.icon} alt={item.name} className="w-4 h-4" />}
+            <span>{item.name}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// Set 15 롤 필터 그룹 컴포넌트
+interface RoleFilterGroupProps {
+  title: string;
+  items: Array<{ id: string; name: string; icon: string; color: string }>;
+  selected: string | null;
+  onSelect: (value: string | null) => void;
+}
+
+const RoleFilterGroup: React.FC<RoleFilterGroupProps> = ({ items, selected, onSelect }) => {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {items.map(item => {
+        const isSelected = selected === item.id;
+        return (
+          <button
+            key={item.id}
+            onClick={() => onSelect(isSelected ? null : item.id)}
+            className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors duration-200 ${isSelected ? 'text-white' : 'bg-background-base dark:bg-dark-background-base hover:bg-background-card dark:hover:bg-dark-background-card text-text-primary dark:text-dark-text-primary hover:text-text-primary'}`}
+            style={{ 
+              backgroundColor: isSelected ? item.color : undefined,
+              borderColor: item.color,
+              borderWidth: '1px',
+              borderStyle: 'solid'
+            }}
+          >
+            <span className="text-xs">{item.icon}</span>
             <span>{item.name}</span>
           </button>
         )

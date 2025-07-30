@@ -1,0 +1,281 @@
+# GraphQL Fragments 정의
+# 재사용 가능한 필드 조각들을 정의하여 쿼리 중복을 줄이고 유지보수성을 향상
+
+# 기본 챔피언 정보
+fragment ChampionBasicInfo on ChampionData {
+  name
+  apiName
+  cost
+  image_url
+}
+
+# 챔피언 상세 정보
+fragment ChampionDetailInfo on ChampionData {
+  ...ChampionBasicInfo
+  traits
+  ability {
+    name
+    description
+  }
+  stats {
+    damage
+    health
+    armor
+    magicResistance
+    attackSpeed
+    critChance
+    range
+  }
+}
+
+# 챔피언 카드용 정보 (UI 컴포넌트에 최적화)
+fragment ChampionCardData on ChampionData {
+  name
+  apiName
+  cost
+  image_url
+  traits
+}
+
+# 기본 특성 정보
+fragment TraitBasicInfo on TraitData {
+  name
+  apiName
+  description
+  image_url
+}
+
+# 특성 상세 정보 (활성화 상태 포함)
+fragment TraitDetailInfo on TraitData {
+  ...TraitBasicInfo
+  tier_current
+  style
+  styleOrder
+}
+
+# 기본 아이템 정보
+fragment ItemBasicInfo on ItemData {
+  name
+  apiName
+  description
+  image_url
+}
+
+# 아이템 상세 정보
+fragment ItemDetailInfo on ItemData {
+  ...ItemBasicInfo
+  category
+  stats {
+    damage
+    health
+    armor
+    magicResistance
+    attackSpeed
+    critChance
+    abilityPower
+  }
+}
+
+# 기본 소환사 정보
+fragment SummonerBasicInfo on SummonerInfo {
+  name
+  tag
+  puuid
+  summonerId
+  profileIconId
+  summonerLevel
+}
+
+# 소환사 랭크 정보
+fragment SummonerRankInfo on SummonerInfo {
+  tier
+  rank
+  leaguePoints
+  wins
+  losses
+}
+
+# 소환사 통합 정보
+fragment SummonerCompleteInfo on SummonerInfo {
+  ...SummonerBasicInfo
+  ...SummonerRankInfo
+}
+
+# 기본 매치 정보
+fragment MatchBasicInfo on MatchInfo {
+  gameId
+  gameDateTime
+  queueType
+  placement
+  level
+  totalDamageToPlayers
+}
+
+# 매치 참가자 정보
+fragment MatchParticipantInfo on MatchInfo {
+  ...MatchBasicInfo
+  traits {
+    name
+    apiName
+    level
+    style
+    styleOrder
+  }
+  units {
+    name
+    apiName
+    tier
+    cost
+    items {
+      name
+      apiName
+      image_url
+    }
+  }
+}
+
+# 매치 상세 정보 (전체)
+fragment MatchDetailInfo on MatchInfo {
+  ...MatchParticipantInfo
+  # 추가 상세 정보가 필요하면 여기에 추가
+}
+
+# 티어리스트 덱 기본 정보
+fragment DeckBasicInfo on DeckData {
+  name
+  tier
+  difficulty
+  playstyle
+}
+
+# 티어리스트 덱 구성 정보
+fragment DeckComposition on DeckData {
+  champions
+  traits
+  items
+  augments
+}
+
+# 티어리스트 덱 완전 정보
+fragment DeckCompleteInfo on DeckData {
+  ...DeckBasicInfo
+  ...DeckComposition
+  patch
+  winRate
+  avgPlacement
+}
+
+# 서비스 정보
+fragment ServiceBasicInfo on ServiceInfo {
+  status
+  version
+  uptime
+}
+
+# 서비스 상세 정보
+fragment ServiceDetailInfo on ServiceInfo {
+  ...ServiceBasicInfo
+  features {
+    graphql
+    realtime
+    ai
+    caching
+  }
+  stats {
+    totalQueries
+    totalUsers
+    cacheHitRate
+  }
+}
+
+# 페이지네이션 정보
+fragment PaginationInfo on PaginationData {
+  hasNextPage
+  hasPreviousPage
+  totalCount
+  currentPage
+  totalPages
+}
+
+# 에러 정보
+fragment ErrorInfo on ErrorData {
+  code
+  message
+  details
+  retryable
+  timestamp
+}
+
+# AI 분석 결과 기본 정보
+fragment AIAnalysisBasicInfo on AIAnalysisResult {
+  analysisId
+  status
+  createdAt
+  completedAt
+}
+
+# AI 분석 결과 상세 정보
+fragment AIAnalysisDetailInfo on AIAnalysisResult {
+  ...AIAnalysisBasicInfo
+  analysis {
+    strengths
+    weaknesses
+    recommendations
+    confidence
+  }
+  metadata {
+    model
+    version
+    parameters
+  }
+}
+
+# 실시간 구독용 필드들
+fragment SubscriptionMetadata on SubscriptionData {
+  subscriptionId
+  timestamp
+  eventType
+  userId
+}
+
+# 챔피언 목록 페이지 최적화 Fragment
+fragment ChampionListPageData on Query {
+  champions(language: $language, set: $set) {
+    ...ChampionCardData
+  }
+}
+
+# 티어리스트 페이지 최적화 Fragment  
+fragment TierListPageData on Query {
+  tierlist(language: $language) {
+    S {
+      ...DeckCompleteInfo
+    }
+    A {
+      ...DeckBasicInfo
+      ...DeckComposition
+    }
+    B {
+      ...DeckBasicInfo
+      ...DeckComposition
+    }
+    C {
+      ...DeckBasicInfo
+    }
+  }
+}
+
+# 소환사 페이지 최적화 Fragment
+fragment SummonerPageData on Query {
+  summonerIntegrated(name: $name, region: $region, matchCount: $matchCount) {
+    summoner {
+      ...SummonerCompleteInfo
+    }
+    matches {
+      ...MatchParticipantInfo
+    }
+    error {
+      ...ErrorInfo
+    }
+  }
+}

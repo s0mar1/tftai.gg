@@ -51,6 +51,23 @@
     "code:refactor": "tsx scripts/code-analysis/refactor-suggestions.ts"
   },
   "packageManager": "pnpm@9.15.9",
+  "pnpm": {
+    "overrides": {
+      "graphql": "16.11.0"
+    },
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "graphql": "16.11.0"
+      },
+      "ignoreMissing": [
+        "react",
+        "react-dom"
+      ]
+    }
+  },
+  "resolutions": {
+    "graphql": "16.11.0"
+  },
   "dependencies": {
     "@anthropic-ai/claude-code": "^1.0.51"
   },

@@ -7,6 +7,7 @@ export interface RiotSummonerDTO {
   id: string;
   puuid: string;
   summonerLevel: number;
+  name?: string; // 일부 API 응답에서 포함될 수 있음
 }
 
 export interface RiotAccountDTO {

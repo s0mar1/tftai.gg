@@ -1,5 +1,6 @@
 import winston from 'winston';
 import path from 'path';
+import { safeStringifyForLogging } from '../utils/safeStringify';
 
 const { combine, timestamp, errors, json, printf, colorize } = winston.format;
 
@@ -12,9 +13,15 @@ const customFormat = printf(({ level, message, timestamp, stack, ...meta }) => {
     log += `\n${stack}`;
   }
   
-  // 추가 메타데이터가 있으면 JSON으로 출력
+  // 추가 메타데이터가 있으면 안전한 JSON으로 출력
   if (Object.keys(meta).length > 0) {
-    log += `\n${JSON.stringify(meta, null, 2)}`;
+    try {
+      log += `\n${safeStringifyForLogging(meta)}`;
+    } catch (error) {
+      // 최후의 수단: 메타데이터 직렬화 실패 시 기본 정보만 출력
+      log += `\n[Meta serialization failed: ${error instanceof Error ? error.message : 'Unknown error'}]`;
+      log += `\nMeta keys: [${Object.keys(meta).join(', ')}]`;
+    }
   }
   
   return log;

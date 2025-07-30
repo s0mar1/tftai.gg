@@ -73,3 +73,88 @@ export const invalidateCacheAPI = async (cacheKey: string): Promise<ApiResponse<
   }
   return response.json();
 };
+
+// Set 15 새로운 API 엔드포인트들
+
+export interface PowerSnax {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  round: '1-3' | '3-6';
+  powerUps: PowerUp[];
+}
+
+export interface PowerUp {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  type: 'stats' | 'ability' | 'trait' | 'special';
+  effects: PowerUpEffect[];
+}
+
+export interface PowerUpEffect {
+  stat?: string;
+  value?: number | string;
+  description?: string;
+  duration?: 'permanent' | 'combat' | number;
+}
+
+export interface UnitRole {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  passive: string;
+  champions?: string[];
+}
+
+export const fetchPowerSnaxAPI = async (round?: '1-3' | '3-6', language: string = 'ko'): Promise<ApiResponse<PowerSnax[]>> => {
+  const params = new URLSearchParams();
+  if (round) params.append('round', round);
+  params.append('language', language);
+  
+  const response = await fetch(`/api/power-snax?${params}`);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to fetch Power Snax');
+  }
+  return response.json();
+};
+
+export const fetchPowerUpsAPI = async (powerSnaxId: string, language: string = 'ko'): Promise<ApiResponse<PowerUp[]>> => {
+  const params = new URLSearchParams();
+  params.append('language', language);
+  
+  const response = await fetch(`/api/power-snax/${powerSnaxId}/power-ups?${params}`);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to fetch Power Ups');
+  }
+  return response.json();
+};
+
+export const fetchUnitRolesAPI = async (language: string = 'ko'): Promise<ApiResponse<UnitRole[]>> => {
+  const params = new URLSearchParams();
+  params.append('language', language);
+  
+  const response = await fetch(`/api/unit-roles?${params}`);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to fetch Unit Roles');
+  }
+  return response.json();
+};
+
+export const fetchUnitRoleAPI = async (roleId: string, language: string = 'ko'): Promise<ApiResponse<UnitRole>> => {
+  const params = new URLSearchParams();
+  params.append('language', language);
+  
+  const response = await fetch(`/api/unit-roles/${roleId}?${params}`);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to fetch Unit Role');
+  }
+  return response.json();
+};

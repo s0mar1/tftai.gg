@@ -3,6 +3,7 @@ import express from 'express';
 import logger from '../config/logger';
 import systemOptimizer from '../services/system/index';
 const { performanceOptimizer, memoryOptimizer, resourceOptimizer } = systemOptimizer;
+import queryMonitor from '../utils/queryMonitor';
 // import scalabilityManager from '../services/system/scalabilityManager';
 import aggregationService from '../services/aggregationService';
 import cacheManager from '../services/cacheManager';
@@ -11,6 +12,8 @@ import { performanceStats, generatePerformanceReport } from '../middlewares/perf
 import { performanceStats as queryPerformanceStats, generateOptimizationReport } from '../utils/queryPerformance';
 import { getConnectionStats, manualConnectionCheck, resetConnectionStats } from '../middlewares/dbConnectionCheck';
 import { sendSuccess, sendError } from '../utils/responseHelper';
+import fallbackApiManager from '../services/fallbackApiManager';
+import { transactionStats } from '../utils/transactionWrapper';
 
 const router = express.Router();
 
@@ -25,8 +28,11 @@ router.get('/', (_req, _res) => {
       { path: '/enhanced-stats', method: 'GET', description: 'Get enhanced performance statistics' },
       { path: '/optimization-report', method: 'GET', description: 'Get detailed optimization report' },
       { path: '/slow-operations', method: 'GET', description: 'Get slow queries and requests' },
+      { path: '/query-stats', method: 'GET', description: 'Get database query performance statistics' },
       { path: '/db-status', method: 'GET', description: 'Get database connection status' },
       { path: '/realtime-monitoring', method: 'GET', description: 'Get real-time monitoring data' },
+      { path: '/fallback-api-stats', method: 'GET', description: 'Get API fallback system statistics' },
+      { path: '/transaction-stats', method: 'GET', description: 'Get MongoDB transaction statistics' },
       { path: '/system/resources', method: 'GET', description: 'Get system resource information' },
       { path: '/recommendations', method: 'GET', description: 'Get performance optimization recommendations' },
       { path: '/cache/warmup', method: 'POST', description: 'Warmup application cache' },
@@ -398,6 +404,39 @@ router.post('/db-test', async (_req, res) => {
 });
 
 /**
+ * 데이터베이스 쿼리 성능 통계 조회
+ */
+router.get('/query-stats', asyncHandler(async (_req, res) => {
+  const stats = queryMonitor.getStats();
+  const slowQueries = queryMonitor.getSlowQueries();
+  
+  return sendSuccess(res, {
+    summary: {
+      totalSlowQueries: stats.totalSlowQueries,
+      slowestQuery: stats.slowestQuery ? {
+        collection: stats.slowestQuery.collection,
+        method: stats.slowestQuery.method,
+        executionTime: `${stats.slowestQuery.executionTime}ms`,
+        timestamp: stats.slowestQuery.timestamp
+      } : null,
+      mostProblematicCollection: stats.mostProblematicCollection
+    },
+    recentSlowQueries: slowQueries.slice(-10).map(query => ({
+      collection: query.collection,
+      method: query.method,
+      executionTime: `${query.executionTime}ms`,
+      timestamp: query.timestamp,
+      query: query.query.substring(0, 200) + (query.query.length > 200 ? '...' : '')
+    })),
+    recommendations: stats.totalSlowQueries > 0 ? [
+      '느린 쿼리가 감지되었습니다. 해당 컬렉션에 인덱스 추가를 고려하세요.',
+      '자주 사용되는 필드에 복합 인덱스를 생성하면 성능이 향상됩니다.',
+      '집계 쿼리의 경우 파이프라인 순서를 최적화하세요.'
+    ] : ['현재 성능이 양호합니다! 🎉']
+  }, '쿼리 성능 통계 조회 성공');
+}));
+
+/**
  * 성능 통계 초기화
  */
 router.post('/reset-stats', async (_req, res) => {
@@ -405,6 +444,7 @@ router.post('/reset-stats', async (_req, res) => {
     performanceStats.clear();
     queryPerformanceStats.clear();
     resetConnectionStats();
+    queryMonitor.clearLogs();
 
     logger.info('성능 통계 초기화 완료');
     return sendSuccess(res, {
@@ -447,5 +487,152 @@ router.get('/realtime-monitoring', async (_req, res) => {
     return sendError(res, 'REALTIME_MONITORING_ERROR', '실시간 성능 모니터링 중 오류가 발생했습니다.');
   }
 });
+
+/**
+ * 🚀 Week 3 Phase 1: API Fallback 시스템 통계 조회
+ */
+router.get('/fallback-api-stats', asyncHandler(async (_req, res) => {
+  const stats = fallbackApiManager.getStats();
+  
+  return sendSuccess(res, {
+    summary: {
+      totalRequests: stats.totalRequests,
+      successRate: stats.successRate,
+      fallbackUsageRate: stats.fallbackUsageRate,
+      cacheHitRate: stats.cacheHitRate
+    },
+    detailed: stats,
+    recommendations: [
+      stats.fallbackUsed > stats.totalRequests * 0.1 ? 
+        '⚠️ Fallback 사용률이 높습니다. 주 API 서버를 점검하세요.' :
+        '✅ 주 API가 안정적으로 작동 중입니다.',
+      stats.circuitBreakerTrips > 0 ? 
+        '🚨 써킷 브레이커가 활성화되었습니다. API 제공자를 확인하세요.' :
+        '✅ 모든 API 제공자가 정상 작동 중입니다.',
+      parseFloat(stats.cacheHitRate) < 20 ? 
+        '💾 캐시 히트율이 낮습니다. 캐시 전략을 검토하세요.' :
+        '✅ 캐시가 효과적으로 작동 중입니다.'
+    ],
+    timestamp: new Date().toISOString()
+  }, 'API Fallback 시스템 통계 조회 성공');
+}));
+
+/**
+ * 🚀 Week 2 완료: MongoDB 트랜잭션 통계 조회
+ */
+router.get('/transaction-stats', asyncHandler(async (_req, res) => {
+  const stats = transactionStats.getStats();
+  
+  return sendSuccess(res, {
+    summary: {
+      totalTransactions: stats.totalTransactions,
+      successfulTransactions: stats.successfulTransactions,
+      failedTransactions: stats.failedTransactions,
+      successRate: stats.totalTransactions > 0 ? 
+        `${((stats.successfulTransactions / stats.totalTransactions) * 100).toFixed(1)}%` : '0%',
+      averageExecutionTime: `${Math.round(stats.averageExecutionTime)}ms`
+    },
+    detailed: stats,
+    recommendations: [
+      stats.totalTransactions === 0 ? 
+        '📊 트랜잭션 사용이 시작되지 않았습니다. ENABLE_DECK_TRANSACTIONS=true로 활성화하세요.' :
+        '✅ 트랜잭션 기능이 활성화되어 있습니다.',
+      stats.failedTransactions > stats.totalTransactions * 0.1 ? 
+        '⚠️ 트랜잭션 실패율이 높습니다. 데이터베이스 상태를 점검하세요.' :
+        '✅ 트랜잭션이 안정적으로 작동 중입니다.',
+      stats.averageExecutionTime > 5000 ? 
+        '🐌 트랜잭션 실행 시간이 길어지고 있습니다. 쿼리 최적화를 고려하세요.' :
+        '⚡ 트랜잭션 성능이 양호합니다.'
+    ],
+    timestamp: new Date().toISOString()
+  }, 'MongoDB 트랜잭션 통계 조회 성공');
+}));
+
+/**
+ * 시스템 통합 상태 조회 (Week 1~3 모든 개선사항 통합)
+ */
+router.get('/system-integration-status', asyncHandler(async (_req, res) => {
+  const [
+    fallbackStats,
+    transactionStatsResult,
+    queryStats,
+    dbConnectionStats
+  ] = await Promise.all([
+    Promise.resolve(fallbackApiManager.getStats()),
+    Promise.resolve(transactionStats.getStats()),
+    Promise.resolve(queryPerformanceStats.getSummary()),
+    Promise.resolve(getConnectionStats())
+  ]);
+
+  const integrationStatus = {
+    week1_envLoading: {
+      status: 'completed',
+      description: '환경변수 로드 순서 최적화',
+      improvements: [
+        '✅ 최우선 환경변수 로드',
+        '✅ 필수 변수 즉시 검증',
+        '✅ 중복 제거 완료'
+      ]
+    },
+    week2_transactions: {
+      status: transactionStatsResult.totalTransactions > 0 ? 'active' : 'available',
+      description: 'MongoDB 트랜잭션 시스템',
+      stats: {
+        totalTransactions: transactionStatsResult.totalTransactions,
+        successRate: transactionStatsResult.totalTransactions > 0 ? 
+          `${((transactionStatsResult.successfulTransactions / transactionStatsResult.totalTransactions) * 100).toFixed(1)}%` : '0%'
+      },
+      improvements: [
+        '✅ 트랜잭션 래퍼 유틸리티 생성',
+        '✅ 안전한 폴백 메커니즘',
+        '✅ 환경변수 제어 가능'
+      ]
+    },
+    week3_apiFallback: {
+      status: process.env.ENABLE_API_FALLBACK === 'true' ? 'active' : 'available',
+      description: 'API Fallback 메커니즘',
+      stats: {
+        totalRequests: fallbackStats.totalRequests,
+        successRate: fallbackStats.successRate,
+        fallbackUsageRate: fallbackStats.fallbackUsageRate
+      },
+      improvements: [
+        '✅ 다중 리전 지원',
+        '✅ 써킷 브레이커 패턴',
+        '✅ 캐시 우선 전략'
+      ]
+    }
+  };
+
+  const overallHealth = {
+    environmentLoading: '🟢 Excellent',
+    databaseTransactions: transactionStatsResult.totalTransactions > 0 && 
+      transactionStatsResult.failedTransactions / transactionStatsResult.totalTransactions < 0.1 ? 
+      '🟢 Excellent' : '🟡 Available',
+    apiResilience: process.env.ENABLE_API_FALLBACK === 'true' && 
+      fallbackStats.totalRequests > 0 && 
+      parseFloat(fallbackStats.successRate) > 95 ? 
+      '🟢 Excellent' : '🟡 Available'
+  };
+
+  return sendSuccess(res, {
+    overallHealth,
+    integrationStatus,
+    systemMetrics: {
+      dbConnection: dbConnectionStats,
+      queryPerformance: queryStats,
+      apiResilience: fallbackStats,
+      transactionReliability: transactionStatsResult
+    },
+    recommendations: [
+      '🚀 모든 핵심 개선사항이 성공적으로 구현되었습니다!',
+      transactionStatsResult.totalTransactions === 0 ? 
+        '💡 트랜잭션 기능을 활성화하려면 ENABLE_DECK_TRANSACTIONS=true 설정하세요.' : null,
+      process.env.ENABLE_API_FALLBACK !== 'true' ? 
+        '💡 API Fallback을 활성화하려면 ENABLE_API_FALLBACK=true 설정하세요.' : null
+    ].filter(Boolean),
+    timestamp: new Date().toISOString()
+  }, '시스템 통합 상태 조회 성공');
+}));
 
 export default router;

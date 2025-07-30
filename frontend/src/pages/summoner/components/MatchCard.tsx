@@ -16,10 +16,17 @@ interface MatchCardProps {
       name: string;
       style: string;
       styleOrder: number;
+      tier_current: number;
     }>;
     units: Array<{
       image_url: string;
       name: string;
+      cost: number;
+      tier: number;
+      items: Array<{
+        name: string;
+        image_url: string;
+      }>;
     }>;
     puuid: string;
   };
@@ -35,8 +42,13 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onToggle, isExpanded }) =>
     return <div className="text-center text-text-secondary dark:text-dark-text-secondary p-4">매치 데이터를 불러올 수 없습니다.</div>;
   }
 
-  const traits = match.traits || [];
-  const units = match.units || [];
+  // MatchDetailContent와 동일한 필터링 로직 사용
+  const traits = (match.traits || [])
+    .filter(t => t && t.style !== 'inactive' && t.style !== 'none')
+    .sort((a, b) => (b.styleOrder || 0) - (a.styleOrder || 0));
+
+  const units = (match.units || [])
+    .filter(u => u && u.image_url);
 
   return (
     <div className="relative bg-background-card dark:bg-dark-background-card border-l-4 rounded-lg p-4 mb-4 shadow-md overflow-hidden"
@@ -52,12 +64,9 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onToggle, isExpanded }) =>
         <div className="flex-1 flex flex-col gap-2">
           <div className="flex justify-between items-center">
             <div className="flex flex-wrap gap-1.5 items-center">
-              {traits
-                .filter(t => t && t.style !== 'inactive')
-                .sort((a, b) => (b.styleOrder || 0) - (a.styleOrder || 0))
-                .map((trait) => (
-                  trait ? <Trait key={trait.apiName || trait.name} trait={trait} showCount={true} /> : null
-                ))}
+              {traits.map((trait, i) => 
+                trait ? <Trait key={trait.apiName || i} trait={trait} showCount={true} /> : null
+              )}
             </div>
             <button 
               onClick={() => onToggle(match.matchId)} 
@@ -69,7 +78,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onToggle, isExpanded }) =>
             </button>
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {units.map((u, idx) => u && u.image_url &&
+            {units.map((u, idx) => 
               <Unit key={idx} unit={u} isCompact={false} />
             )}
           </div>

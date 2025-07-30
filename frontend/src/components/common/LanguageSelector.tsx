@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { createComponentLogger } from '../../utils/logger';
+import { Flag } from './FlagIcons';
 
 const logger = createComponentLogger('LanguageSelector');
 
 interface Language {
-  code: string;
+  code: 'ko' | 'en' | 'ja' | 'zh';
   name: string;
-  flag: string;
 }
 
 const LanguageSelector: React.FC = () => {
@@ -19,10 +19,10 @@ const LanguageSelector: React.FC = () => {
   const { lang } = useParams<{ lang: string }>();
 
   const supportedLanguages: Language[] = [
-    { code: 'ko', name: '한국어', flag: '🇰🇷' },
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'ja', name: '日本語', flag: '🇯🇵' },
-    { code: 'zh', name: '中文', flag: '🇨🇳' }
+    { code: 'ko', name: '한국어' },
+    { code: 'en', name: 'English' },
+    { code: 'ja', name: '日本語' },
+    { code: 'zh', name: '中文' }
   ];
 
   const currentLang = supportedLanguages.find(langItem => langItem.code === i18n.language) || supportedLanguages[0];
@@ -57,7 +57,7 @@ const LanguageSelector: React.FC = () => {
         className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-background-base dark:hover:bg-dark-background-base transition-colors duration-200"
         aria-label="언어 선택"
       >
-        <span className="text-xl">{currentLang.flag}</span>
+        <Flag countryCode={currentLang.code} size={20} className="flex-shrink-0" />
         <span className="text-sm font-medium text-text-primary dark:text-dark-text-primary">
           {currentLang.name}
         </span>
@@ -94,7 +94,7 @@ const LanguageSelector: React.FC = () => {
                       : ''
                   }`}
                 >
-                  <span className="text-xl">{langItem.flag}</span>
+                  <Flag countryCode={langItem.code} size={20} className="flex-shrink-0" />
                   <span className={`text-sm font-medium flex-1 ${
                     i18n.language === langItem.code 
                       ? 'text-brand-mint' 

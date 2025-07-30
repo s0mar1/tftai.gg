@@ -4,6 +4,8 @@ import DeckTier from '../models/DeckTier';
 import { getTFTDataWithLanguage } from '../services/tftData';
 import { isMongoConnected } from '../config/db';
 import logger from '../config/logger';
+import { withTransaction, withBatchTransaction, transactionStats } from '../utils/transactionWrapper';
+import { ClientSession } from 'mongoose';
 
 const SUPPORTED_LANGUAGES = ['ko', 'en', 'ja', 'zh'] as const;
 type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
@@ -206,5 +208,251 @@ export const analyzeAndCacheDeckTiers = async (): Promise<void> => {
     } catch (err) {
         const error = err as Error;
         console.error('[다국어] 덱 티어리스트 분석 중 에러:', error.message, error.stack);
+    }
+};
+
+// 🚀 Week 2 Phase 2: 트랜잭션 기반 덱 분석 함수 (기존 함수 완전 보존)
+
+/**
+ * 환경변수로 트랜잭션 모드를 제어
+ * ENABLE_DECK_TRANSACTIONS=true 시 트랜잭션 함수 사용
+ */
+const isTransactionModeEnabled = (): boolean => {
+  return process.env.ENABLE_DECK_TRANSACTIONS === 'true';
+};
+
+/**
+ * 트랜잭션 기반 덱 티어리스트 분석 함수
+ * 기존 analyzeAndCacheDeckTiers() 로직을 트랜잭션으로 래핑
+ * 
+ * 장점:
+ * - 데이터 일관성 보장
+ * - 중간 실패 시 전체 롤백
+ * - 배치 업데이트 최적화
+ */
+export const analyzeAndCacheDeckTiersWithTransaction = async (): Promise<void> => {
+    // MongoDB 연결 상태 확인
+    if (!isMongoConnected()) {
+        logger.warn('[Deck Analyzer TX] MongoDB 연결이 끊어진 상태입니다. 작업을 건너뜁니다.');
+        return;
+    }
+
+    logger.info('[Deck Analyzer TX] 🚀 트랜잭션 기반 덱 티어리스트 분석 시작');
+
+    try {
+        // Step 1: 데이터 준비 (읽기 작업 - 트랜잭션 외부에서 수행)
+        const { deckDataAggregator, tftDataMap } = await prepareDeckAnalysisData();
+        
+        if (Object.keys(deckDataAggregator).length === 0) {
+            logger.info('[Deck Analyzer TX] 분석할 덱 데이터가 없습니다.');
+            return;
+        }
+
+        // Step 2: 트랜잭션으로 배치 업데이트 수행
+        const updateOperations = createDeckTierUpdateOperations(deckDataAggregator, tftDataMap);
+        
+        const result = await withBatchTransaction(updateOperations, {
+            maxRetries: 3,
+            retryDelay: 2000,
+            timeoutMs: 60000, // 1분
+            logLevel: 'info'
+        });
+
+        if (result.success) {
+            logger.info(`[Deck Analyzer TX] ✅ 트랜잭션 성공 - ${updateOperations.length}개 덱 업데이트 완료 (${result.executionTime}ms)`);
+            
+            // 통계 로깅
+            const stats = transactionStats.getStats();
+            logger.info('[Deck Analyzer TX] 📊 트랜잭션 통계', {
+                totalTransactions: stats.totalTransactions,
+                successRate: `${((stats.successfulTransactions / stats.totalTransactions) * 100).toFixed(1)}%`,
+                avgExecutionTime: `${Math.round(stats.averageExecutionTime)}ms`
+            });
+        } else {
+            logger.error(`[Deck Analyzer TX] ❌ 트랜잭션 실패: ${result.error?.message}`);
+            
+            // 트랜잭션 실패 시 기존 함수로 폴백
+            logger.info('[Deck Analyzer TX] 🔄 기존 함수로 폴백 실행');
+            await analyzeAndCacheDeckTiers();
+        }
+
+    } catch (error: any) {
+        logger.error('[Deck Analyzer TX] 예상치 못한 에러:', error.message);
+        
+        // 예외 발생 시 기존 함수로 폴백
+        logger.info('[Deck Analyzer TX] 🔄 예외 발생으로 기존 함수 폴백 실행');
+        await analyzeAndCacheDeckTiers();
+    }
+};
+
+/**
+ * 덱 분석 데이터 준비 (읽기 작업)
+ * 트랜잭션 외부에서 수행하여 트랜잭션 시간 최소화
+ */
+async function prepareDeckAnalysisData() {
+    // 1. 모든 언어의 TFT 데이터 로드
+    const tftDataMap = await loadAllLanguageTFTData();
+    const koTftData = tftDataMap.get('ko');
+    
+    if (!koTftData) {
+        throw new Error('기준이 되는 한국어 TFT 데이터를 불러오지 못했습니다.');
+    }
+
+    // 2. 매치 데이터 조회 및 분석
+    const allMatches = await Match.find({});
+    const deckDataAggregator: Record<string, DeckDataAggregator> = {};
+    
+    logger.info(`[Deck Analyzer TX] 📊 ${allMatches.length}개 매치 분석 시작`);
+
+    // 기존 로직과 동일한 분석 과정
+    allMatches.forEach(match => {
+        if (!match?.info?.participants) return;
+
+        match.info.participants.forEach((p: any) => {
+            if (!p?.units || !p?.traits) return;
+
+            const findChampInfo = (id: string) => koTftData.champions.find((c: any) => c.apiName && id && c.apiName.toLowerCase() === id.toLowerCase());
+            const enrichedUnits = p.units.map((u: any) => ({ ...u, cost: findChampInfo(u.character_id)?.cost || 0 }));
+
+            let carryUnit =
+                enrichedUnits.find((u: any) => u.tier === 3 && u.itemNames?.length >= 2) ||
+                enrichedUnits.find((u: any) => ((u.cost === 4 || u.cost === 5) && u.tier >= 2 && u.itemNames?.length >= 2)) ||
+                [...enrichedUnits].sort((a: any, b: any) => (b.itemNames?.length || 0) - (a.itemNames?.length || 0))[0];
+
+            if (!carryUnit || !carryUnit.character_id) return;
+            const carryInfo = findChampInfo(carryUnit.character_id);
+            if (!carryInfo) return;
+
+            const traits = p.traits
+                .map((t: any) => {
+                    const traitInfo = koTftData.traitMap.get(t.name.toLowerCase());
+                    return traitInfo ? { ...t, name: traitInfo.apiName } : null;
+                })
+                .filter(Boolean);
+
+            if (!traits.length) return;
+
+            const mainTrait = [...traits].sort((a: any, b: any) => (b.style || 0) - (a.style || 0))[0];
+            if (!mainTrait) return;
+            
+            const deckKey = `${mainTrait.name} ${carryInfo.apiName}`;
+
+            if (!deckDataAggregator[deckKey]) {
+                deckDataAggregator[deckKey] = {
+                    mainTraitApiName: mainTrait.name,
+                    carryChampionApiName: carryInfo.apiName,
+                    placements: [],
+                    unitOccurrences: {},
+                };
+            }
+            const agg = deckDataAggregator[deckKey];
+            agg.placements.push(p.placement);
+
+            enrichedUnits.forEach((u: any) => {
+                if (!u.character_id) return;
+                if (!agg.unitOccurrences[u.character_id]) {
+                    agg.unitOccurrences[u.character_id] = { count: 0, items: [], cost: u.cost, tier: u.tier };
+                }
+                const entry = agg.unitOccurrences[u.character_id];
+                if (entry) {
+                    entry.count++;
+                    if (u.itemNames) entry.items.push(...u.itemNames);
+                }
+            });
+        });
+    });
+
+    logger.info(`[Deck Analyzer TX] 📈 ${Object.keys(deckDataAggregator).length}개 덱 발견`);
+    
+    return { deckDataAggregator, tftDataMap };
+}
+
+/**
+ * DeckTier 업데이트 작업들을 생성
+ * 각 작업은 트랜잭션 내에서 실행됨
+ */
+function createDeckTierUpdateOperations(
+    deckDataAggregator: Record<string, DeckDataAggregator>,
+    tftDataMap: Map<SupportedLanguage, any>
+) {
+    const operations: Array<(session: ClientSession) => Promise<any>> = [];
+    const koTftData = tftDataMap.get('ko')!;
+
+    for (const key in deckDataAggregator) {
+        const d = deckDataAggregator[key];
+        if (!d) continue;
+        const totalGames = d.placements.length;
+        if (totalGames < 3) continue;
+
+        // 덱 데이터 처리 (기존 로직과 동일)
+        const coreUnits = Object.entries(d.unitOccurrences)
+            .sort((a, b) => b[1].count - a[1].count).slice(0, 8).map(([apiName, u]) => {
+                const champInfo = koTftData.champions.find((c: any) => c.apiName && apiName && c.apiName.toLowerCase() === apiName.toLowerCase());
+                const itemCounts = u.items.reduce((acc: Record<string, number>, n: string) => { acc[n] = (acc[n] || 0) + 1; return acc; }, {});
+
+                const recommendedItems = Object.entries(itemCounts)
+                    .sort((a, b) => b[1] - a[1]).slice(0, 3).map(([itemApi]) => {
+                        const itemInfo = koTftData.items.completed.find((i: any) => i.apiName && itemApi && i.apiName.toLowerCase() === itemApi.toLowerCase());
+                        return {
+                            name: createLocaleNameObject(itemApi, tftDataMap),
+                            image_url: itemInfo?.icon || null
+                        };
+                    });
+
+                return {
+                    name: createLocaleNameObject(apiName, tftDataMap),
+                    apiName: champInfo?.apiName,
+                    image_url: champInfo?.tileIcon,
+                    cost: u.cost,
+                    tier: u.tier,
+                    traits: champInfo?.traits || [],
+                    recommendedItems,
+                };
+            });
+
+        const avg = d.placements.reduce((s, p) => s + p, 0) / totalGames;
+        const top4 = d.placements.filter(p => p <= 4).length / totalGames;
+        const tier = calculateTierRank(avg, top4);
+
+        // 트랜잭션 내에서 실행될 업데이트 작업 생성
+        const updateOperation = async (session: ClientSession) => {
+            return await DeckTier.findOneAndUpdate(
+                { deckKey: key },
+                {
+                    mainTraitName: createLocaleNameObject(d.mainTraitApiName, tftDataMap),
+                    carryChampionName: createLocaleNameObject(d.carryChampionApiName, tftDataMap),
+                    coreUnits,
+                    totalGames,
+                    top4Count: d.placements.filter(p => p <= 4).length,
+                    winCount: d.placements.filter(p => p === 1).length,
+                    averagePlacement: avg,
+                    tierRank: tier.rank,
+                    tierOrder: tier.order,
+                },
+                { 
+                    upsert: true, 
+                    new: true,
+                    session // 트랜잭션 세션 전달
+                }
+            );
+        };
+
+        operations.push(updateOperation);
+    }
+
+    return operations;
+}
+
+/**
+ * 통합된 덱 분석 함수 (환경변수로 모드 선택)
+ * 기본적으로는 기존 함수 사용, ENABLE_DECK_TRANSACTIONS=true 시 트랜잭션 함수 사용
+ */
+export const analyzeAndCacheDeckTiersUnified = async (): Promise<void> => {
+    if (isTransactionModeEnabled()) {
+        logger.info('[Deck Analyzer] 🔄 트랜잭션 모드로 실행');
+        await analyzeAndCacheDeckTiersWithTransaction();
+    } else {
+        logger.info('[Deck Analyzer] 🔄 일반 모드로 실행');
+        await analyzeAndCacheDeckTiers();
     }
 };

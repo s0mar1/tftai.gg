@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTFTData } from '../../context/TFTDataContext';
 import TraitHexIcon from '../../pages/summoner/components/TraitHexIcon';
-import { processImagePath } from '../../utils/imageUtils';
+import { processTraitImageUrl, createImageErrorHandler } from '../../utils/imageUtils';
 
 interface TraitTooltipItemProps {
   traitName: string;
@@ -74,7 +74,13 @@ const TraitTooltipItem: React.FC<TraitTooltipItemProps> = ({ traitName }) => {
       }}>
         <TraitHexIcon variant="bronze" size={16} />
         <img 
-          src={processImagePath(traitData.icon)} 
+          src={(() => {
+            const imageUrl = traitData.icon || processTraitImageUrl(traitData.apiName || traitData.displayName);
+            if (process.env.NODE_ENV === 'development') {
+              console.log('🔍 TraitTooltipItem image URL:', imageUrl, 'for trait:', traitData.displayName, 'apiName:', traitData.apiName);
+            }
+            return imageUrl;
+          })()} 
           alt={traitData.displayName} 
           style={{ 
             position: 'absolute', 
@@ -82,6 +88,7 @@ const TraitTooltipItem: React.FC<TraitTooltipItemProps> = ({ traitName }) => {
             width: 10, 
             height: 10 
           }} 
+          onError={createImageErrorHandler('trait')}
         />
       </div>
       <span className="text-xs text-text-secondary dark:text-dark-text-secondary">

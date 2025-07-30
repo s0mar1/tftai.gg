@@ -33,9 +33,14 @@ import performanceRoutes from '../routes/performance';
 import securityRoutes from '../routes/security';
 import statsRoutes from '../routes/stats';
 import translationRoutes from '../routes/translation';
+import powerSnaxRoutes from '../routes/powerSnax';
+import unitRolesRoutes from '../routes/unitRoles';
 
 // 에러 핸들러
 import errorHandler from '../middlewares/errorHandler';
+
+// CSRF 보호 (현대적 방식)
+import { originBasedCsrfProtection, provideSecurityToken } from '../middlewares/csrf';
 
 interface RouteSetupResult {
   success: boolean;
@@ -60,7 +65,7 @@ const setupMiddlewares = (app: Application): void => {
     origin: config.corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-client-name', 'x-client-version'],
     exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
     optionsSuccessStatus: 200 // 프리플라이트 요청 처리 개선
   }));
@@ -70,6 +75,10 @@ const setupMiddlewares = (app: Application): void => {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   logger.info('  ✓ Body 파싱 미들웨어 설정 완료');
+  
+  // CSRF 보호 미들웨어 (Origin 기반)
+  app.use(originBasedCsrfProtection);
+  logger.info('  ✓ Origin 기반 CSRF 보호 미들웨어 활성화');
   
   // 요청 로깅 미들웨어 (개발 환경)
   if (config.isDevelopment) {
@@ -98,6 +107,13 @@ const setupApiRoutes = (app: Application): string[] => {
     });
   }
   
+  const registeredRoutes: string[] = [];
+  
+  // 보안 토큰 제공 엔드포인트
+  app.get('/api/security-token', provideSecurityToken);
+  registeredRoutes.push('/api/security-token');
+  logger.info('  ✓ 보안 토큰 제공 엔드포인트 등록: /api/security-token');
+
   const routes = [
     { path: '/api-docs', router: swaggerUi.serve, name: 'Swagger UI' },
     { path: '/health', router: healthRoutes, name: 'Health Check' },
@@ -118,10 +134,10 @@ const setupApiRoutes = (app: Application): string[] => {
     { path: '/api/performance', router: performanceRoutes, name: 'Performance' },
     { path: '/api/security', router: securityRoutes, name: 'Security' },
     { path: '/api/stats', router: statsRoutes, name: 'Stats' },
-    { path: '/api/translation', router: translationRoutes, name: 'Translation' }
+    { path: '/api/translation', router: translationRoutes, name: 'Translation' },
+    { path: '/api/power-snax', router: powerSnaxRoutes, name: 'Power Snax' },
+    { path: '/api/unit-roles', router: unitRolesRoutes, name: 'Unit Roles' }
   ];
-  
-  const registeredRoutes: string[] = [];
   
   // Swagger UI 설정 (특별 처리)
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
@@ -182,16 +198,25 @@ const setupApiRoutes = (app: Application): string[] => {
 };
 
 /**
- * 에러 핸들러를 설정합니다.
+ * 에러 핸들러를 설정합니다. (404 핸들러는 별도로 설정)
  */
 const setupErrorHandlers = (app: Application): void => {
   logger.info('[Route Setup] 에러 핸들러 설정 중...');
   
-  // 전역 에러 핸들러
+  // CSRF는 이미 originBasedCsrfProtection에서 처리됨
+  
+  // 전역 에러 핸들러만 등록 (404 핸들러는 나중에 설정)
   app.use(errorHandler);
   logger.info('  ✓ 전역 에러 핸들러 등록');
+};
+
+/**
+ * 404 핸들러를 설정합니다. (모든 미들웨어 등록 후 마지막에 호출)
+ */
+export const setup404Handler = (app: Application): void => {
+  logger.info('[Route Setup] 404 핸들러 설정 중...');
   
-  // 404 핸들러
+  // 404 핸들러 - 반드시 모든 라우트와 미들웨어 등록 후 마지막에 설정
   app.use((_req, _res) => {
     _res.status(404).json({
       _error: 'Not Found',
@@ -199,7 +224,7 @@ const setupErrorHandlers = (app: Application): void => {
       timestamp: new Date().toISOString()
     });
   });
-  logger.info('  ✓ 404 핸들러 등록');
+  logger.info('  ✓ 404 핸들러 등록 완료');
 };
 
 /**
