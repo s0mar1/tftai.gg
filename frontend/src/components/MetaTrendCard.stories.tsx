@@ -315,7 +315,7 @@ export const StatsComparison: Story = {
           totalGames: 5000,
           top4Count: 2250, // 45% 승률이지만 많이 플레이됨
           tierRank: 'A'
-        }} -->
+        }} />
       </div>
 
       <div>

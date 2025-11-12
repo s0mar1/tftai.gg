@@ -15,7 +15,18 @@
     "back": "戻る",
     "next": "次へ",
     "previous": "前へ",
-    "close": "閉じる"
+    "close": "閉じる",
+    "retry": "再試行",
+    "retrying": "再試行中...",
+    "send": "送信",
+    "sending": "送信中",
+    "games": "ゲーム",
+    "openMenu": "メニューを開く",
+    "closeMenu": "メニューを閉じる",
+    "toggleLightMode": "ライトモードに切り替え",
+    "toggleDarkMode": "ダークモードに切り替え",
+    "selectLanguage": "言語選択",
+    "copied": "コピーしました！"
   },
   "nav": {
     "home": "ホーム",
@@ -56,36 +67,36 @@
       "emblem": "エンブレム"
     },
     "traitTypes": {
-      "origin": "オリジン",
-      "class": "クラス"
+      "origin": "出身",
+      "class": "職業"
     }
   },
   "home": {
     "hero": {
-      "title1": "あなたのプレイ、",
-      "title2": "チャレンジャーの視点から分析してみましょう。",
-      "description": "TFTai.ggは上位ランカーのデータをリアルタイムで分析し、あなたのゲームへの深いフィードバックと共に最新メタトレンドを提供します。",
+      "title1": "あなたのプレイを、",
+      "title2": "チャレンジャーの視点で分析してみませんか。",
+      "description": "TFTai.ggは上位ランカーのデータをリアルタイムで分析し、あなたのゲームに対する深い洞察と最新のメタトレンドを提供します。",
       "searchPlaceholder": "サモナー名 #タグ",
-      "searchAlert": "サモナー名#タグ形式で入力してください。(例: Challenger#KR1)"
+      "searchAlert": "サモナー名#タグの形式で入力してください。（例：Challenger#KR1）"
     },
     "trends": {
       "title": "リアルタイムメタトレンド",
       "error": "メタトレンド情報の読み込みに失敗しました。",
       "noData": "まだ分析されたメタトレンド情報がありません。",
-      "noDataDescription": "データ収集及び分析が完了するまでお待ちください。"
+      "noDataDescription": "データ収集と分析が完了するまでお待ちください。"
     },
     "features": {
       "tierlist": {
         "title": "おすすめメタ",
-        "description": "現在メタで最も強力なデッキ構成を確認しましょう"
+        "description": "現在のメタで最も強力なデッキ構成を確認してください"
       },
       "stats": {
         "title": "詳細統計",
-        "description": "アイテムと特性別勝率を詳しく分析してみましょう"
+        "description": "アイテムと特性別の勝率を詳しく分析してみてください"
       },
       "guides": {
         "title": "デッキ攻略",
-        "description": "プロプレイヤーのデッキ運用ガイドを確認しましょう"
+        "description": "プロプレイヤーのデッキ運用ガイドを確認してください"
       }
     }
   },
@@ -111,7 +122,14 @@
     "winRate": "勝率",
     "recentGames": "最近のゲーム",
     "loading": "ランキングを読み込み中...",
-    "noData": "ランキングデータがありません"
+    "noData": "ランキングデータがありません",
+    "rankGameRanking": "ランクゲーム順位表",
+    "summonerColumn": "サモナー",
+    "tierColumn": "ティア",
+    "lpColumn": "LP",
+    "winRateColumn": "勝率",
+    "totalGamesColumn": "総ゲーム数",
+    "winRateDisplay": "勝率"
   },
   "guides": {
     "title": "デッキ攻略",
@@ -123,7 +141,7 @@
     "easy": "簡単",
     "medium": "普通",
     "hard": "難しい",
-    "newGuide": "新規ガイド作成",
+    "newGuide": "新しいガイド作成",
     "editGuide": "ガイド編集",
     "deleteGuide": "ガイド削除",
     "loading": "ガイドを読み込み中...",
@@ -145,7 +163,7 @@
   },
   "deckBuilder": {
     "title": "デッキビルダー",
-    "subtitle": "自分だけのデッキ構成を作成してみましょう",
+    "subtitle": "自分だけのデッキ構成を作ってみてください",
     "createGuide": "攻略作成",
     "champions": "チャンピオン",
     "items": "アイテム",
@@ -155,7 +173,7 @@
     "selectItem": "アイテム選択",
     "saveDeck": "デッキ保存",
     "loadDeck": "デッキ読み込み",
-    "clearDeck": "デッキ初期化",
+    "clearDeck": "デッキクリア",
     "deckName": "デッキ名",
     "deckDescription": "デッキ説明",
     "synergies": "シナジー",
@@ -164,25 +182,164 @@
     "starLevel": "{{star}}星",
     "equippedItems": "装備アイテム",
     "noUnitSelected": "選択されたユニットがありません",
-    "searchByName": "名前で検索..."
+    "searchByName": "名前で検索...",
+    "traitsLabel": "特性",
+    "roleLabel": "ロール",
+    "powerSnaxLabel": "Power Snax",
+    "selectedPowerSnax": "選択されたPower Snax",
+    "deckSummary": "デッキ要約",
+    "origin": "出身",
+    "class": "職業",
+    "searchByDeckName": "デッキ名で検索...",
+    "enterTip": "ヒントを入力してください...",
+    "enterAugmentName": "オーグメント名を入力してください...",
+    "loadingData": "データロード中...",
+    "failedToLoadData": "データの読み込みに失敗しました。",
+    "placeChampionOnBoard": "⚔️ チャンピオンをボードに配置してみてください",
+    "activeSynergies": "アクティブ特性",
+    "inProgressSynergies": "進行中の特性",
+    "unitCount": "ユニット数",
+    "activeSynergyCount": "アクティブ特性"
   },
   "aiChat": {
     "title": "AIに質問",
-    "subtitle": "TFTに関する質問をAIにしてみましょう",
+    "subtitle": "TFT関連の疑問をAIに聞いてみてください",
     "inputPlaceholder": "質問を入力してください...",
     "send": "送信",
     "thinking": "AIが考え中...",
     "error": "AI応答中にエラーが発生しました",
-    "exampleQuestions": "質問例",
+    "exampleQuestions": "例題質問",
     "examples": {
-      "meta": "現在メタで最強のデッキは？",
-      "items": "このアイテム構成は良いですか？",
-      "positioning": "どのようにポジショニングすれば良いですか？"
+      "meta": "現在のメタで最も強いデッキは？",
+      "items": "このアイテム組み合わせは良いですか？",
+      "positioning": "どのようにポジショニングすべきですか？"
+    },
+    "challengerTitle": "チャレンジャーAIに質問",
+    "challengerDescription": "こんにちは！TFTチャレンジャーの専門家です。何をお手伝いしましょうか？疑問を分析し、ゲームに関する情報をいただければ最善を尽くして回答いたします。TFTai.ggのリアルタイムチャレンジャー統計データに基づいて最適な戦略を提示できます。",
+    "generating": "回答生成中...",
+    "askQuestion": "質問する",
+    "pleaseEnterQuestion": "質問を入力してください。",
+    "noResponse": "回答を受け取れませんでした。",
+    "failedToLoad": "回答の読み込みに失敗しました。",
+    "sorryTryAgain": "申し訳ございません。もう一度お試しください。"
+  },
+  "roles": {
+    "tank": "タンク",
+    "fighter": "ファイター",
+    "assassin": "アサシン",
+    "caster": "キャスター",
+    "specialist": "スペシャリスト",
+    "marksman": "マークスマン"
+  },
+  "items": {
+    "category": {
+      "item": "アイテム",
+      "exotech": "特性",
+      "trait": "特性"
     }
   },
   "errors": {
     "networkError": "ネットワークエラーが発生しました",
     "dataLoadError": "データの読み込みに失敗しました",
-    "unknownError": "不明なエラーが発生しました"
+    "unknownError": "不明なエラーが発生しました",
+    "dataLoadingUnknownError": "データロード中に不明なエラーが発生しました",
+    "network": {
+      "title": "ネットワークエラー",
+      "message": "サーバーに接続できません"
+    },
+    "notFound": {
+      "title": "データが見つかりません",
+      "message": "要求されたデータが見つかりません"
+    },
+    "timeout": {
+      "title": "リクエストタイムアウト",
+      "message": "サーバー応答時間が超過しました"
+    },
+    "validation": {
+      "title": "入力エラー",
+      "message": "入力した情報を確認してください"
+    },
+    "unauthorized": {
+      "title": "権限なし",
+      "message": "アクセス権限がありません"
+    },
+    "maintenance": {
+      "title": "サービスメンテナンス",
+      "message": "現在サービスメンテナンス中です"
+    },
+    "apiError": "APIエラー",
+    "failedToFetchMatchHistory": "対戦履歴の取得に失敗しました",
+    "failedToFetchRanking": "ランキングの取得に失敗しました",
+    "failedToFetchStats": "統計の取得に失敗しました",
+    "failedToInvalidateCache": "キャッシュの無効化に失敗しました",
+    "requestTimeout": "リクエストタイムアウト",
+    "unexpectedJsonResponse": "予期しないJSON応答です",
+    "summonerNotFound": "サモナー情報が見つかりません。",
+    "errorOccurred": "エラーが発生しました",
+    "developerInfo": "開発者情報（詳細エラー）"
+  },
+  "api": {
+    "cache": {
+      "refreshCompleted": "キャッシュ更新が完了しました。",
+      "refreshLimitOrInProgress": "キャッシュ更新間隔制限または既に進行中です。",
+      "tftDataCleared": "TFTデータキャッシュがクリアされました。"
+    }
+  },
+  "profile": {
+    "winRate": "勝率",
+    "averagePlacement": "平均順位",
+    "playCount": "プレイ数"
+  },
+  "guides": {
+    "title": "おすすめデッキガイド",
+    "subtitle": "最新のガイドデータに基づいてまとめられたデッキガイドです。",
+    "authorBy": "作成者",
+    "authorAnonymous": "匿名",
+    "score": "スコア",
+    "recommend": "推薦",
+    "view": "表示",
+    "viewGuide": "ガイドを見る",
+    "championFilter": "チャンピオンでフィルター",
+    "cost": "コスト",
+    "sortRecommended": "推薦順",
+    "sortScore": "スコア順",
+    "sortNewest": "新着順",
+    "reset": "リセット",
+    "includesChampion": "を含むデッキのみ表示",
+    "totalGuides": "合計{count}個のガイドがあります。",
+    "noGuidesYet": "まだ作成されたガイドがありません。",
+    "createNewGuide": "新しいガイドを作成してみてください！",
+    "noMatchingGuides": "検索条件に一致するガイドがありません。",
+    "tryDifferentSearch": "他の検索語やフィルターを試してください。",
+    "loadingDetail": "ガイドの詳細を読み込み中...",
+    "notFound": "該当するガイドが見つかりません。",
+    "failedToLoad": "ガイドの読み込みに失敗しました。",
+    "confirmDelete": "本当にこのガイドを削除しますか？",
+    "deleteSuccess": "ガイドが正常に削除されました。",
+    "deleteFailed": "ガイドの削除に失敗しました。",
+    "levelDeckComposition": "レベル{level}デッキ構成",
+    "activeSynergies": "アクティブシナジー"
+  },
+  "deckBuilder": {
+    "itemsLoadingData": "アイテムデータを読み込み中...",
+    "synergyExplanation": "特性シナジーがここに表示されます",
+    "role": "ロール"
+  },
+  "placeholders": {
+    "askQuestion": "質問を入力してください...",
+    "searchDeck": "デッキ名で検索...",
+    "enterTip": "ヒントを入力してください...",
+    "enterAugmentName": "オーグメント名を入力してください..."
+  },
+  "pages": {
+    "set15Features": "Set 15 機能"
+  },
+  "tooltip": {
+    "mana": "マナ",
+    "skillValues": "スキル数値",
+    "recommendedItems": "推奨アイテム",
+    "noRecommendedItems": "推奨アイテム情報がありません。",
+    "unknownAbility": "不明なスキル",
+    "noDescription": "説明がありません"
   }
 }

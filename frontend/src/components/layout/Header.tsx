@@ -75,14 +75,14 @@ const Header: React.FC = () => {
             <button
               onClick={toggleMobileMenu}
               className="lg:hidden p-2 rounded-md hover:bg-tft-gray-100 dark:hover:bg-dark-tft-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-mint"
-              aria-label={isMobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+              aria-label={isMobileMenuOpen ? t('common.closeMenu') : t('common.openMenu')}
               aria-expanded={isMobileMenuOpen}
             >
               <HamburgerIcon isOpen={isMobileMenuOpen} />
             </button>
 
             {/* 로고 */}
-            <Link to="/" className="flex items-center gap-2" aria-label="TFTai.gg 홈페이지로 이동" onClick={closeMobileMenu}>
+            <Link to="/" className="flex items-center gap-2" aria-label={t('nav.home')} onClick={closeMobileMenu}>
               <LogoIcon />
               <span className="text-lg sm:text-xl font-bold text-text-primary dark:text-white">
                 <span className="sm:hidden">TFT</span>
@@ -106,8 +106,8 @@ const Header: React.FC = () => {
             <button
               onClick={handleDarkModeToggle}
               className="p-2 rounded-full hover:bg-background-base dark:hover:bg-dark-background-base transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-mint focus:ring-offset-2"
-              aria-label={isDarkMode ? '라이트 모드로 전환' : '다크 모드로 전환'}
-              title={isDarkMode ? '라이트 모드로 전환' : '다크 모드로 전환'}
+              aria-label={isDarkMode ? t('common.toggleLightMode') : t('common.toggleDarkMode')}
+              title={isDarkMode ? t('common.toggleLightMode') : t('common.toggleDarkMode')}
               aria-pressed={isDarkMode}
             >
               {isDarkMode ? (
@@ -177,7 +177,7 @@ const Header: React.FC = () => {
             {/* 모바일 전용: 언어 선택 */}
             <div className="px-4 py-3 border-t border-border-light dark:border-dark-border-light">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-text-secondary dark:text-dark-text-secondary">언어 선택</span>
+                <span className="text-sm font-medium text-text-secondary dark:text-dark-text-secondary">{t('common.selectLanguage')}</span>
                 <LanguageSelector />
               </div>
             </div>

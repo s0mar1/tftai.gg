@@ -15,7 +15,18 @@
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
-    "close": "Close"
+    "close": "Close",
+    "retry": "Retry",
+    "retrying": "Retrying...",
+    "send": "Send",
+    "sending": "Sending",
+    "games": "Games",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "toggleLightMode": "Switch to light mode",
+    "toggleDarkMode": "Switch to dark mode",
+    "selectLanguage": "Select language",
+    "copied": "Copied!"
   },
   "nav": {
     "home": "Home",
@@ -111,7 +122,14 @@
     "winRate": "Win Rate",
     "recentGames": "Recent Games",
     "loading": "Loading Rankings...",
-    "noData": "No Ranking data available."
+    "noData": "No Ranking data available.",
+    "rankGameRanking": "Ranked Game Leaderboard",
+    "summonerColumn": "Summoner",
+    "tierColumn": "Tier",
+    "lpColumn": "LP",
+    "winRateColumn": "Win Rate",
+    "totalGamesColumn": "Total Games",
+    "winRateDisplay": "Win Rate"
   },
   "guides": {
     "title": "Team Comps",
@@ -164,7 +182,24 @@
     "starLevel": "{{star}} Star",
     "equippedItems": "Equipped Items",
     "noUnitSelected": "No unit selected.",
-    "searchByName": "Search by name..."
+    "searchByName": "Search by name...",
+    "traitsLabel": "Traits",
+    "roleLabel": "Role",
+    "powerSnaxLabel": "Power Snax",
+    "selectedPowerSnax": "Selected Power Snax",
+    "deckSummary": "Team Summary",
+    "origin": "Origin",
+    "class": "Class",
+    "searchByDeckName": "Search by team name...",
+    "enterTip": "Enter tip...",
+    "enterAugmentName": "Enter augment name...",
+    "loadingData": "Loading data...",
+    "failedToLoadData": "Failed to load data.",
+    "placeChampionOnBoard": "⚔️ Place champions on the board",
+    "activeSynergies": "Active Synergies",
+    "inProgressSynergies": "In Progress Synergies",
+    "unitCount": "Unit Count",
+    "activeSynergyCount": "Active Synergies"
   },
   "aiChat": {
     "title": "Ask AI",
@@ -178,11 +213,133 @@
       "meta": "What's the strongest comp in the current meta?",
       "items": "Are these item combinations good?",
       "positioning": "How should I position my units?"
+    },
+    "challengerTitle": "Ask the Challenger AI",
+    "challengerDescription": "Hello! I'm a TFT Challenger expert. How can I help you today? I'll analyze your questions and provide the best strategies based on TFTai.gg's real-time Challenger statistics data.",
+    "generating": "Generating response...",
+    "askQuestion": "Ask Question",
+    "pleaseEnterQuestion": "Please enter your question.",
+    "noResponse": "No response received.",
+    "failedToLoad": "Failed to load response.",
+    "sorryTryAgain": "Sorry, please try again."
+  },
+  "roles": {
+    "tank": "Tank",
+    "fighter": "Fighter",
+    "assassin": "Assassin",
+    "caster": "Caster",
+    "specialist": "Specialist",
+    "marksman": "Marksman"
+  },
+  "items": {
+    "category": {
+      "item": "Item",
+      "exotech": "Trait",
+      "trait": "Trait"
     }
   },
   "errors": {
     "networkError": "A network error occurred.",
     "dataLoadError": "Failed to load data.",
-    "unknownError": "An unknown error occurred."
+    "unknownError": "An unknown error occurred.",
+    "dataLoadingUnknownError": "Unknown error occurred while loading data",
+    "network": {
+      "title": "Network Error",
+      "message": "Unable to connect to server"
+    },
+    "notFound": {
+      "title": "Data Not Found",
+      "message": "The requested data could not be found"
+    },
+    "timeout": {
+      "title": "Request Timeout",
+      "message": "Server response timed out"
+    },
+    "validation": {
+      "title": "Input Error",
+      "message": "Please check your input"
+    },
+    "unauthorized": {
+      "title": "Unauthorized",
+      "message": "You don't have access permission"
+    },
+    "maintenance": {
+      "title": "Service Maintenance",
+      "message": "Service is currently under maintenance"
+    },
+    "apiError": "API Error",
+    "failedToFetchMatchHistory": "Failed to fetch match history",
+    "failedToFetchRanking": "Failed to fetch ranking",
+    "failedToFetchStats": "Failed to fetch stats",
+    "failedToInvalidateCache": "Failed to invalidate cache",
+    "requestTimeout": "Request timeout",
+    "unexpectedJsonResponse": "Unexpected JSON response",
+    "summonerNotFound": "Summoner not found.",
+    "errorOccurred": "An error occurred",
+    "developerInfo": "Developer Info (Detailed Error)"
+  },
+  "api": {
+    "cache": {
+      "refreshCompleted": "Cache refresh completed.",
+      "refreshLimitOrInProgress": "Cache refresh rate limited or already in progress.",
+      "tftDataCleared": "TFT data cache has been cleared."
+    }
+  },
+  "profile": {
+    "winRate": "Win Rate",
+    "averagePlacement": "Average Placement",
+    "playCount": "Play Count"
+  },
+  "guides": {
+    "title": "Recommended Deck Guides",
+    "subtitle": "Deck guides compiled based on the latest guide data.",
+    "authorBy": "Author",
+    "authorAnonymous": "Anonymous",
+    "score": "Score",
+    "recommend": "Recommend",
+    "view": "View",
+    "viewGuide": "View Guide",
+    "championFilter": "Filter by Champion",
+    "cost": "Cost",
+    "sortRecommended": "Most Recommended",
+    "sortScore": "By Score",
+    "sortNewest": "Newest",
+    "reset": "Reset",
+    "includesChampion": "Show only decks including",
+    "totalGuides": "Total {count} guides available.",
+    "noGuidesYet": "No guides have been written yet.",
+    "createNewGuide": "Try creating a new guide!",
+    "noMatchingGuides": "No guides match your search criteria.",
+    "tryDifferentSearch": "Try different search terms or filters.",
+    "loadingDetail": "Loading guide details...",
+    "notFound": "Guide not found.",
+    "failedToLoad": "Failed to load guide.",
+    "confirmDelete": "Are you sure you want to delete this guide?",
+    "deleteSuccess": "Guide has been successfully deleted.",
+    "deleteFailed": "Failed to delete guide.",
+    "levelDeckComposition": "Level {level} Deck Composition",
+    "activeSynergies": "Active Synergies"
+  },
+  "deckBuilder": {
+    "itemsLoadingData": "Loading item data...",
+    "synergyExplanation": "Trait synergies will be displayed here",
+    "role": "Role"
+  },
+  "placeholders": {
+    "askQuestion": "Enter your question...",
+    "searchDeck": "Search by team name...",
+    "enterTip": "Enter tip...",
+    "enterAugmentName": "Enter augment name..."
+  },
+  "pages": {
+    "set15Features": "Set 15 Features"
+  },
+  "tooltip": {
+    "mana": "Mana",
+    "skillValues": "Skill Values",
+    "recommendedItems": "Recommended Items",
+    "noRecommendedItems": "No recommended item information available.",
+    "unknownAbility": "Unknown Ability",
+    "noDescription": "No description available"
   }
 }

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../utils/fetchApi';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import HexGrid from '../DeckBuilderPage/HexGrid'; // 덱 빌더의 HexGrid 재사용
-import SynergyPanel from '../DeckBuilderPage/SynergyPanel'; // 시너지 패널 재사용
+// Dynamic import for better code splitting
+const SynergyPanel = React.lazy(() => import('../DeckBuilderPage/SynergyPanel'));
 import { useTFTData } from '../../context/TFTDataContext';
 import { decodeDeck } from '../../utils/deckCode';
 import { createComponentLogger } from '../../utils/logger';
@@ -36,6 +38,7 @@ interface ApiError {
 }
 
 export default function GuideDetailPage(): JSX.Element {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate(); // useNavigate 훅 추가
   const [guide, setGuide] = useState<Guide | null>(null);
@@ -48,16 +51,16 @@ export default function GuideDetailPage(): JSX.Element {
   const [isAdmin, setIsAdmin] = useState<boolean>(true);
 
   const handleDeleteGuide = async (): Promise<void> => {
-    if (window.confirm('정말로 이 공략을 삭제하시겠습니까?')) {
+    if (window.confirm(t('guides.confirmDelete'))) {
       try {
         await api.delete(`/api/guides/${id}`);
         logger.info('공략 삭제 성공', { guideId: id });
-        alert('공략이 성공적으로 삭제되었습니다.');
+        alert(t('guides.deleteSuccess'));
         navigate('/guides'); // 공략 목록 페이지로 이동
       } catch (err) {
         const error = err as ApiError;
         logger.error('공략 삭제 실패', error as Error, { guideId: id });
-        alert('공략 삭제에 실패했습니다.');
+        alert(t('guides.deleteFailed'));
       }
     }
   };
@@ -70,7 +73,7 @@ export default function GuideDetailPage(): JSX.Element {
         const defaultLevel = response.data.level_boards.find(b => b.level === 8) ? 8 : response.data.level_boards[0]?.level;
         setActiveLevel(defaultLevel);
       } catch (err) {
-        setError('공략을 불러오는 데 실패했습니다.');
+        setError(t('guides.failedToLoad'));
       }
       setLoading(false);
     };
@@ -80,9 +83,9 @@ export default function GuideDetailPage(): JSX.Element {
     }
   }, [id, champions]);
 
-  if (loading) return <div className="text-center p-8">공략 상세 정보를 불러오는 중...</div>;
+  if (loading) return <div className="text-center p-8">{t('guides.loadingDetail')}</div>;
   if (error) return <div className="text-center p-8 text-error-red">{error}</div>;
-  if (!guide) return <div className="text-center p-8">해당 공략을 찾을 수 없습니다.</div>;
+  if (!guide) return <div className="text-center p-8">{t('guides.notFound')}</div>;
 
   const activeBoard = guide.level_boards.find(b => b.level === activeLevel);
   const placedUnits = activeBoard ? decodeDeck(activeBoard.board, champions, allItems) : {};
@@ -121,7 +124,11 @@ export default function GuideDetailPage(): JSX.Element {
               ))}
             </div>
             <div className="grid grid-cols-[200px_1fr] gap-6">
-              <aside><SynergyPanel placedUnits={placedUnits} /></aside>
+              <aside>
+                <React.Suspense fallback={<div className="animate-pulse bg-gray-300 h-32 rounded"></div>}>
+                  <SynergyPanel placedUnits={placedUnits} />
+                </React.Suspense>
+              </aside>
               <main className="flex justify-center"><HexGrid placedUnits={placedUnits} onUnitAction={() => {}} /></main>
             </div>
             {activeBoard.notes && <p className="mt-4 text-center text-text-primary dark:text-dark-text-primary p-2 bg-background-base dark:bg-dark-background-base rounded">{activeBoard.notes}</p>}

@@ -8,17 +8,17 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "outDir": "./dist",
-    "rootDir": "./",
+    "rootDir": "../",
     "baseUrl": "./",
-    // TypeScript 철의 장막 규칙 - 임시 완화 (Set 15 긴급 배포용)
+    // TypeScript 철의 장막 규칙 - 최대 엄격성 복구
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "noImplicitReturns": true,
-    "noUnusedLocals": false, // 임시 완화
-    "noUnusedParameters": false, // 임시 완화
-    "exactOptionalPropertyTypes": false, // 임시 완화
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
     "allowUnreachableCode": false,
     "skipLibCheck": true,
     "paths": {
@@ -34,7 +34,8 @@
     }
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "../shared/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",

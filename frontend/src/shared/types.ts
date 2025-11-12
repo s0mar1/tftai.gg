@@ -13,6 +13,22 @@ export interface ApiResponse<T = any> {
 
 // TFT 게임 관련 공유 타입들
 
+// 챔피언 스킬 변수 타입
+export interface Variable {
+  name: string;
+  value: number[];
+}
+
+// 챔피언 스킬 타입
+export interface Ability {
+  name: string;
+  desc: string;
+  icon: string;
+  variables?: Variable[];
+  manaStart?: number;
+  manaCost?: number;
+}
+
 export interface Champion {
   apiName: string;
   characterId?: string;
@@ -22,9 +38,15 @@ export interface Champion {
   tileIcon: string;
   traits: string[];
   stats?: ChampionStats;
+  ability?: Ability;
+  abilities?: Ability[]; // 백워드 호환성
   // 프론트엔드 호환성을 위한 추가 필드들
   tier?: number;
   recommendedItems?: Item[];
+  // 추가 UI 관련 필드들
+  image_url?: string;
+  icon?: string;
+  role?: string;
 }
 
 export interface Item {

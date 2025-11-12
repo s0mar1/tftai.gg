@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { decodeDeck } from '../../../utils/deckCode';
 import Trait from '../../summoner/components/Trait';
 import { Champion, Item, Trait as TraitType } from '../../../types';
@@ -103,6 +104,7 @@ const calculateActiveTraits = (unitsArray: DecodedUnit[], allTraits: TraitType[]
 };
 
 const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, traitMap, allTraits }) => {
+  const { t } = useTranslation();
   const previewBoard = guide.level_boards.find(b => b.level === guide.initialDeckLevel) || guide.level_boards.find(b => b.level === 8) || guide.level_boards[0];
   const units = previewBoard ? decodeDeck(previewBoard.board, champions, allItems) : {};
   const unitsArray: DecodedUnit[] = Object.values(units);
@@ -149,19 +151,19 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, trait
               {guide.difficulty}
             </span>
             <span className="text-text-secondary dark:text-dark-text-secondary text-sm">
-              {guide.author.name} (점수: {guide.author.score})
+              {guide.author.name} ({t('guides.score')}: {guide.author.score})
             </span>
           </div>
         </div>
         <div className="flex flex-col items-end text-sm text-text-secondary dark:text-dark-text-secondary">
-          <span>추천 {guide.recommendCount}</span>
-          <span>조회 {guide.viewCount}</span>
+          <span>{t('guides.recommend')} {guide.recommendCount}</span>
+          <span>{t('guides.view')} {guide.viewCount}</span>
         </div>
       </div>
 
       <div className="mb-4">
         <h4 className="text-sm font-medium text-text-primary dark:text-dark-text-primary mb-2">
-          레벨 {previewBoard?.level} 덱 구성
+          {t('guides.levelDeckComposition', { level: previewBoard?.level })}
         </h4>
         <div className="flex flex-wrap gap-1 mb-3">
           {unitsArray.map((unit, index) => (
@@ -186,7 +188,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, trait
 
       <div className="mb-4">
         <h4 className="text-sm font-medium text-text-primary dark:text-dark-text-primary mb-2">
-          활성 시너지
+          {t('guides.activeSynergies')}
         </h4>
         <div className="flex flex-wrap gap-1">
           {activeTraits.slice(0, 8).map((trait, index) => (

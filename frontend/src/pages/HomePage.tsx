@@ -80,8 +80,8 @@ const HomePage: React.FC = () => {
           ) : isError ? (
             <div className="max-w-2xl mx-auto">
               <PageErrorMessage
-                title="실시간 메타 트렌드 로딩 실패"
-                message={error.message || 'An unexpected error occurred'}
+                title={t('home.trends.error')}
+                message={error.message || t('errors.unknownError')}
                 showRetry={true}
                 onRetry={handleRetry}
                 variant="compact"

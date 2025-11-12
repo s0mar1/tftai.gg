@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../utils/fetchApi';
 import { createComponentLogger } from '../../utils/logger';
 
@@ -27,6 +28,7 @@ interface ApiError {
 }
 
 export default function AiQnaPage(): JSX.Element {
+  const { t } = useTranslation();
   const [question, setQuestion] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -45,7 +47,7 @@ export default function AiQnaPage(): JSX.Element {
     if (messages.length === 0 && !loading && !error) {
       const welcomeMessage: Message = {
         role: 'ai',
-        content: '안녕하세요! 롤토체스 챌린저 전문가입니다. 무엇을 도와드릴까요? 궁금한 점을 분석해 드리고 게임에 대한 정보를 주시면 최선을 다해 답변드리겠습니다. TFTai.gg의 실시간 챌린저 통계 데이터를 바탕으로 최적의 전략을 제시해 드릴 수 있습니다.'
+        content: t('aiChat.challengerDescription')
       };
       setMessages([welcomeMessage]);
       logger.info('초기 환영 메시지 설정');
@@ -54,7 +56,7 @@ export default function AiQnaPage(): JSX.Element {
 
   const handleQuestionSubmit = async (): Promise<void> => {
     if (!question.trim()) {
-      setError('질문을 입력해주세요.');
+      setError(t('aiChat.pleaseEnterQuestion'));
       return;
     }
 
@@ -79,14 +81,14 @@ export default function AiQnaPage(): JSX.Element {
       
       // 백엔드 응답 구조에 따라 답변 추출
       logger.debug('AI 응답 수신', { hasAnswer: !!(response?.answer || response?.data?.answer) });
-      const aiAnswer = response?.answer || response?.data?.answer || '답변을 받지 못했습니다.';
+      const aiAnswer = response?.answer || response?.data?.answer || t('aiChat.noResponse');
       const aiMessage: Message = { role: 'ai', content: aiAnswer };
       setMessages(prevMessages => [...prevMessages, aiMessage]);
     } catch (err) {
       const apiError = err as ApiError;
       logger.error('AI QnA 에러', apiError as Error);
       
-      let errorMessage = '답변을 불러오는데 실패했습니다.';
+      let errorMessage = t('aiChat.failedToLoad');
       if (apiError.response?.data?.message) {
         errorMessage = apiError.response.data.message;
       } else if (apiError.response?.data?.error) {
@@ -98,7 +100,7 @@ export default function AiQnaPage(): JSX.Element {
       setError(errorMessage);
       const errorMessage2: Message = { 
         role: 'ai', 
-        content: `죄송합니다. ${errorMessage} 다시 시도해주세요.` 
+        content: `${t('aiChat.sorryTryAgain')} ${errorMessage}` 
       };
       setMessages(prev => [...prev.slice(0, -1), errorMessage2]);
     } finally {
@@ -111,11 +113,11 @@ export default function AiQnaPage(): JSX.Element {
       {/* 모든 요소를 포함하는 하나의 패널 */}
       <div className="bg-background-card dark:bg-dark-background-base p-6 rounded-lg shadow-md">
         {/* 제목 */}
-        <h1 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-2 text-center">챌린저 AI에게 질문하기</h1>
+        <h1 className="text-xl font-bold text-text-primary dark:text-dark-text-primary mb-2 text-center">{t('aiChat.challengerTitle')}</h1>
         <hr className="border-t border-border-light dark:border-dark-border-light mb-4" />
         {/* 안내사항 */}
         <p className="text-text-secondary dark:text-dark-text-secondary mb-4 text-center text-sm">
-          롤토체스에 대한 어떤 질문이든 해주세요! 챌린저 전문가가 답변해 드립니다. (롤토체스 관련 질문이 아니면 답변을 거절할 수 있습니다.)
+          {t('aiChat.challengerDescription')}
         </p>
 
         {/* 채팅 로그 영역 */}
@@ -136,7 +138,7 @@ export default function AiQnaPage(): JSX.Element {
             {loading && (
               <div className="text-left">
                 <span className="inline-block p-3 max-w-[80%] bg-white dark:bg-dark-background-card text-text-primary dark:text-dark-text-primary rounded-2xl rounded-bl-md mr-auto">
-                  답변 생성중...
+                  {t('aiChat.generating')}
                 </span>
               </div>
             )}
@@ -153,7 +155,7 @@ export default function AiQnaPage(): JSX.Element {
               onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
                 if (e.key === 'Enter' && !loading) handleQuestionSubmit();
               }}
-              placeholder="질문을 입력하세요..."
+              placeholder={t('placeholders.askQuestion')}
               disabled={loading}
             />
             <button
@@ -161,7 +163,7 @@ export default function AiQnaPage(): JSX.Element {
               className={`ml-2 px-4 py-2 rounded-md bg-brand-mint text-white font-bold cursor-pointer transition-colors duration-200 ${loading ? 'bg-gray-400' : 'hover:bg-brand-mint'}`}
               disabled={loading}
             >
-              {loading ? '전송중' : '질문하기'}
+              {loading ? t('common.sending') : t('aiChat.askQuestion')}
             </button>
           </div>
         </div>

@@ -255,8 +255,196 @@ export const getMasterLeague = async (region: Region = 'kr'): Promise<RiotChalle
   const apiRegion = region;
   const url = `https://${apiRegion}.api.riotgames.com/tft/league/v1/master`;
   
-  const response = await api.get(url);
-  return response.data;
+  return await apiRequestWithRetry<RiotChallengerLeagueDTO>(url);
+};
+
+// Diamond 랭킹 조회 (페이지네이션 지원)
+export const getDiamondLeague = async (region: Region = 'kr', tier: 'I' | 'II' | 'III' | 'IV' = 'I', page: number = 1): Promise<RiotLeagueEntryDTO[]> => {
+  const apiRegion = region;
+  const url = `https://${apiRegion}.api.riotgames.com/tft/league/v1/entries/DIAMOND/${tier}?page=${page}`;
+  
+  return await apiRequestWithRetry<RiotLeagueEntryDTO[]>(url);
+};
+
+// Platinum 랭킹 조회 (페이지네이션 지원)
+export const getPlatinumLeague = async (region: Region = 'kr', tier: 'I' | 'II' | 'III' | 'IV' = 'I', page: number = 1): Promise<RiotLeagueEntryDTO[]> => {
+  const apiRegion = region;
+  const url = `https://${apiRegion}.api.riotgames.com/tft/league/v1/entries/PLATINUM/${tier}?page=${page}`;
+  
+  return await apiRequestWithRetry<RiotLeagueEntryDTO[]>(url);
+};
+
+// Gold 랭킹 조회 (필요시 확장)
+export const getGoldLeague = async (region: Region = 'kr', tier: 'I' | 'II' | 'III' | 'IV' = 'I', page: number = 1): Promise<RiotLeagueEntryDTO[]> => {
+  const apiRegion = region;
+  const url = `https://${apiRegion}.api.riotgames.com/tft/league/v1/entries/GOLD/${tier}?page=${page}`;
+  
+  return await apiRequestWithRetry<RiotLeagueEntryDTO[]>(url);
+};
+
+// 🚀 시즌 초기 대응: 유연한 랭킹 시스템
+export interface FlexibleRankingResult {
+  players: Array<{
+    puuid: string;
+    summonerId: string;
+    leaguePoints: number;
+    tier: string;
+    rank: string;
+    wins: number;
+    losses: number;
+  }>;
+  usedTier: string;
+  totalPlayers: number;
+  source: 'challenger' | 'grandmaster' | 'master' | 'diamond' | 'platinum' | 'gold';
+}
+
+export const getFlexibleHighTierPlayers = async (
+  region: Region = 'kr',
+  targetCount: number = 100,
+  minTier: string = 'PLATINUM'
+): Promise<FlexibleRankingResult> => {
+  const tierPriority = [
+    {
+      name: 'Challenger',
+      source: 'challenger' as const,
+      fetch: async () => {
+        const league = await getChallengerLeague(region);
+        return league.entries.map(entry => ({
+          puuid: (entry as any).puuid,
+          summonerId: (entry as any).summonerId,
+          leaguePoints: entry.leaguePoints,
+          tier: league.tier,
+          rank: entry.rank,
+          wins: entry.wins,
+          losses: entry.losses
+        }));
+      }
+    },
+    {
+      name: 'Grandmaster',
+      source: 'grandmaster' as const,
+      fetch: async () => {
+        const league = await getGrandmasterLeague(region);
+        return league.entries.map(entry => ({
+          puuid: (entry as any).puuid,
+          summonerId: (entry as any).summonerId,
+          leaguePoints: entry.leaguePoints,
+          tier: league.tier,
+          rank: entry.rank,
+          wins: entry.wins,
+          losses: entry.losses
+        }));
+      }
+    },
+    {
+      name: 'Master',
+      source: 'master' as const,
+      fetch: async () => {
+        const league = await getMasterLeague(region);
+        return league.entries.map(entry => ({
+          puuid: (entry as any).puuid,
+          summonerId: (entry as any).summonerId,
+          leaguePoints: entry.leaguePoints,
+          tier: league.tier,
+          rank: entry.rank,
+          wins: entry.wins,
+          losses: entry.losses
+        }));
+      }
+    },
+    {
+      name: 'Diamond I',
+      source: 'diamond' as const,
+      fetch: async () => {
+        const entries = await getDiamondLeague(region, 'I', 1);
+        return entries.map(entry => ({
+          puuid: entry.summonerId, // Diamond API는 summonerId 사용
+          summonerId: entry.summonerId,
+          leaguePoints: entry.leaguePoints,
+          tier: entry.tier,
+          rank: entry.rank,
+          wins: entry.wins,
+          losses: entry.losses
+        }));
+      }
+    },
+    {
+      name: 'Platinum I',
+      source: 'platinum' as const,
+      fetch: async () => {
+        const entries = await getPlatinumLeague(region, 'I', 1);
+        return entries.map(entry => ({
+          puuid: entry.summonerId, // Platinum API는 summonerId 사용
+          summonerId: entry.summonerId,
+          leaguePoints: entry.leaguePoints,
+          tier: entry.tier,
+          rank: entry.rank,
+          wins: entry.wins,
+          losses: entry.losses
+        }));
+      }
+    },
+    {
+      name: 'Gold I',
+      source: 'gold' as const,
+      fetch: async () => {
+        const entries = await getGoldLeague(region, 'I', 1);
+        return entries.map(entry => ({
+          puuid: entry.summonerId, // Gold API는 summonerId 사용
+          summonerId: entry.summonerId,
+          leaguePoints: entry.leaguePoints,
+          tier: entry.tier,
+          rank: entry.rank,
+          wins: entry.wins,
+          losses: entry.losses
+        }));
+      }
+    }
+  ];
+
+  // minTier에 따른 시작점 결정
+  const minTierIndex = tierPriority.findIndex(tier => 
+    tier.name.toUpperCase().includes(minTier.toUpperCase())
+  );
+  const startIndex = minTierIndex >= 0 ? 0 : 0; // 항상 최고 티어부터 시작
+
+  for (let i = startIndex; i < tierPriority.length; i++) {
+    const tierInfo = tierPriority[i];
+    
+    if (!tierInfo) {
+      continue;
+    }
+    
+    try {
+      logger.info(`[Flexible Ranking] ${tierInfo.name} 티어 시도 중...`);
+      const players = await tierInfo.fetch();
+      
+      if (players && players.length > 0) {
+        // 리그 포인트 기준으로 정렬
+        const sortedPlayers = players
+          .filter(p => p.puuid && p.summonerId) // 유효한 데이터만
+          .sort((a, b) => b.leaguePoints - a.leaguePoints);
+        
+        const selectedPlayers = sortedPlayers.slice(0, targetCount);
+        
+        logger.info(`✅ ${tierInfo.name} 티어에서 ${selectedPlayers.length}명 확보`);
+        
+        return {
+          players: selectedPlayers,
+          usedTier: tierInfo.name,
+          totalPlayers: selectedPlayers.length,
+          source: tierInfo.source
+        };
+      } else {
+        logger.warn(`⚠️ ${tierInfo.name} 티어에 플레이어가 없음`);
+      }
+    } catch (error) {
+      logger.warn(`⚠️ ${tierInfo.name} 티어 조회 실패: ${(error as Error).message}`);
+      continue;
+    }
+  }
+  
+  throw new Error(`${minTier} 이상의 랭킹 데이터를 찾을 수 없습니다`);
 };
 
 export const getAccountByPuuid = async (puuid: string, region: Region): Promise<RiotAccountDTO> => {
@@ -265,6 +453,19 @@ export const getAccountByPuuid = async (puuid: string, region: Region): Promise<
   
   const response = await api.get(url);
   return response.data;
+};
+
+export const getSummonerById = async (summonerId: string, region: Region): Promise<RiotSummonerDTO> => {
+  const apiRegion = region;
+  const url = `https://${apiRegion}.api.riotgames.com/tft/summoner/v1/summoners/${summonerId}`;
+  
+  try {
+    const response = await apiRequestWithRetry<RiotSummonerDTO>(url);
+    return response;
+  } catch (error) {
+    logger.error(`[Riot API Error] getSummonerById: Failed to fetch summoner for ID ${summonerId.substring(0, 8)}...`);
+    throw error;
+  }
 };
 
 export const getSummonerByPuuid = async (puuid: string, region: Region): Promise<RiotSummonerDTO> => {

@@ -6,17 +6,22 @@ import { useTranslation } from 'react-i18next';
 import { Champion, Trait } from '../../types';
 import { ChampionCardSkeleton } from '../../components/common/TFTSkeletons';
 import { fixChampionImageUrl, createImageErrorHandler } from '../../utils/imageUtils';
+import { createDebugLogger } from '../../utils/debugLogger';
+import { useDeferredValue } from '../../hooks/useDeferredValue';
+import { useSearchTransition } from '../../hooks/useTransition';
+
+const logger = createDebugLogger('UnitPanel');
 
 const COST_COLORS: { [key: number]: string } = { 1: '#808080', 2: '#1E823C', 3: '#156293', 4: '#87259E', 5: '#B89D29' };
 
 // Set 15 유닛 롤 컬러 및 아이콘 매핑
-const ROLE_CONFIG: { [key: string]: { color: string; icon: string; koreanName: string } } = {
-  tank: { color: '#8B4513', icon: '🛡️', koreanName: '탱커' },
-  fighter: { color: '#DC143C', icon: '⚔️', koreanName: '파이터' },
-  assassin: { color: '#6A0DAD', icon: '🗡️', koreanName: '어쌔신' },
-  caster: { color: '#4169E1', icon: '🔮', koreanName: '캐스터' },
-  specialist: { color: '#FF8C00', icon: '⚙️', koreanName: '스페셜리스트' },
-  marksman: { color: '#228B22', icon: '🏹', koreanName: '마크스맨' }
+const ROLE_CONFIG: { [key: string]: { color: string; icon: string } } = {
+  tank: { color: '#8B4513', icon: '🛡️' },
+  fighter: { color: '#DC143C', icon: '⚔️' },
+  assassin: { color: '#6A0DAD', icon: '🗡️' },
+  caster: { color: '#4169E1', icon: '🔮' },
+  specialist: { color: '#FF8C00', icon: '⚙️' },
+  marksman: { color: '#228B22', icon: '🏹' }
 };
 
 // Set 15 롤 배지 컴포넌트
@@ -26,6 +31,7 @@ interface RoleBadgeProps {
 }
 
 const RoleBadge: React.FC<RoleBadgeProps> = ({ role, size = 'small' }) => {
+  const { t } = useTranslation();
   const config = ROLE_CONFIG[role];
   if (!config) return null;
 
@@ -36,7 +42,7 @@ const RoleBadge: React.FC<RoleBadgeProps> = ({ role, size = 'small' }) => {
     <div 
       className={`${badgeSize} rounded-full flex items-center justify-center font-bold text-white shadow-sm`}
       style={{ backgroundColor: config.color }}
-      title={config.koreanName}
+      title={t(`roles.${role}`)}
     >
       <span className={iconSize}>{config.icon}</span>
     </div>
@@ -54,7 +60,7 @@ const DraggableUnit: React.FC<DraggableUnitProps> = ({ champion }) => {
     type: ItemTypes.UNIT,
     item: () => {
       if (import.meta.env.DEV) {
-        console.log('드래그 시작:', champion.name, champion.apiName);
+        logger.debug('드래그 시작:', champion.name, champion.apiName);
       }
       return { championApiName: champion.apiName };
     },
@@ -62,11 +68,11 @@ const DraggableUnit: React.FC<DraggableUnitProps> = ({ champion }) => {
     end: (item, monitor) => {
       if (monitor.didDrop()) {
         if (import.meta.env.DEV) {
-          console.log('드롭 성공:', champion.name);
+          logger.debug('드롭 성공:', champion.name);
         }
       } else {
         if (import.meta.env.DEV) {
-          console.log('드롭 실패:', champion.name);
+          logger.debug('드롭 실패:', champion.name);
         }
       }
     }
@@ -79,6 +85,10 @@ const DraggableUnit: React.FC<DraggableUnitProps> = ({ champion }) => {
   const borderColor = COST_COLORS[champion.cost] || COST_COLORS[1];
 
   const handleMouseEnter = (e: React.MouseEvent) => {
+    console.log('🖱️ handleMouseEnter 트리거됨:', champion.name);
+    console.log('🖱️ showTooltip 함수 타입:', typeof showTooltip);
+    console.log('🖱️ tftDataResult 전체:', tftDataResult);
+    
     // 기존 타이머 클리어
     if (tooltipTimerRef.current) {
       clearTimeout(tooltipTimerRef.current);
@@ -86,10 +96,13 @@ const DraggableUnit: React.FC<DraggableUnitProps> = ({ champion }) => {
     
     // 200ms 지연 후 툴팁 표시 (UX 개선)
     tooltipTimerRef.current = setTimeout(() => {
+      console.log('🖱️ 타이머 실행됨, showTooltip 호출 시도');
       if (showTooltip && typeof showTooltip === 'function') {
+        console.log('🖱️ showTooltip 함수 호출:', champion.name);
         showTooltip(champion, e);
       } else {
-        console.warn('showTooltip 함수가 없습니다:', { showTooltip, champion });
+        console.log('🖱️ showTooltip 함수가 없음 또는 잘못된 타입:', { showTooltip, champion });
+        logger.warn('showTooltip 함수가 없습니다:', { showTooltip, champion });
       }
     }, 200);
   };
@@ -104,7 +117,7 @@ const DraggableUnit: React.FC<DraggableUnitProps> = ({ champion }) => {
     if (hideTooltip && typeof hideTooltip === 'function') {
       hideTooltip();
     } else {
-      console.warn('hideTooltip 함수가 없습니다:', { hideTooltip });
+      logger.warn('hideTooltip 함수가 없습니다:', { hideTooltip });
     }
   };
 
@@ -154,11 +167,11 @@ interface UnitPanelProps {
 }
 
 const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
-  console.log('UnitPanel: 컴포넌트 렌더링 시작');
+  logger.debug('UnitPanel: 컴포넌트 렌더링 시작');
   const tftDataResult = useTFTData();
   const { t } = useTranslation();
   
-  console.log('UnitPanel: useTFTData 결과:', {
+  logger.debug('UnitPanel: useTFTData 결과:', {
     tftDataResult: !!tftDataResult,
     tftDataResultType: typeof tftDataResult,
     loading: tftDataResult?.loading,
@@ -175,7 +188,7 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
   const loading = tftDataResult?.loading || false;
   
   // 디버깅 정보 추가
-  console.log('UnitPanel 디버깅:', {
+  logger.debug('UnitPanel 디버깅:', {
     tftDataResult: !!tftDataResult,
     tftDataResultType: typeof tftDataResult,
     champions: !!champions,
@@ -189,17 +202,25 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
   const [filterTrait, setFilterTrait] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<'cost' | 'origin' | 'class' | 'role'>('cost');
+  
+  // React 18 Concurrent Features 적용
+  const deferredSearch = useDeferredValue(search);
+  const deferredFilterTrait = useDeferredValue(filterTrait);
+  const [isPending, startSearchTransition] = useSearchTransition();
 
   const filtered = useMemo(() => {
     if (!champions) return [];
     let currentChampions = [...champions];
-    if (search) {
-      const lowerCaseSearch = search.toLowerCase();
+    
+    // 지연된 검색어 사용으로 성능 최적화
+    if (deferredSearch) {
+      const lowerCaseSearch = deferredSearch.toLowerCase();
       currentChampions = currentChampions.filter(c => {
         const name = c.name || '';
         return name.toLowerCase().includes(lowerCaseSearch);
       });
     }
+    
     if (activeTab === 'cost') {
       return currentChampions.sort((a, b) => {
         if (a.cost !== b.cost) return a.cost - b.cost;
@@ -209,17 +230,19 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
         return nameA.localeCompare(nameB, 'ko');
       });
     }
-    if (filterTrait) {
+    
+    // 지연된 필터 특성 사용으로 성능 최적화
+    if (deferredFilterTrait) {
       if (activeTab === 'role') {
         // 롤 필터링: champion.role이 filterTrait와 일치하는지 확인
-        currentChampions = currentChampions.filter(c => c.role === filterTrait);
+        currentChampions = currentChampions.filter(c => c.role === deferredFilterTrait);
       } else {
         // 기존 특성 필터링
-        currentChampions = currentChampions.filter(c => c.traits.includes(filterTrait));
+        currentChampions = currentChampions.filter(c => c.traits.includes(deferredFilterTrait));
       }
     }
     return currentChampions;
-  }, [champions, filterTrait, search, activeTab]);
+  }, [champions, deferredFilterTrait, deferredSearch, activeTab]);
 
   const origins = useMemo(() => (traits || []).filter(t => t.type === 'origin'), [traits]);
   const classes = useMemo(() => (traits || []).filter(t => t.type === 'class'), [traits]);
@@ -234,16 +257,16 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
     });
     return Array.from(roleSet).map(role => ({
       id: role,
-      name: ROLE_CONFIG[role]?.koreanName || role,
+      name: t(`roles.${role}`) || role,
       icon: ROLE_CONFIG[role]?.icon || '❓',
       color: ROLE_CONFIG[role]?.color || '#374151'
     })).sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-  }, [champions]);
+  }, [champions, t]);
 
   const groupedChampions = useMemo(() => {
     if (activeTab === 'cost') return null;
     
-    console.log('🔍 UnitPanel groupedChampions 계산 시작:', {
+    logger.debug('🔍 UnitPanel groupedChampions 계산 시작:', {
       activeTab,
       originsCount: origins.length,
       classesCount: classes.length,
@@ -257,7 +280,7 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
     
     // Set 15 롤 기반 그룹핑
     if (activeTab === 'role') {
-      const roleGroupMap = new Map<string, { role: any; champions: Champion[] }>();
+      const roleGroupMap = new Map<string, { role: { apiName: string; name: string; icon: string; color: string }; champions: Champion[] }>();
       
       filtered.forEach(champion => {
         if (champion.role) {
@@ -296,7 +319,7 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
         return nameA.localeCompare(nameB, 'ko');
       });
       
-      console.log('✅ UnitPanel 롤 그룹핑 완료:', {
+      logger.debug('✅ UnitPanel 롤 그룹핑 완료:', {
         groupCount: roleResult.length,
         groups: roleResult.map(g => ({ 
           roleName: g.role.name, 
@@ -312,39 +335,47 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
     const groupMap = new Map<string, { trait: Trait; champions: Champion[] }>();
     const targetTraits = activeTab === 'origin' ? origins : classes;
     
-    // 특성 이름 매핑 헬퍼 함수 (useTraitProcessing과 동일한 로직)
+    // 최적화된 특성 이름 매핑 (Map 기반 O(1) 검색)
+    const traitLookupMap = useMemo(() => {
+      const map = new Map<string, Trait>();
+      targetTraits.forEach(trait => {
+        // 정확한 이름으로 매핑
+        if (trait.name) map.set(trait.name.toLowerCase(), trait);
+        if (trait.apiName) map.set(trait.apiName.toLowerCase(), trait);
+        
+        // 접두사 제거된 이름으로도 매핑
+        if (trait.apiName) {
+          const cleanApiName = trait.apiName.toLowerCase()
+            .replace(/^tft\d+_/, '')
+            .replace(/^set\d+_/, '');
+          map.set(cleanApiName, trait);
+        }
+      });
+      return map;
+    }, [targetTraits]);
+    
     const findTraitByName = (traitNameOrApiName: string): Trait | null => {
-      // 1. 한국어 이름으로 직접 찾기
-      let trait = targetTraits.find(t => t.name === traitNameOrApiName);
+      const lowerName = traitNameOrApiName.toLowerCase();
+      
+      // 1. 직접 매핑 시도 (O(1))
+      let trait = traitLookupMap.get(lowerName);
       if (trait) return trait;
       
-      // 2. API 이름으로 찾기 (대소문자 구분 없음)
-      trait = targetTraits.find(t => 
-        t.apiName?.toLowerCase() === traitNameOrApiName.toLowerCase()
-      );
-      if (trait) return trait;
-      
-      // 3. 부분 매칭 시도 (API 이름에서 접두사 제거)
-      const cleanApiName = traitNameOrApiName.toLowerCase()
-        .replace(/^tft\d+_/, '')  // tft15_ 같은 접두사 제거
-        .replace(/^set\d+_/, ''); // set15_ 같은 접두사 제거
-      
-      trait = targetTraits.find(t => 
-        t.apiName?.toLowerCase().includes(cleanApiName) ||
-        cleanApiName.includes(t.apiName?.toLowerCase() || '')
-      );
+      // 2. 접두사 제거 후 시도 (O(1))
+      const cleanName = lowerName.replace(/^tft\d+_/, '').replace(/^set\d+_/, '');
+      trait = traitLookupMap.get(cleanName);
       if (trait) return trait;
       
       return null;
     };
     
     filtered.forEach(champion => {
-      console.log(`🧩 ${champion.name} 특성 매칭 시작:`, champion.traits);
+      logger.debug(`🧩 ${champion.name} 특성 매칭 시작:`, champion.traits);
       
       champion.traits.forEach(traitName => {
         const foundTrait = findTraitByName(traitName);
         
-        console.log('🔄 특성 매칭 결과:', {
+        logger.debug('🔄 특성 매칭 결과:', {
           championName: champion.name,
           originalTraitName: traitName,
           foundTrait: foundTrait ? { apiName: foundTrait.apiName, name: foundTrait.name } : null
@@ -356,7 +387,7 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
           }
           groupMap.get(foundTrait.apiName)?.champions.push(champion);
         } else {
-          console.warn(`❌ UnitPanel: ${champion.name}의 특성 "${traitName}"을 찾을 수 없음`);
+          logger.warn(`❌ UnitPanel: ${champion.name}의 특성 "${traitName}"을 찾을 수 없음`);
         }
       });
     });
@@ -378,14 +409,16 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
       return nameA.localeCompare(nameB, 'ko');
     });
     
-    console.log('✅ UnitPanel groupedChampions 계산 완료:', {
-      groupCount: result.length,
-      groups: result.map(g => ({ 
-        traitName: g.trait.name, 
-        championCount: g.champions.length,
-        championNames: g.champions.map(c => c.name).slice(0, 3)
-      }))
-    });
+    if (import.meta.env.DEV) {
+      logger.debug('✅ UnitPanel groupedChampions 계산 완료:', {
+        groupCount: result.length,
+        groups: result.map(g => ({ 
+          traitName: g.trait.name, 
+          championCount: g.champions.length,
+          championNames: g.champions.map(c => c.name).slice(0, 3)
+        }))
+      });
+    }
     
     return result;
   }, [filtered, activeTab, origins, classes, roles]);
@@ -451,23 +484,35 @@ const UnitPanel: React.FC<UnitPanelProps> = ({ mini = false }) => {
     <div className="bg-background-card dark:bg-dark-background-card p-4 rounded-lg text-text-primary dark:text-dark-text-primary h-full overflow-y-auto space-y-3">
       <div className="flex justify-between items-center">
         <h2 className="font-bold text-xl text-text-primary dark:text-dark-text-primary">{t('deckBuilder.unit')}</h2>
-        <input type="text" placeholder={t('deckBuilder.searchByName')} value={search} onChange={(e) => setSearch(e.target.value)} className="p-1 text-text-primary dark:text-dark-text-primary rounded bg-background-base dark:bg-dark-background-base text-xs" style={{ width: '150px' }} />
+        <input 
+          type="text" 
+          placeholder={t('deckBuilder.searchByName')} 
+          value={search} 
+          onChange={(e) => {
+            const newValue = e.target.value;
+            startSearchTransition(() => {
+              setSearch(newValue);
+            });
+          }}
+          className={`p-1 text-text-primary dark:text-dark-text-primary rounded bg-background-base dark:bg-dark-background-base text-xs transition-opacity ${isPending ? 'opacity-60' : 'opacity-100'}`}
+          style={{ width: '150px' }} 
+        />
       </div>
       <div className="flex border-b border-gray-300 mb-3">
         <button onClick={() => { setActiveTab('cost'); setFilterTrait(null); }} className={`px-4 py-2 text-sm font-semibold ${activeTab === 'cost' ? 'text-brand-mint border-b-2 border-brand-mint' : 'text-text-secondary dark:text-dark-text-secondary hover:text-text-primary'}`}>{t('deckBuilder.cost')}</button>
         <button onClick={() => setActiveTab('origin')} className={`px-4 py-2 text-sm font-semibold ${activeTab === 'origin' ? 'text-brand-mint border-b-2 border-brand-mint' : 'text-text-secondary dark:text-dark-text-secondary hover:text-text-primary'}`}>{t('stats.traitTypes.origin')}</button>
         <button onClick={() => setActiveTab('class')} className={`px-4 py-2 text-sm font-semibold ${activeTab === 'class' ? 'text-brand-mint border-b-2 border-brand-mint' : 'text-text-secondary dark:text-dark-text-secondary hover:text-text-primary'}`}>{t('stats.traitTypes.class')}</button>
-        <button onClick={() => setActiveTab('role')} className={`px-4 py-2 text-sm font-semibold ${activeTab === 'role' ? 'text-brand-mint border-b-2 border-brand-mint' : 'text-text-secondary dark:text-dark-text-secondary hover:text-text-primary'}`}>롤</button>
+        <button onClick={() => setActiveTab('role')} className={`px-4 py-2 text-sm font-semibold ${activeTab === 'role' ? 'text-brand-mint border-b-2 border-brand-mint' : 'text-text-secondary dark:text-dark-text-secondary hover:text-text-primary'}`}>{t('deckBuilder.role')}</button>
       </div>
-      {activeTab === 'origin' && <div className="space-y-2"><FilterGroup title={t('stats.traitTypes.origin')} items={origins} selected={filterTrait} onSelect={setFilterTrait} /></div>}
-      {activeTab === 'class' && <div className="space-y-2"><FilterGroup title={t('stats.traitTypes.class')} items={classes} selected={filterTrait} onSelect={setFilterTrait} /></div>}
-      {activeTab === 'role' && <div className="space-y-2"><RoleFilterGroup title="롤" items={roles} selected={filterTrait} onSelect={setFilterTrait} /></div>}
+      {activeTab === 'origin' && <div className="space-y-2"><FilterGroup title={t('stats.traitTypes.origin')} items={origins} selected={filterTrait} onSelect={(value) => startSearchTransition(() => setFilterTrait(value))} /></div>}
+      {activeTab === 'class' && <div className="space-y-2"><FilterGroup title={t('stats.traitTypes.class')} items={classes} selected={filterTrait} onSelect={(value) => startSearchTransition(() => setFilterTrait(value))} /></div>}
+      {activeTab === 'role' && <div className="space-y-2"><RoleFilterGroup title={t('deckBuilder.role')} items={roles} selected={filterTrait} onSelect={(value) => startSearchTransition(() => setFilterTrait(value))} /></div>}
       {activeTab === 'cost' ? (
-        <div className="grid gap-x-[3px] gap-y-2 pt-2" style={{ gridTemplateColumns: 'repeat(auto-fill, 52px)' }}>
+        <div className={`grid gap-x-[3px] gap-y-2 pt-2 transition-opacity ${isPending ? 'opacity-60' : 'opacity-100'}`} style={{ gridTemplateColumns: 'repeat(auto-fill, 52px)' }}>
           {filtered.map((ch) => (<DraggableUnit key={ch.apiName} champion={ch} />))}
         </div>
       ) : (
-        <div className="space-y-4 pt-2">
+        <div className={`space-y-4 pt-2 transition-opacity ${isPending ? 'opacity-60' : 'opacity-100'}`}>
           {groupedChampions && groupedChampions.map(group => (
             <div key={group.trait ? group.trait.apiName : group.role.apiName}>
               <h3 className="text-lg font-bold mb-2 flex items-center gap-2">

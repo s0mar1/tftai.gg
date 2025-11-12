@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import Header from '../layout/Header';
 import Footer from '../layout/Footer';
-import ChampionTooltip from '../common/ChampionTooltip';
+import PerfectedChampionTooltip from '../common/PerfectedChampionTooltip';
 import PerformanceDashboard from '../common/PerformanceDashboard';
 import PageLoadingFallback from '../common/PageLoadingFallback.jsx';
 import ErrorBoundary from '../common/ErrorBoundary';
@@ -42,8 +42,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {/* Champion Tooltip - 조건부 렌더링 */}
       {tooltip.visible && (
         <Suspense fallback={null}>
-          <ChampionTooltip 
-            champion={tooltip.data} 
+          <PerfectedChampionTooltip 
+            champion={tooltip.data && 'cost' in tooltip.data ? tooltip.data : null} 
             position={tooltip.position} 
           />
         </Suspense>

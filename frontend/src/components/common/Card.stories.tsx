@@ -85,55 +85,6 @@ const meta: Meta<typeof Card> = {
 />
 \`\`\`
         `
-다양한 콘텐츠를 담을 수 있는 카드 컴포넌트입니다.
-
-## 특징
-- 4가지 변형: default, outlined, elevated, filled
-- 3가지 크기: sm, md, lg
-- 호버 효과 및 클릭 가능 옵션
-- 구성 요소: CardHeader, CardContent, CardFooter
-- 특화 카드: ImageCard, StatCard, ListCard
-- 다크모드 완전 지원
-
-## 사용법
-\`\`\`tsx
-// 기본 카드
-<Card>
-  <CardHeader title="제목" subtitle="부제목" />
-  <CardContent>
-    카드 내용이 들어갑니다.
-  </CardContent>
-  <CardFooter>
-    <Button>액션</Button>
-  </CardFooter>
-</Card>
-
-// 이미지 카드
-<ImageCard
-  src="/path/to/image.jpg"
-  alt="이미지 설명"
-  title="이미지 제목"
-  description="이미지 설명"
-/>
-
-// 통계 카드
-<StatCard
-  title="총 게임 수"
-  value="1,234"
-  change={{ value: "+12%", type: "increase" }}
-  icon={<ChartIcon />}
-/>
-
-// 리스트 카드
-<ListCard
-  title="최근 매치"
-  items={[
-    { id: "1", primary: "승리", secondary: "1등" },
-    { id: "2", primary: "패배", secondary: "8등" }
-  ]}
-/>
-\`\`\`
-        `
       }
     }
   },

@@ -28,6 +28,14 @@ module.exports = {
     'jsx-a11y/interactive-supports-focus': 'error',
     'jsx-a11y/no-autofocus': 'warn',
     'jsx-a11y/media-has-caption': 'warn',
+    
+    // 🚫 Console 사용 방지 (프로덕션 품질 향상)
+    'no-console': ['error', { allow: ['warn', 'error'] }],
+    
+    // 🚨 TypeScript 엄격성 규칙
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/prefer-const': 'error',
   },
   overrides: [
     {

@@ -35,6 +35,7 @@ import statsRoutes from '../routes/stats';
 import translationRoutes from '../routes/translation';
 import powerSnaxRoutes from '../routes/powerSnax';
 import unitRolesRoutes from '../routes/unitRoles';
+import aiMetaRoutes from '../routes/aiMeta';
 
 // 에러 핸들러
 import errorHandler from '../middlewares/errorHandler';
@@ -136,7 +137,8 @@ const setupApiRoutes = (app: Application): string[] => {
     { path: '/api/stats', router: statsRoutes, name: 'Stats' },
     { path: '/api/translation', router: translationRoutes, name: 'Translation' },
     { path: '/api/power-snax', router: powerSnaxRoutes, name: 'Power Snax' },
-    { path: '/api/unit-roles', router: unitRolesRoutes, name: 'Unit Roles' }
+    { path: '/api/unit-roles', router: unitRolesRoutes, name: 'Unit Roles' },
+    { path: '/api/ai-meta', router: aiMetaRoutes, name: 'AI Meta Prediction' }
   ];
   
   // Swagger UI 설정 (특별 처리)

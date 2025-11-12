@@ -9,10 +9,12 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import HexGrid from '../DeckBuilderPage/HexGrid';
-import SynergyPanel from '../DeckBuilderPage/SynergyPanel';
-import UnitPanel from '../DeckBuilderPage/UnitPanel';
-import ItemPanel from '../DeckBuilderPage/ItemPanel';
-import DetailPanel from '../DeckBuilderPage/DetailPanel';
+
+// Dynamic imports for better code splitting
+const SynergyPanel = React.lazy(() => import('../DeckBuilderPage/SynergyPanel'));
+const UnitPanel = React.lazy(() => import('../DeckBuilderPage/UnitPanel'));
+const ItemPanel = React.lazy(() => import('../DeckBuilderPage/ItemPanel'));
+const DetailPanel = React.lazy(() => import('../DeckBuilderPage/DetailPanel'));
 
 const logger = createComponentLogger('GuideEditorPage');
 
@@ -274,18 +276,36 @@ export default function GuideEditorPage(): JSX.Element {
           {/* 중앙 영역 */}
           <div className="flex gap-3 mb-4">
             {/* 왼쪽 시너지 */}
-            <aside className="bg-background-card dark:bg-dark-background-card p-2 rounded-lg shadow-md h-full w-[150px]"><SynergyPanel placedUnits={Object.values(activeBoard)} /></aside>
+            <aside className="bg-background-card dark:bg-dark-background-card p-2 rounded-lg shadow-md h-full w-[150px]">
+              <React.Suspense fallback={<div className="animate-pulse bg-gray-300 h-32 rounded"></div>}>
+                <SynergyPanel placedUnits={Object.values(activeBoard)} />
+              </React.Suspense>
+            </aside>
             {/* 보드 */}
-            <main className="flex-grow flex justify-center items-center bg-background-card dark:bg-dark-background-card rounded-lg p-2 shadow-md w-[480px]"><HexGrid placedUnits={activeBoard} onUnitAction={handleUnitAction} onSelectUnit={handleSelectUnit} onUnitRemove={handleUnitRemove} onItemDrop={handleEquip} selectedKey={selectedKey} /></main>
+            <main className="flex-grow flex justify-center items-center bg-background-card dark:bg-dark-background-card rounded-lg p-2 shadow-md w-[480px]">
+              <HexGrid placedUnits={activeBoard} onUnitAction={handleUnitAction} onSelectUnit={handleSelectUnit} onUnitRemove={handleUnitRemove} onItemDrop={handleEquip} selectedKey={selectedKey} />
+            </main>
             {/* 상세 */}
-            <aside className="bg-background-card dark:bg-dark-background-card p-2 rounded-lg shadow-md h-full w-[220px]"><DetailPanel selectedUnit={selectedUnit} onUnitRemove={handleUnitRemove} onChangeStar={handleChangeStar} onEquip={handleEquip} onUnequip={handleUnequip} /></aside>
+            <aside className="bg-background-card dark:bg-dark-background-card p-2 rounded-lg shadow-md h-full w-[220px]">
+              <React.Suspense fallback={<div className="animate-pulse bg-gray-300 h-32 rounded"></div>}>
+                <DetailPanel selectedUnit={selectedUnit} onUnitRemove={handleUnitRemove} onChangeStar={handleChangeStar} onEquip={handleEquip} onUnequip={handleUnequip} />
+              </React.Suspense>
+            </aside>
           </div>
 
           {/* 하단 패널 */}
           <div className="bg-background-card dark:bg-dark-background-card p-2 rounded-lg shadow-md">
             <div className="grid grid-cols-12 gap-3">
-              <div className="col-span-8"><UnitPanel /></div>
-              <div className="col-span-4"><ItemPanel /></div>
+              <div className="col-span-8">
+                <React.Suspense fallback={<div className="animate-pulse bg-gray-300 h-64 rounded"></div>}>
+                  <UnitPanel />
+                </React.Suspense>
+              </div>
+              <div className="col-span-4">
+                <React.Suspense fallback={<div className="animate-pulse bg-gray-300 h-64 rounded"></div>}>
+                  <ItemPanel />
+                </React.Suspense>
+              </div>
             </div>
           </div>
         </div>

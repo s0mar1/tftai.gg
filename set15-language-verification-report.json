@@ -1,0 +1,588 @@
+{
+  "timestamp": "2025-07-30T17:25:48.387Z",
+  "set": "Set15",
+  "languages": [
+    "en",
+    "ko",
+    "ja",
+    "zh"
+  ],
+  "issues": [
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_Mecha_RebootProtocol",
+      "enName": "tft_item_name_RebootProtocol",
+      "langName": "tft_item_name_RebootProtocol",
+      "message": "아이템 미번역: tft_item_name_RebootProtocol → tft_item_name_RebootProtocol"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_Mecha_UpgradeModule",
+      "enName": "tft_item_name_UpgradeModule",
+      "langName": "tft_item_name_UpgradeModule",
+      "message": "아이템 미번역: tft_item_name_UpgradeModule → tft_item_name_UpgradeModule"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_Mecha_FluxEngine",
+      "enName": "tft_item_name_FluxEngine",
+      "langName": "tft_item_name_FluxEngine",
+      "message": "아이템 미번역: tft_item_name_FluxEngine → tft_item_name_FluxEngine"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_Mecha_OperatingSystem",
+      "enName": "tft_item_name_TFT15_Mecha_OperatingSystem",
+      "langName": "tft_item_name_TFT15_Mecha_OperatingSystem",
+      "message": "아이템 미번역: tft_item_name_TFT15_Mecha_OperatingSystem → tft_item_name_TFT15_Mecha_OperatingSystem"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_Mecha_ChernoAftermath",
+      "enName": "tft_item_name_ChernoAftermath",
+      "langName": "tft_item_name_ChernoAftermath",
+      "message": "아이템 미번역: tft_item_name_ChernoAftermath → tft_item_name_ChernoAftermath"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_Mecha_Railgun",
+      "enName": "tft_item_name_Railgun",
+      "langName": "tft_item_name_Railgun",
+      "message": "아이템 미번역: tft_item_name_Railgun → tft_item_name_Railgun"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_Mecha_VoltaicBattery",
+      "enName": "tft_item_name_VoltaicBattery",
+      "langName": "tft_item_name_VoltaicBattery",
+      "message": "아이템 미번역: tft_item_name_VoltaicBattery → tft_item_name_VoltaicBattery"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_Mecha_NanoFabricator",
+      "enName": "tft_item_name_NanoFabricator",
+      "langName": "tft_item_name_NanoFabricator",
+      "message": "아이템 미번역: tft_item_name_NanoFabricator → tft_item_name_NanoFabricator"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_HiddenTech_SoulOfASentinel",
+      "enName": "TFT15_HiddenTech_SoulOfASentinel_Name",
+      "langName": "TFT15_HiddenTech_SoulOfASentinel_Name",
+      "message": "아이템 미번역: TFT15_HiddenTech_SoulOfASentinel_Name → TFT15_HiddenTech_SoulOfASentinel_Name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_HiddenTech_SoulOfAStarGuardian",
+      "enName": "TFT15_HiddenTech_SoulOfAStarGuardian_Name",
+      "langName": "TFT15_HiddenTech_SoulOfAStarGuardian_Name",
+      "message": "아이템 미번역: TFT15_HiddenTech_SoulOfAStarGuardian_Name → TFT15_HiddenTech_SoulOfAStarGuardian_Name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_HiddenTech_SoulOfAChallenger",
+      "enName": "TFT15_HiddenTech_SoulOfAChallenger_Name",
+      "langName": "TFT15_HiddenTech_SoulOfAChallenger_Name",
+      "message": "아이템 미번역: TFT15_HiddenTech_SoulOfAChallenger_Name → TFT15_HiddenTech_SoulOfAChallenger_Name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_General_Consumable_IncreaseThreat",
+      "enName": "tft15_General_itemname_IncreaseThreat",
+      "langName": "tft15_General_itemname_IncreaseThreat",
+      "message": "아이템 미번역: tft15_General_itemname_IncreaseThreat → tft15_General_itemname_IncreaseThreat"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_General_Consumable_BenchedUnitInCombat",
+      "enName": "tft15_General_itemname_BenchedUnitInCombat",
+      "langName": "tft15_General_itemname_BenchedUnitInCombat",
+      "message": "아이템 미번역: tft15_General_itemname_BenchedUnitInCombat → tft15_General_itemname_BenchedUnitInCombat"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_General_Consumable_ReduceThreat",
+      "enName": "tft15_General_itemname_ReduceThreat",
+      "langName": "tft15_General_itemname_ReduceThreat",
+      "message": "아이템 미번역: tft15_General_itemname_ReduceThreat → tft15_General_itemname_ReduceThreat"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_General_Consumable_JumpToBackline",
+      "enName": "tft15_General_itemname_JumpToBackline",
+      "langName": "tft15_General_itemname_JumpToBackline",
+      "message": "아이템 미번역: tft15_General_itemname_JumpToBackline → tft15_General_itemname_JumpToBackline"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_General_Consumable_GoldOnKill",
+      "enName": "tft15_General_itemname_GoldOnKill",
+      "langName": "tft15_General_itemname_GoldOnKill",
+      "message": "아이템 미번역: tft15_General_itemname_GoldOnKill → tft15_General_itemname_GoldOnKill"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_General_Consumable_Debuff",
+      "enName": "tft15_General_itemname_Debuff",
+      "langName": "tft15_General_itemname_Debuff",
+      "message": "아이템 미번역: tft15_General_itemname_Debuff → tft15_General_itemname_Debuff"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_Item_LimitBreak",
+      "enName": "tft15_LimitBreak_Item_name",
+      "langName": "tft15_LimitBreak_Item_name",
+      "message": "아이템 미번역: tft15_LimitBreak_Item_name → tft15_LimitBreak_Item_name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_Item_Underdogs_ChampionsBelt",
+      "enName": "tft15_itemname_ChampionsBelt",
+      "langName": "tft15_itemname_ChampionsBelt",
+      "message": "아이템 미번역: tft15_itemname_ChampionsBelt → tft15_itemname_ChampionsBelt"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_Item_BattleQueen_Crown",
+      "enName": "tft15_itemname_BattleQueenCrown",
+      "langName": "tft15_itemname_BattleQueenCrown",
+      "message": "아이템 미번역: tft15_itemname_BattleQueenCrown → tft15_itemname_BattleQueenCrown"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ko",
+      "apiName": "TFT15_SetMechanic_KeepCurrentOption",
+      "enName": "TFT15_SetMechanic_KeepCurrentOption_Name",
+      "langName": "TFT15_SetMechanic_KeepCurrentOption_Name",
+      "message": "아이템 미번역: TFT15_SetMechanic_KeepCurrentOption_Name → TFT15_SetMechanic_KeepCurrentOption_Name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_Mecha_RebootProtocol",
+      "enName": "tft_item_name_RebootProtocol",
+      "langName": "tft_item_name_RebootProtocol",
+      "message": "아이템 미번역: tft_item_name_RebootProtocol → tft_item_name_RebootProtocol"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_Mecha_UpgradeModule",
+      "enName": "tft_item_name_UpgradeModule",
+      "langName": "tft_item_name_UpgradeModule",
+      "message": "아이템 미번역: tft_item_name_UpgradeModule → tft_item_name_UpgradeModule"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_Mecha_FluxEngine",
+      "enName": "tft_item_name_FluxEngine",
+      "langName": "tft_item_name_FluxEngine",
+      "message": "아이템 미번역: tft_item_name_FluxEngine → tft_item_name_FluxEngine"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_Mecha_OperatingSystem",
+      "enName": "tft_item_name_TFT15_Mecha_OperatingSystem",
+      "langName": "tft_item_name_TFT15_Mecha_OperatingSystem",
+      "message": "아이템 미번역: tft_item_name_TFT15_Mecha_OperatingSystem → tft_item_name_TFT15_Mecha_OperatingSystem"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_Mecha_ChernoAftermath",
+      "enName": "tft_item_name_ChernoAftermath",
+      "langName": "tft_item_name_ChernoAftermath",
+      "message": "아이템 미번역: tft_item_name_ChernoAftermath → tft_item_name_ChernoAftermath"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_Mecha_Railgun",
+      "enName": "tft_item_name_Railgun",
+      "langName": "tft_item_name_Railgun",
+      "message": "아이템 미번역: tft_item_name_Railgun → tft_item_name_Railgun"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_Mecha_VoltaicBattery",
+      "enName": "tft_item_name_VoltaicBattery",
+      "langName": "tft_item_name_VoltaicBattery",
+      "message": "아이템 미번역: tft_item_name_VoltaicBattery → tft_item_name_VoltaicBattery"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_Mecha_NanoFabricator",
+      "enName": "tft_item_name_NanoFabricator",
+      "langName": "tft_item_name_NanoFabricator",
+      "message": "아이템 미번역: tft_item_name_NanoFabricator → tft_item_name_NanoFabricator"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_HiddenTech_SoulOfASentinel",
+      "enName": "TFT15_HiddenTech_SoulOfASentinel_Name",
+      "langName": "TFT15_HiddenTech_SoulOfASentinel_Name",
+      "message": "아이템 미번역: TFT15_HiddenTech_SoulOfASentinel_Name → TFT15_HiddenTech_SoulOfASentinel_Name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_HiddenTech_SoulOfAStarGuardian",
+      "enName": "TFT15_HiddenTech_SoulOfAStarGuardian_Name",
+      "langName": "TFT15_HiddenTech_SoulOfAStarGuardian_Name",
+      "message": "아이템 미번역: TFT15_HiddenTech_SoulOfAStarGuardian_Name → TFT15_HiddenTech_SoulOfAStarGuardian_Name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_HiddenTech_SoulOfAChallenger",
+      "enName": "TFT15_HiddenTech_SoulOfAChallenger_Name",
+      "langName": "TFT15_HiddenTech_SoulOfAChallenger_Name",
+      "message": "아이템 미번역: TFT15_HiddenTech_SoulOfAChallenger_Name → TFT15_HiddenTech_SoulOfAChallenger_Name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_General_Consumable_IncreaseThreat",
+      "enName": "tft15_General_itemname_IncreaseThreat",
+      "langName": "tft15_General_itemname_IncreaseThreat",
+      "message": "아이템 미번역: tft15_General_itemname_IncreaseThreat → tft15_General_itemname_IncreaseThreat"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_General_Consumable_BenchedUnitInCombat",
+      "enName": "tft15_General_itemname_BenchedUnitInCombat",
+      "langName": "tft15_General_itemname_BenchedUnitInCombat",
+      "message": "아이템 미번역: tft15_General_itemname_BenchedUnitInCombat → tft15_General_itemname_BenchedUnitInCombat"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_General_Consumable_ReduceThreat",
+      "enName": "tft15_General_itemname_ReduceThreat",
+      "langName": "tft15_General_itemname_ReduceThreat",
+      "message": "아이템 미번역: tft15_General_itemname_ReduceThreat → tft15_General_itemname_ReduceThreat"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_General_Consumable_JumpToBackline",
+      "enName": "tft15_General_itemname_JumpToBackline",
+      "langName": "tft15_General_itemname_JumpToBackline",
+      "message": "아이템 미번역: tft15_General_itemname_JumpToBackline → tft15_General_itemname_JumpToBackline"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_General_Consumable_GoldOnKill",
+      "enName": "tft15_General_itemname_GoldOnKill",
+      "langName": "tft15_General_itemname_GoldOnKill",
+      "message": "아이템 미번역: tft15_General_itemname_GoldOnKill → tft15_General_itemname_GoldOnKill"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_General_Consumable_Debuff",
+      "enName": "tft15_General_itemname_Debuff",
+      "langName": "tft15_General_itemname_Debuff",
+      "message": "아이템 미번역: tft15_General_itemname_Debuff → tft15_General_itemname_Debuff"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_Item_LimitBreak",
+      "enName": "tft15_LimitBreak_Item_name",
+      "langName": "tft15_LimitBreak_Item_name",
+      "message": "아이템 미번역: tft15_LimitBreak_Item_name → tft15_LimitBreak_Item_name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_Item_Underdogs_ChampionsBelt",
+      "enName": "tft15_itemname_ChampionsBelt",
+      "langName": "tft15_itemname_ChampionsBelt",
+      "message": "아이템 미번역: tft15_itemname_ChampionsBelt → tft15_itemname_ChampionsBelt"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_Item_BattleQueen_Crown",
+      "enName": "tft15_itemname_BattleQueenCrown",
+      "langName": "tft15_itemname_BattleQueenCrown",
+      "message": "아이템 미번역: tft15_itemname_BattleQueenCrown → tft15_itemname_BattleQueenCrown"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "ja",
+      "apiName": "TFT15_SetMechanic_KeepCurrentOption",
+      "enName": "TFT15_SetMechanic_KeepCurrentOption_Name",
+      "langName": "TFT15_SetMechanic_KeepCurrentOption_Name",
+      "message": "아이템 미번역: TFT15_SetMechanic_KeepCurrentOption_Name → TFT15_SetMechanic_KeepCurrentOption_Name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_Mecha_RebootProtocol",
+      "enName": "tft_item_name_RebootProtocol",
+      "langName": "tft_item_name_RebootProtocol",
+      "message": "아이템 미번역: tft_item_name_RebootProtocol → tft_item_name_RebootProtocol"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_Mecha_UpgradeModule",
+      "enName": "tft_item_name_UpgradeModule",
+      "langName": "tft_item_name_UpgradeModule",
+      "message": "아이템 미번역: tft_item_name_UpgradeModule → tft_item_name_UpgradeModule"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_Mecha_FluxEngine",
+      "enName": "tft_item_name_FluxEngine",
+      "langName": "tft_item_name_FluxEngine",
+      "message": "아이템 미번역: tft_item_name_FluxEngine → tft_item_name_FluxEngine"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_Mecha_OperatingSystem",
+      "enName": "tft_item_name_TFT15_Mecha_OperatingSystem",
+      "langName": "tft_item_name_TFT15_Mecha_OperatingSystem",
+      "message": "아이템 미번역: tft_item_name_TFT15_Mecha_OperatingSystem → tft_item_name_TFT15_Mecha_OperatingSystem"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_Mecha_ChernoAftermath",
+      "enName": "tft_item_name_ChernoAftermath",
+      "langName": "tft_item_name_ChernoAftermath",
+      "message": "아이템 미번역: tft_item_name_ChernoAftermath → tft_item_name_ChernoAftermath"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_Mecha_Railgun",
+      "enName": "tft_item_name_Railgun",
+      "langName": "tft_item_name_Railgun",
+      "message": "아이템 미번역: tft_item_name_Railgun → tft_item_name_Railgun"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_Mecha_VoltaicBattery",
+      "enName": "tft_item_name_VoltaicBattery",
+      "langName": "tft_item_name_VoltaicBattery",
+      "message": "아이템 미번역: tft_item_name_VoltaicBattery → tft_item_name_VoltaicBattery"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_Mecha_NanoFabricator",
+      "enName": "tft_item_name_NanoFabricator",
+      "langName": "tft_item_name_NanoFabricator",
+      "message": "아이템 미번역: tft_item_name_NanoFabricator → tft_item_name_NanoFabricator"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_HiddenTech_SoulOfASentinel",
+      "enName": "TFT15_HiddenTech_SoulOfASentinel_Name",
+      "langName": "TFT15_HiddenTech_SoulOfASentinel_Name",
+      "message": "아이템 미번역: TFT15_HiddenTech_SoulOfASentinel_Name → TFT15_HiddenTech_SoulOfASentinel_Name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_HiddenTech_SoulOfAStarGuardian",
+      "enName": "TFT15_HiddenTech_SoulOfAStarGuardian_Name",
+      "langName": "TFT15_HiddenTech_SoulOfAStarGuardian_Name",
+      "message": "아이템 미번역: TFT15_HiddenTech_SoulOfAStarGuardian_Name → TFT15_HiddenTech_SoulOfAStarGuardian_Name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_HiddenTech_SoulOfAChallenger",
+      "enName": "TFT15_HiddenTech_SoulOfAChallenger_Name",
+      "langName": "TFT15_HiddenTech_SoulOfAChallenger_Name",
+      "message": "아이템 미번역: TFT15_HiddenTech_SoulOfAChallenger_Name → TFT15_HiddenTech_SoulOfAChallenger_Name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_General_Consumable_IncreaseThreat",
+      "enName": "tft15_General_itemname_IncreaseThreat",
+      "langName": "tft15_General_itemname_IncreaseThreat",
+      "message": "아이템 미번역: tft15_General_itemname_IncreaseThreat → tft15_General_itemname_IncreaseThreat"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_General_Consumable_BenchedUnitInCombat",
+      "enName": "tft15_General_itemname_BenchedUnitInCombat",
+      "langName": "tft15_General_itemname_BenchedUnitInCombat",
+      "message": "아이템 미번역: tft15_General_itemname_BenchedUnitInCombat → tft15_General_itemname_BenchedUnitInCombat"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_General_Consumable_ReduceThreat",
+      "enName": "tft15_General_itemname_ReduceThreat",
+      "langName": "tft15_General_itemname_ReduceThreat",
+      "message": "아이템 미번역: tft15_General_itemname_ReduceThreat → tft15_General_itemname_ReduceThreat"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_General_Consumable_JumpToBackline",
+      "enName": "tft15_General_itemname_JumpToBackline",
+      "langName": "tft15_General_itemname_JumpToBackline",
+      "message": "아이템 미번역: tft15_General_itemname_JumpToBackline → tft15_General_itemname_JumpToBackline"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_General_Consumable_GoldOnKill",
+      "enName": "tft15_General_itemname_GoldOnKill",
+      "langName": "tft15_General_itemname_GoldOnKill",
+      "message": "아이템 미번역: tft15_General_itemname_GoldOnKill → tft15_General_itemname_GoldOnKill"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_General_Consumable_Debuff",
+      "enName": "tft15_General_itemname_Debuff",
+      "langName": "tft15_General_itemname_Debuff",
+      "message": "아이템 미번역: tft15_General_itemname_Debuff → tft15_General_itemname_Debuff"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_Item_LimitBreak",
+      "enName": "tft15_LimitBreak_Item_name",
+      "langName": "tft15_LimitBreak_Item_name",
+      "message": "아이템 미번역: tft15_LimitBreak_Item_name → tft15_LimitBreak_Item_name"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_Item_Underdogs_ChampionsBelt",
+      "enName": "tft15_itemname_ChampionsBelt",
+      "langName": "tft15_itemname_ChampionsBelt",
+      "message": "아이템 미번역: tft15_itemname_ChampionsBelt → tft15_itemname_ChampionsBelt"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_Item_BattleQueen_Crown",
+      "enName": "tft15_itemname_BattleQueenCrown",
+      "langName": "tft15_itemname_BattleQueenCrown",
+      "message": "아이템 미번역: tft15_itemname_BattleQueenCrown → tft15_itemname_BattleQueenCrown"
+    },
+    {
+      "type": "UNTRANSLATED_ITEM",
+      "language": "zh",
+      "apiName": "TFT15_SetMechanic_KeepCurrentOption",
+      "enName": "TFT15_SetMechanic_KeepCurrentOption_Name",
+      "langName": "TFT15_SetMechanic_KeepCurrentOption_Name",
+      "message": "아이템 미번역: TFT15_SetMechanic_KeepCurrentOption_Name → TFT15_SetMechanic_KeepCurrentOption_Name"
+    }
+  ],
+  "summary": {
+    "ko": {
+      "language": "ko",
+      "totalChampions": 69,
+      "translatedChampions": 69,
+      "totalTraits": 151,
+      "translatedTraits": 151,
+      "totalItems": 261,
+      "translatedItems": 240,
+      "totalAugments": 10,
+      "translatedAugments": 10
+    },
+    "ja": {
+      "language": "ja",
+      "totalChampions": 69,
+      "translatedChampions": 69,
+      "totalTraits": 151,
+      "translatedTraits": 151,
+      "totalItems": 261,
+      "translatedItems": 240,
+      "totalAugments": 10,
+      "translatedAugments": 10
+    },
+    "zh": {
+      "language": "zh",
+      "totalChampions": 69,
+      "translatedChampions": 69,
+      "totalTraits": 151,
+      "translatedTraits": 151,
+      "totalItems": 261,
+      "translatedItems": 240,
+      "totalAugments": 10,
+      "translatedAugments": 10
+    }
+  },
+  "examples": [
+    {
+      "apiName": "TFT15_Ahri",
+      "en": "Ahri",
+      "ko": "아리",
+      "ja": "アーリ",
+      "zh": "阿狸"
+    },
+    {
+      "apiName": "TFT15_Ezreal",
+      "en": "Ezreal",
+      "ko": "이즈리얼",
+      "ja": "エズリアル",
+      "zh": "伊泽瑞尔"
+    },
+    {
+      "apiName": "TFT15_Jinx",
+      "en": "Jinx",
+      "ko": "징크스",
+      "ja": "ジンクス",
+      "zh": "金克丝"
+    },
+    {
+      "apiName": "TFT15_Lux",
+      "en": "Lux",
+      "ko": "럭스",
+      "ja": "ラックス",
+      "zh": "拉克丝"
+    },
+    {
+      "apiName": "TFT15_Yasuo",
+      "en": "Yasuo",
+      "ko": "야스오",
+      "ja": "ヤスオ",
+      "zh": "亚索"
+    }
+  ]
+}

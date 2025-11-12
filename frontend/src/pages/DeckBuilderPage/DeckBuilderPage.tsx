@@ -128,29 +128,37 @@ export default function DeckBuilderPage() {
       if (fromKey && next[fromKey]) delete next[fromKey];
       if (next[toKey] && next[toKey].apiName !== apiName) delete next[toKey];
 
-      const fullUnitData = champions.find(c => c.apiName === apiName);
-      console.log('🔍 fullUnitData 찾기:', { 
-        apiName, 
-        found: !!fullUnitData, 
-        fullUnitData: fullUnitData ? { 
-          name: fullUnitData.name, 
-          apiName: fullUnitData.apiName,
-          traits: fullUnitData.traits,
-          traitsCount: fullUnitData.traits?.length || 0
-        } : null,
-        availableChampionsCount: champions.length,
-        sampleChampion: champions[0] ? { 
-          name: champions[0].name, 
-          apiName: champions[0].apiName, 
-          traits: champions[0].traits 
-        } : null
-      });
+      // 개선된 챔피언 검색 로직 - 여러 방법으로 검색 시도
+      const fullUnitData = champions.find(c => c.apiName === apiName) ||
+                          champions.find(c => c.apiName?.toLowerCase() === apiName?.toLowerCase()) ||
+                          champions.find(c => c.name === apiName);
+      
+      if (import.meta.env.DEV) {
+        console.log('🔍 fullUnitData 찾기:', { 
+          apiName, 
+          found: !!fullUnitData, 
+          fullUnitData: fullUnitData ? { 
+            name: fullUnitData.name, 
+            apiName: fullUnitData.apiName,
+            traits: fullUnitData.traits,
+            traitsCount: fullUnitData.traits?.length || 0
+          } : null,
+          availableChampionsCount: champions.length,
+          sampleChampion: champions[0] ? { 
+            name: champions[0].name, 
+            apiName: champions[0].apiName, 
+            traits: champions[0].traits 
+          } : null
+        });
+      }
       
       if (!fullUnitData) {
-        console.error('챔피언 데이터를 찾을 수 없음:', { 
-          apiName, 
-          availableChampions: champions.slice(0, 5).map(c => ({ name: c.name, apiName: c.apiName })) 
-        });
+        if (import.meta.env.DEV) {
+          console.error('챔피언 데이터를 찾을 수 없음:', { 
+            apiName, 
+            availableChampions: champions.slice(0, 5).map(c => ({ name: c.name, apiName: c.apiName })) 
+          });
+        }
         return prev;
       }
       
@@ -243,7 +251,7 @@ export default function DeckBuilderPage() {
       <div className="flex items-center justify-center min-h-[calc(100vh-theme(space.16))] bg-background-base dark:bg-dark-background-page">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-brand-mint"></div>
-          <p className="mt-4 text-text-secondary dark:text-dark-text-secondary">데이터 로딩 중...</p>
+          <p className="mt-4 text-text-secondary dark:text-dark-text-secondary">{t('deckBuilder.loadingData')}</p>
         </div>
       </div>
     );
@@ -255,7 +263,7 @@ export default function DeckBuilderPage() {
       <div className="flex items-center justify-center min-h-[calc(100vh-theme(space.16))] bg-background-base dark:bg-dark-background-page">
         <div className="text-center">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <p className="text-text-primary dark:text-dark-text-primary">데이터를 불러오지 못했습니다.</p>
+          <p className="text-text-primary dark:text-dark-text-primary">{t('deckBuilder.failedToLoadData')}</p>
         </div>
       </div>
     );

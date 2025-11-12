@@ -3,7 +3,7 @@
  * 기존 코드를 전혀 변경하지 않으면서 성능 데이터만 수집
  */
 
-import type { ApolloServerPlugin, GraphQLRequestContext } from '@apollo/server';
+import type { ApolloServerPlugin } from '@apollo/server';
 import logger from '../config/logger';
 import type { GraphQLContext } from './types';
 
@@ -76,7 +76,7 @@ function calculateFieldCount(selectionSet: any): number {
  * 기존 동작에 전혀 영향을 주지 않으면서 성능 데이터만 수집
  */
 export const performanceMonitoringPlugin: ApolloServerPlugin<GraphQLContext> = {
-  async requestDidStart() {
+  async requestDidStart(requestContext) {
     const startTime = Date.now();
     let parseStartTime = 0;
     let validationStartTime = 0;
@@ -86,7 +86,7 @@ export const performanceMonitoringPlugin: ApolloServerPlugin<GraphQLContext> = {
     return {
       async didResolveOperation(requestContext) {
         try {
-          const { request, document, operationName } = requestContext;
+          const { document, operationName } = requestContext;
           
           // 기본 메트릭스 수집
           metrics.operationName = operationName || 'Unknown';
@@ -119,30 +119,26 @@ export const performanceMonitoringPlugin: ApolloServerPlugin<GraphQLContext> = {
 
       async parsingDidStart() {
         parseStartTime = Date.now();
-        return {
-          async parsingDidEnd() {
-            metrics.parseTime = Date.now() - parseStartTime;
-          }
+        return async () => {
+          metrics.parseTime = Date.now() - parseStartTime;
         };
       },
 
       async validationDidStart() {
         validationStartTime = Date.now();
-        return {
-          async validationDidEnd() {
-            metrics.validationTime = Date.now() - validationStartTime;
-          }
+        return async () => {
+          metrics.validationTime = Date.now() - validationStartTime;
         };
       },
 
       async executionDidStart() {
         executionStartTime = Date.now();
         return {
-          async executionDidEnd() {
+          executionDidEnd: async () => {
             metrics.resolveTime = Date.now() - executionStartTime;
           },
           
-          async willResolveField({ info }) {
+          willResolveField: () => {
             // 리졸버 카운트 증가 (안전하게)
             if (metrics.resolverCount !== undefined) {
               metrics.resolverCount++;
@@ -222,24 +218,3 @@ export const performanceMonitoringPlugin: ApolloServerPlugin<GraphQLContext> = {
   }
 };
 
-/**
- * 성능 메트릭스를 외부 모니터링 시스템에 전송
- * (필요시 구현)
- */
-async function sendMetricsToExternalSystem(metrics: PerformanceMetrics): Promise<void> {
-  // 예시: Prometheus, DataDog, New Relic 등에 메트릭스 전송
-  // 현재는 로깅만 수행
-  
-  try {
-    // 외부 시스템 연동 로직 (옵션)
-    // await prometheusClient.recordMetrics(metrics);
-    // await datadogClient.increment('graphql.query.count', 1, metrics);
-    
-    logger.debug('성능 메트릭스 외부 전송 준비 완료:', {
-      operation: metrics.operationName,
-      duration: metrics.executionTime
-    });
-  } catch (error: any) {
-    logger.debug('외부 메트릭스 전송 실패 (무시됨):', error.message);
-  }
-}

@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-07-30T15:42:48.803Z",
+  "actions": [
+    {
+      "type": "DROP_COLLECTION",
+      "collection": "deckguides",
+      "count": 2,
+      "reason": "Set 14 챔피언 이름 포함 (사일러스, 세라핀, 베인), 삭제 필요"
+    },
+    {
+      "type": "OPTIMIZE_INDEXES",
+      "collections": [
+        "traitstats",
+        "itemstats",
+        "userdecks"
+      ],
+      "reason": "Set 15 데이터를 위한 인덱스 최적화"
+    },
+    {
+      "type": "VERIFY_BACKUP",
+      "reason": "모든 데이터가 백업되었는지 확인"
+    }
+  ]
+}

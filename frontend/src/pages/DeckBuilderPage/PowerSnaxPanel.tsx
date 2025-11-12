@@ -8,53 +8,69 @@ interface PowerSnaxPanelProps {
 }
 
 // 샘플 PowerSnax 데이터 (실제로는 API에서 가져와야 함)
-const SAMPLE_POWER_SNAX: PowerSnax[] = [
+interface PowerSnaxWithKeys extends Omit<PowerSnax, 'name' | 'description'> {
+  name?: string;
+  description?: string;
+  nameKey?: string;
+  descriptionKey?: string;
+  powerUps: (Omit<PowerUp, 'name' | 'description'> & {
+    name?: string;
+    description?: string;
+    nameKey?: string;
+    descriptionKey?: string;
+    effects: (PowerUp['effects'][0] & {
+      descriptionKey?: string;
+    })[];
+  })[];
+}
+
+const SAMPLE_POWER_SNAX: PowerSnaxWithKeys[] = [
   {
     id: 'golden-ox',
-    name: '황금 소',
-    description: '전투 시작 시 골드 획득 및 특성 강화',
+    nameKey: 'powerSnax.goldenOx',
+    descriptionKey: 'powerSnax.goldenOxDesc',
     round: '1-3',
     powerUps: [
       {
         id: 'gold-boost',
-        name: '골드 부스트',
-        description: '전투 승리 시 추가 골드 +2',
+        nameKey: 'powerSnax.goldBoost',
+        descriptionKey: 'powerSnax.goldBoostDesc',
         type: 'special',
-        effects: [{ description: '전투 승리 시 골드 +2', duration: 'permanent' }]
+        effects: [{ descriptionKey: 'powerSnax.goldBoostDesc', duration: 'permanent' }]
       },
       {
         id: 'trait-enhance',
-        name: '특성 강화',
-        description: '모든 특성 레벨 +1',
+        nameKey: 'powerSnax.traitEnhance',
+        descriptionKey: 'powerSnax.traitEnhanceDesc',
         type: 'trait',
-        effects: [{ description: '모든 활성 특성 레벨 +1', duration: 'permanent' }]
+        effects: [{ descriptionKey: 'powerSnax.effects.allActiveTraitsLevel', duration: 'permanent' }]
       }
     ]
   },
   {
     id: 'combat-mastery',
-    name: '전투 숙련',
-    description: '전투력 향상 파워업들',
+    nameKey: 'powerSnax.combatMastery',
+    descriptionKey: 'powerSnax.combatMasteryDesc',
     round: '3-6',
     powerUps: [
       {
         id: 'damage-boost',
-        name: '공격력 증가',
-        description: '모든 유닛의 공격력 +20%',
+        nameKey: 'powerSnax.damageBoost',
+        descriptionKey: 'powerSnax.damageBoostDesc',
         type: 'stats',
         effects: [{ stat: 'damage', value: '20%', duration: 'permanent' }]
       },
       {
         id: 'health-boost',
-        name: '체력 증가',
-        description: '모든 유닛의 체력 +25%',
+        nameKey: 'powerSnax.healthBoost',
+        descriptionKey: 'powerSnax.healthBoostDesc',
         type: 'stats',
         effects: [{ stat: 'health', value: '25%', duration: 'permanent' }]
       },
       {
         id: 'crit-master',
-        name: '치명타 숙련',
-        description: '치명타 확률 +15%, 치명타 피해 +30%',
+        nameKey: 'powerSnax.critMaster',
+        descriptionKey: 'powerSnax.critMasterDesc',
         type: 'stats',
         effects: [
           { stat: 'critChance', value: '15%', duration: 'permanent' },
@@ -101,7 +117,7 @@ const PowerSnaxPanel: React.FC<PowerSnaxPanelProps> = ({ selectedPowerSnax, onPo
         <div className="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
           <span className="text-white text-xs font-bold">⚡</span>
         </div>
-        <h3 className="text-lg font-bold">Power Snax</h3>
+        <h3 className="text-lg font-bold">{t('powerSnax.title')}</h3>
       </div>
 
       <div className="space-y-3">
@@ -117,7 +133,7 @@ const PowerSnaxPanel: React.FC<PowerSnaxPanelProps> = ({ selectedPowerSnax, onPo
                   <span className="font-semibold">Round {round}</span>
                   {selectedPowerSnax[round] && (
                     <span className="text-xs bg-white/20 px-2 py-1 rounded">
-                      {selectedPowerSnax[round]?.name}
+                      {selectedPowerSnax[round]?.nameKey ? t(selectedPowerSnax[round].nameKey) : selectedPowerSnax[round]?.name}
                     </span>
                   )}
                 </div>
@@ -138,10 +154,10 @@ const PowerSnaxPanel: React.FC<PowerSnaxPanelProps> = ({ selectedPowerSnax, onPo
                 {roundData[round].map(snax => (
                   <div key={snax.id} className="space-y-2">
                     <div className="text-sm font-medium text-text-primary dark:text-dark-text-primary">
-                      {snax.name}
+                      {snax.nameKey ? t(snax.nameKey) : snax.name}
                     </div>
                     <div className="text-xs text-text-secondary dark:text-dark-text-secondary mb-2">
-                      {snax.description}
+                      {snax.descriptionKey ? t(snax.descriptionKey) : snax.description}
                     </div>
                     <div className="grid gap-2">
                       {snax.powerUps.map(powerUp => {
@@ -160,14 +176,14 @@ const PowerSnaxPanel: React.FC<PowerSnaxPanelProps> = ({ selectedPowerSnax, onPo
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
                                   <span className="text-sm font-medium text-text-primary dark:text-dark-text-primary">
-                                    {powerUp.name}
+                                    {powerUp.nameKey ? t(powerUp.nameKey) : powerUp.name}
                                   </span>
                                   <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${getPowerUpTypeColor(powerUp.type)}`}>
-                                    {powerUp.type}
+                                    {t(`powerSnax.type.${powerUp.type}`)}
                                   </span>
                                 </div>
                                 <p className="text-xs text-text-secondary dark:text-dark-text-secondary mb-1">
-                                  {powerUp.description}
+                                  {powerUp.descriptionKey ? t(powerUp.descriptionKey) : powerUp.description}
                                 </p>
                                 {powerUp.effects.length > 0 && (
                                   <div className="space-y-0.5">
@@ -178,9 +194,9 @@ const PowerSnaxPanel: React.FC<PowerSnaxPanelProps> = ({ selectedPowerSnax, onPo
                                             {effect.stat}: +{effect.value}
                                           </span>
                                         )}
-                                        {effect.description && (
+                                        {(effect.description || effect.descriptionKey) && (
                                           <div className="text-text-secondary dark:text-dark-text-secondary">
-                                            {effect.description}
+                                            {effect.descriptionKey ? t(effect.descriptionKey) : effect.description}
                                           </div>
                                         )}
                                       </div>
@@ -209,7 +225,7 @@ const PowerSnaxPanel: React.FC<PowerSnaxPanelProps> = ({ selectedPowerSnax, onPo
                     onClick={() => onPowerSnaxSelect(round, null)}
                     className="w-full mt-2 p-2 text-xs text-text-secondary dark:text-dark-text-secondary hover:text-text-primary dark:hover:text-dark-text-primary border border-gray-200 dark:border-gray-700 rounded hover:bg-background-base dark:hover:bg-dark-background-base transition-colors"
                   >
-                    선택 해제
+                    {t('powerSnax.deselect')}
                   </button>
                 )}
               </div>
@@ -220,13 +236,13 @@ const PowerSnaxPanel: React.FC<PowerSnaxPanelProps> = ({ selectedPowerSnax, onPo
 
       {/* 선택된 Power Snax 요약 */}
       <div className="mt-4 p-3 bg-background-base dark:bg-dark-background-base rounded border">
-        <div className="text-sm font-semibold mb-2">선택된 Power Snax</div>
+        <div className="text-sm font-semibold mb-2">{t('powerSnax.selected')}</div>
         <div className="space-y-1 text-xs">
           {(['1-3', '3-6'] as const).map(round => (
             <div key={round} className="flex justify-between">
-              <span className="text-text-secondary dark:text-dark-text-secondary">Round {round}:</span>
+              <span className="text-text-secondary dark:text-dark-text-secondary">{t('powerSnax.round')} {round}:</span>
               <span className="text-text-primary dark:text-dark-text-primary">
-                {selectedPowerSnax[round]?.name || '선택 안함'}
+                {selectedPowerSnax[round]?.nameKey ? t(selectedPowerSnax[round].nameKey) : (selectedPowerSnax[round]?.name || t('powerSnax.notSelected'))}
               </span>
             </div>
           ))}

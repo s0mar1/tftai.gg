@@ -1,9 +1,9 @@
 // backend/src/jobs/matchCollector.ts
-import { getChallengerLeague, getSummonerByPuuid, getAccountByPuuid, getMatchIdsByPUUID, getMatchDetail } from '../services/riotApi';
+import { getChallengerLeague, getSummonerByPuuid, getSummonerById, getAccountByPuuid, getMatchIdsByPUUID, getMatchDetail, getFlexibleHighTierPlayers } from '../services/riotApi';
 import Match from '../models/Match';
 import Ranker from '../models/Ranker';
 import { getTFTDataWithLanguage } from '../services/tftData';
-import { DEFAULT_REGION, MATCH_COLLECTOR_MATCH_COUNT, TOP_RANKER_COUNT, MATCH_DETAIL_PROCESS_LIMIT } from '../services/constants';
+import { DEFAULT_REGION, MATCH_COLLECTOR_MATCH_COUNT, TOP_RANKER_COUNT, MATCH_DETAIL_PROCESS_LIMIT, MIN_TIER_FOR_COLLECTION, FLEXIBLE_RANKING_ENABLED } from '../services/constants';
 import { isMongoConnected } from '../config/db';
 import logger from '../config/logger';
 
@@ -32,17 +32,57 @@ export const collectTopRankerMatches = async (): Promise<void> => {
     // 현재 챌린저 리그에 있는 모든 puuid 수집
     const currentChallengerPuuids = new Set<string>();
 
-    // 1단계: 랭커 목록 확보
-    const challengerLeague = await getChallengerLeague(DEFAULT_REGION);
-    const topRankers = challengerLeague.entries.slice(0, TOP_RANKER_COUNT);
+    // 1단계: 유연한 랭커 목록 확보 (시즌 초기 대응)
+    console.log(`[1단계 시작] 유연한 랭킹 시스템으로 상위 랭커 ${TOP_RANKER_COUNT}명 확보 시도...`);
     
-    // 현재 챌린저 리그에 있는 puuid들을 Set에 추가
-    topRankers.forEach(entry => currentChallengerPuuids.add((entry as any).puuid));
+    let rankingResult;
+    try {
+      // 🚀 새로운 유연한 랭킹 시스템 사용
+      rankingResult = await getFlexibleHighTierPlayers(DEFAULT_REGION, TOP_RANKER_COUNT, MIN_TIER_FOR_COLLECTION);
+      
+      console.log(`✅ ${rankingResult.usedTier} 티어에서 ${rankingResult.totalPlayers}명 확보`);
+      console.log(`📊 사용된 데이터 소스: ${rankingResult.source.toUpperCase()}`);
+      
+    } catch (flexibleError) {
+      // 유연한 시스템도 실패하면 기존 방식으로 폴백
+      console.warn(`⚠️ 유연한 랭킹 시스템 실패: ${(flexibleError as Error).message}`);
+      console.log('📦 기존 챌린저 시스템으로 폴백 시도...');
+      
+      try {
+        const challengerLeague = await getChallengerLeague(DEFAULT_REGION);
+        const topRankers = challengerLeague.entries.slice(0, TOP_RANKER_COUNT);
+        
+        rankingResult = {
+          players: topRankers.map(entry => ({
+            puuid: (entry as any).puuid,
+            summonerId: (entry as any).summonerId,
+            leaguePoints: entry.leaguePoints,
+            tier: challengerLeague.tier,
+            rank: entry.rank,
+            wins: entry.wins,
+            losses: entry.losses
+          })),
+          usedTier: 'Challenger (Fallback)',
+          totalPlayers: topRankers.length,
+          source: 'challenger' as const
+        };
+        
+        console.log(`✅ 폴백 성공: 챌린저 ${rankingResult.totalPlayers}명 확보`);
+      } catch (challengerError) {
+        console.error(`❌ 모든 랭킹 시스템 실패: ${(challengerError as Error).message}`);
+        throw new Error('랭킹 데이터를 전혀 가져올 수 없습니다');
+      }
+    }
     
-    console.log(`[1단계 완료] 챌린저 ${topRankers.length}명의 랭커 데이터 확보.`);
+    const topRankers = rankingResult.players;
+    
+    // 현재 고티어 리그에 있는 puuid들을 Set에 추가
+    topRankers.forEach(player => currentChallengerPuuids.add(player.puuid));
+    
+    console.log(`[1단계 완료] ${rankingResult.usedTier} ${topRankers.length}명의 랭커 데이터 확보.`);
 
     // 2단계: 랭커 프로필 업데이트 (배치 처리)
-    console.log(`[2단계 시작] 챌린저 ${topRankers.length}명의 프로필 업데이트 시작...`);
+    console.log(`[2단계 시작] ${rankingResult.usedTier} ${topRankers.length}명의 프로필 업데이트 시작...`);
     
     // 프로필 데이터를 배치로 수집 (Rate Limit 최적화)
     const profileDataPromises: Array<{
@@ -62,30 +102,68 @@ export const collectTopRankerMatches = async (): Promise<void> => {
     
     for (let i = 0; i < topRankers.length; i += BATCH_SIZE) {
       const batch = topRankers.slice(i, i + BATCH_SIZE);
-      const batchPromises = batch.map(async (entry: any) => {
+      const batchPromises = batch.map(async (player: any) => {
         try {
-          const summonerDetails = await getSummonerByPuuid(entry.puuid, DEFAULT_REGION);
+          // Diamond/Platinum 등은 summonerId만 있고 puuid가 없을 수 있음
+          let puuid = player.puuid;
+          let summonerDetails;
+          
+          if (puuid && puuid.length > 50) {
+            // puuid가 있는 경우 (Challenger, Grandmaster, Master)
+            summonerDetails = await getSummonerByPuuid(puuid, DEFAULT_REGION);
+          } else {
+            // summonerId만 있는 경우 (Diamond, Platinum, Gold)
+            console.log(`⚠️ PUUID 없음, summonerId로 조회: ${player.summonerId}`);
+            
+            try {
+              // summonerId로 summoner 정보를 가져와서 puuid 획득
+              summonerDetails = await getSummonerById(player.summonerId, DEFAULT_REGION);
+              puuid = summonerDetails.puuid;
+              console.log(`✅ summonerId -> puuid 변환 성공: ${player.summonerId.substring(0, 8)}...`);
+            } catch (summonerError) {
+              console.warn(`⚠️ summonerId 조회 실패, 임시 데이터 사용: ${player.summonerId.substring(0, 8)}...`);
+              // 임시 데이터로 대체
+              puuid = player.summonerId;
+              summonerDetails = {
+                puuid: player.summonerId,
+                id: player.summonerId,
+                name: `Player_${player.summonerId.substring(0, 8)}`,
+                profileIconId: 1
+              };
+            }
+          }
+          
           await delay(1200); // 918ms -> 1200ms (더 안전한 딜레이)
           
-          const accountData = await getAccountByPuuid(summonerDetails.puuid, DEFAULT_REGION);
+          let accountData;
+          try {
+            accountData = await getAccountByPuuid(puuid, DEFAULT_REGION);
+          } catch (accountError) {
+            console.warn(`⚠️ Account 정보 조회 실패: ${player.summonerId.substring(0, 8)}...`);
+            accountData = {
+              gameName: `Player_${player.summonerId.substring(0, 8)}`,
+              tagLine: 'KR1'
+            };
+          }
+          
           await delay(1200); // 918ms -> 1200ms (더 안전한 딜레이)
           
           return {
-            puuid: summonerDetails.puuid,
-            summonerId: summonerDetails.id,
-            summonerName: (summonerDetails as any).name,
+            puuid: puuid,
+            summonerId: player.summonerId,
+            summonerName: (summonerDetails as any).name || accountData.gameName,
             gameName: accountData.gameName,
             tagLine: accountData.tagLine,
-            profileIconId: summonerDetails.profileIconId,
-            leaguePoints: entry.leaguePoints,
-            tier: challengerLeague.tier,
-            rank: entry.rank,
-            wins: entry.wins,
-            losses: entry.losses,
+            profileIconId: (summonerDetails as any).profileIconId || 1,
+            leaguePoints: player.leaguePoints,
+            tier: player.tier,
+            rank: player.rank,
+            wins: player.wins,
+            losses: player.losses,
           };
         } catch (e) {
           const error = e as Error;
-          console.error(`[2단계 - 에러] 랭커 PUUID: ${entry.puuid.substring(0,10)}... 프로필 처리 중 에러: ${error.message}`);
+          console.error(`[2단계 - 에러] 랭커 ID: ${player.summonerId?.substring(0,10)}... 프로필 처리 중 에러: ${error.message}`);
           return null;
         }
       });

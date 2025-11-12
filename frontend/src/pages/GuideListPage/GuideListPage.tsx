@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../utils/fetchApi';
 import { useTFTData } from '../../context/TFTDataContext';
 import { decodeDeck } from '../../utils/deckCode';
@@ -108,6 +109,7 @@ interface GuideCardProps {
 }
 
 const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, traitMap, allTraits, getChampionImageUrl }) => {
+  const { t } = useTranslation();
   const previewBoard = guide.level_boards.find(b => b.level === guide.initialDeckLevel) || guide.level_boards.find(b => b.level === 8) || guide.level_boards[0];
   const units = previewBoard ? decodeDeck(previewBoard.board, champions, allItems) : {};
   const unitsArray: DecodedUnit[] = Object.values(units);
@@ -163,11 +165,11 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, trait
           </div>
           <div className="flex items-center gap-3 mt-1 text-xs text-text-secondary dark:text-dark-text-secondary">
             {guide.author && guide.author.name ? (
-              <span>작성자: {guide.author.name}</span>
+              <span>{t('guides.authorBy')}: {guide.author.name}</span>
             ) : (
-              <span>작성자: 익명</span>
+              <span>{t('guides.authorBy')}: {t('guides.authorAnonymous')}</span>
             )}
-            <span>점수: {(guide.author && guide.author.score) || 1500}점</span>
+            <span>{t('guides.score')}: {(guide.author && guide.author.score) || 1500}</span>
           </div>
         </div>
       </div>
@@ -207,8 +209,8 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, trait
       <div className="flex-shrink-0 flex flex-col items-end gap-2">
         <div className="text-right text-xs text-text-secondary dark:text-dark-text-secondary">
           <div className="flex gap-3">
-            <span>추천 {guide.recommendCount || 0}</span>
-            <span>조회 {guide.viewCount || 0}</span>
+            <span>{t('guides.recommend')} {guide.recommendCount || 0}</span>
+            <span>{t('guides.view')} {guide.viewCount || 0}</span>
             {guide.createdAt && (
               <span>{new Date(guide.createdAt).toLocaleDateString()}</span>
             )}
@@ -218,7 +220,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, trait
           to={`/guides/${guide._id}`} 
           className="px-4 py-2 bg-brand-mint text-white rounded-md hover:bg-brand-mint/80 transition-colors font-medium"
         >
-          공략 보기
+{t('guides.viewGuide')}
         </Link>
       </div>
     </div>
@@ -226,6 +228,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide, champions, allItems, trait
 };
 
 export default function GuideListPage() {
+  const { t } = useTranslation();
   const [guides, setGuides] = useState<Guide[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -267,7 +270,7 @@ export default function GuideListPage() {
         const response = await api.get('/api/guides');
         setGuides(response);
       } catch (err) {
-        setError('공략을 불러오는 데 실패했습니다.');
+        setError(t('guides.failedToLoad'));
       }
       setLoading(false);
     };
@@ -322,8 +325,8 @@ export default function GuideListPage() {
 
   if (loading) return (
     <div className="container mx-auto py-8">
-      <h1 className="text-4xl font-bold text-center mb-2 text-text-primary dark:text-dark-text-primary">추천 덱 공략</h1>
-      <p className="text-center text-text-secondary dark:text-dark-text-secondary mb-8">최신 공략 데이터를 기반으로 집계된 덱 공략입니다.</p>
+      <h1 className="text-4xl font-bold text-center mb-2 text-text-primary dark:text-dark-text-primary">{t('guides.title')}</h1>
+      <p className="text-center text-text-secondary dark:text-dark-text-secondary mb-8">{t('guides.subtitle')}</p>
       
       <div className="bg-background-card dark:bg-dark-background-card rounded-lg p-6 mb-6 shadow-md animate-pulse">
         <div className="space-y-3 mb-6">
@@ -404,12 +407,12 @@ export default function GuideListPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-4xl font-bold text-center mb-2 text-text-primary dark:text-dark-text-primary">추천 덱 공략</h1>
-      <p className="text-center text-text-secondary dark:text-dark-text-secondary mb-8">최신 공략 데이터를 기반으로 집계된 덱 공략입니다.</p>
+      <h1 className="text-4xl font-bold text-center mb-2 text-text-primary dark:text-dark-text-primary">{t('guides.title')}</h1>
+      <p className="text-center text-text-secondary dark:text-dark-text-secondary mb-8">{t('guides.subtitle')}</p>
       
       <div className="bg-background-card dark:bg-dark-background-card rounded-lg p-6 mb-6 shadow-md">
         <div className="space-y-3 mb-6">
-          <h3 className="text-lg font-semibold text-text-primary dark:text-dark-text-primary">챔피언별 필터</h3>
+          <h3 className="text-lg font-semibold text-text-primary dark:text-dark-text-primary">{t('guides.championFilter')}</h3>
           <div className="flex gap-3 justify-center">
             {[1, 2, 3, 4, 5].map(cost => {
               const champions = championsByCost[cost] || [];
@@ -423,7 +426,7 @@ export default function GuideListPage() {
                   >
                     <div className="flex items-center gap-1.5 mb-2">
                       <span className="text-xs font-bold text-text-primary dark:text-dark-text-primary">
-                        {cost}코스트
+                        {cost}{t('guides.cost')}
                       </span>
                       <div 
                         className="w-2.5 h-2.5 rounded-full"
@@ -493,7 +496,7 @@ export default function GuideListPage() {
           <div className="flex-grow">
             <input
               type="text"
-              placeholder="덱 이름으로 검색..."
+              placeholder={t('placeholders.searchDeck')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full px-4 py-2 rounded-md border border-border-light dark:border-dark-border-light bg-background-base dark:bg-dark-background-base text-text-primary dark:text-dark-text-primary focus:ring-2 focus:ring-brand-mint focus:border-transparent"
@@ -505,9 +508,9 @@ export default function GuideListPage() {
               onChange={(e) => setSortBy(e.target.value as 'recommended' | 'score' | 'newest')}
               className="px-4 py-2 rounded-md border border-border-light dark:border-dark-border-light bg-background-base dark:bg-dark-background-base text-text-primary dark:text-dark-text-primary focus:ring-2 focus:ring-brand-mint"
             >
-              <option value="recommended">추천순</option>
-              <option value="score">점수순</option>
-              <option value="newest">최신순</option>
+              <option value="recommended">{t('guides.sortRecommended')}</option>
+              <option value="score">{t('guides.sortScore')}</option>
+              <option value="newest">{t('guides.sortNewest')}</option>
             </select>
             {(selectedChampion || searchQuery) && (
               <button
@@ -517,7 +520,7 @@ export default function GuideListPage() {
                 }}
                 className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
               >
-                초기화
+{t('guides.reset')}
               </button>
             )}
           </div>
@@ -535,7 +538,7 @@ export default function GuideListPage() {
               }}
             />
             <span className="text-text-primary dark:text-dark-text-primary font-medium">
-              {selectedChampion.name} 포함 덱만 표시
+              {selectedChampion.name} {t('guides.includesChampion')}
             </span>
           </div>
         )}
@@ -543,7 +546,7 @@ export default function GuideListPage() {
 
       <div className="mb-4">
         <p className="text-text-secondary dark:text-dark-text-secondary">
-          총 {filteredAndSortedGuides.length}개의 공략이 있습니다.
+          {t('guides.totalGuides', { count: filteredAndSortedGuides.length })}
         </p>
       </div>
       
@@ -565,13 +568,13 @@ export default function GuideListPage() {
         <div className="py-8 text-center text-text-secondary dark:text-dark-text-secondary">
           {guides.length === 0 ? (
             <>
-              아직 작성된 공략이 없습니다. <br />
-              새로운 공략을 작성해 보세요!
+              {t('guides.noGuidesYet')} <br />
+              {t('guides.createNewGuide')}
             </>
           ) : (
             <>
-              검색 조건에 맞는 공략이 없습니다. <br />
-              다른 검색어나 필터를 시도해보세요.
+              {t('guides.noMatchingGuides')} <br />
+              {t('guides.tryDifferentSearch')}
             </>
           )}
         </div>

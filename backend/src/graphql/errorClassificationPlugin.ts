@@ -154,26 +154,43 @@ function classifyError(error: any, requestContext: GraphQLRequestContext<GraphQL
     suggestedAction = 'Server error detected, developers have been notified';
   }
   
-  return {
+  const classifiedError: ClassifiedError = {
     type,
     severity,
     message,
-    code,
     details: {
       originalError: error.name || 'Unknown',
       extensions,
       locations: error.locations,
       path: error.path
     },
-    stackTrace: error.stack,
     timestamp: Date.now(),
     requestId: requestContext.contextValue?.requestId || 'unknown',
-    operationName: requestContext.operationName || undefined,
-    userId: requestContext.contextValue?.user?.id || undefined,
-    fieldPath: error.path,
     isRetryable,
     suggestedAction
   };
+
+  if (code) {
+    classifiedError.code = code;
+  }
+  
+  if (error.stack) {
+    classifiedError.stackTrace = error.stack;
+  }
+  
+  if (requestContext.operationName) {
+    classifiedError.operationName = requestContext.operationName;
+  }
+  
+  if (requestContext.contextValue?.user?.id) {
+    classifiedError.userId = requestContext.contextValue.user.id;
+  }
+  
+  if (error.path) {
+    classifiedError.fieldPath = error.path;
+  }
+
+  return classifiedError;
 }
 
 /**

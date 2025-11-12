@@ -5,9 +5,9 @@ import { safeStringifyForAPI } from './safeStringify';
 
 // 확장된 응답 타입 정의
 interface ExtendedApiResponse<T = any> extends ApiResponse<T> {
-  message?: string | undefined;
-  timestamp?: string | undefined;
-  statusCode?: number | undefined;
+  message?: string;
+  timestamp?: string;
+  statusCode?: number;
 }
 
 interface ApiErrorResponse {
@@ -93,7 +93,7 @@ export const sendPaginatedSuccess = <T>(
       items: data,
       pagination
     },
-    message,
+    ...(message !== undefined && { message }),
     timestamp: new Date().toISOString(),
     statusCode
   };
@@ -118,7 +118,7 @@ export const sendCachedSuccess = <T>(
   const response: ExtendedApiResponse<T> = {
     success: true,
     data,
-    message,
+    ...(message !== undefined && { message }),
     timestamp: new Date().toISOString(),
     statusCode
   };

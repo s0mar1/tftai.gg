@@ -87,9 +87,12 @@ export async function extractUserFromToken(token: string): Promise<AuthResult> {
       role: user.role,
       permissions: user.permissions,
       status: user.status,
-      riotPuuid: user.riotPuuid,
       preferences: user.preferences
     };
+    
+    if (user.riotPuuid) {
+      authenticatedUser.riotPuuid = user.riotPuuid;
+    }
     
     return {
       success: true,

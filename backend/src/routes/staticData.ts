@@ -123,7 +123,6 @@ router.get('/items-by-category/:language?', async (_req: Request, _res: Response
       ornn: categorizedItems.ornn || [],
       radiant: categorizedItems.radiant || [],
       emblem: categorizedItems.emblem || [],
-      robot: categorizedItems.robot || [],
       unknown: categorizedItems.unknown || []
     };
     

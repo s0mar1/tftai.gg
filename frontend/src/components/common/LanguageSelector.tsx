@@ -12,7 +12,7 @@ interface Language {
 }
 
 const LanguageSelector: React.FC = () => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,7 +55,7 @@ const LanguageSelector: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-background-base dark:hover:bg-dark-background-base transition-colors duration-200"
-        aria-label="언어 선택"
+        aria-label={t('common.selectLanguage')}
       >
         <Flag countryCode={currentLang.code} size={20} className="flex-shrink-0" />
         <span className="text-sm font-medium text-text-primary dark:text-dark-text-primary">

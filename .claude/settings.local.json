@@ -61,7 +61,9 @@
       "Bash(export PORT=3001)",
       "Bash(PORT=3001 npx tsx src/server.ts)",
       "WebFetch(domain:raw.communitydragon.org)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "mcp__filesystem__directory_tree",
+      "mcp__playwright__browser_hover"
     ],
     "deny": []
   }

@@ -2,7 +2,7 @@
   "common": {
     "loading": "加载中...",
     "error": "发生错误",
-    "noData": "暂无数据",
+    "noData": "没有数据",
     "search": "搜索",
     "filter": "筛选",
     "sort": "排序",
@@ -13,9 +13,20 @@
     "edit": "编辑",
     "create": "创建",
     "back": "返回",
-    "next": "下一个",
-    "previous": "上一个",
-    "close": "关闭"
+    "next": "下一步",
+    "previous": "上一步",
+    "close": "关闭",
+    "retry": "重试",
+    "retrying": "重试中...",
+    "send": "发送",
+    "sending": "发送中",
+    "games": "游戏",
+    "openMenu": "打开菜单",
+    "closeMenu": "关闭菜单",
+    "toggleLightMode": "切换至亮色模式",
+    "toggleDarkMode": "切换至暗色模式",
+    "selectLanguage": "选择语言",
+    "copied": "已复制！"
   },
   "nav": {
     "home": "首页",
@@ -23,37 +34,37 @@
     "guides": "阵容攻略",
     "ranking": "排行榜",
     "stats": "详细统计",
-    "deckBuilder": "阵容模拟器",
+    "deckBuilder": "阵容构建器",
     "aiChat": "AI问答",
-    "about": "关于TFTai.gg"
+    "about": "关于 TFTai.gg"
   },
   "header": {
     "search_placeholder": "请输入召唤师名称#标签",
     "language": "语言",
-    "darkMode": "夜间模式"
+    "darkMode": "暗色模式"
   },
   "stats": {
     "title": "详细统计",
-    "subtitle": "按装备、羁绊分析胜率",
-    "itemStats": "装备统计",
-    "traitStats": "羁绊统计",
-    "filters": "筛选条件",
+    "subtitle": "按物品和特质分析胜率",
+    "itemStats": "物品统计",
+    "traitStats": "特质统计",
+    "filters": "筛选器",
     "all": "全部",
     "winRate": "胜率",
     "top4Rate": "前四率",
     "averagePlacement": "平均排名",
-    "totalGames": "对局数",
+    "totalGames": "总游戏数",
     "highToLow": "从高到低",
     "lowToHigh": "从低到高",
-    "minGames": "最低对局数",
+    "minGames": "最少游戏数",
     "noStatsFound": "未找到符合条件的统计数据",
-    "games": "{{count}}场对局",
+    "games": "{{count}}场游戏",
     "itemTypes": {
-      "completed": "成装",
-      "basic": "基础装备",
-      "ornn": "奥恩装备",
-      "radiant": "光明装备",
-      "emblem": "纹章"
+      "completed": "成装物品",
+      "basic": "基础物品",
+      "ornn": "奥恩物品",
+      "radiant": "光辉物品",
+      "emblem": "徽章"
     },
     "traitTypes": {
       "origin": "种族",
@@ -62,60 +73,67 @@
   },
   "home": {
     "hero": {
-      "title1": "您的对局，",
-      "title2": "以挑战者的视角进行分析。",
-      "description": "TFTai.gg实时分析高段位玩家数据，为您提供深入的游戏反馈和最新的版本趋势。",
-      "searchPlaceholder": "召唤师名称#标签",
-      "searchAlert": "请输入召唤师名称#标签格式。(例如：挑战者#KR1)"
+      "title1": "提升你的游戏水平，",
+      "title2": "从王者的视角进行分析。",
+      "description": "TFTai.gg实时分析高段位玩家数据，为你的游戏提供深度反馈和最新的版本趋势洞察。",
+      "searchPlaceholder": "召唤师名称 #标签",
+      "searchAlert": "请按召唤师名称#标签格式输入。（例：Challenger#KR1）"
     },
     "trends": {
-      "title": "实时阵容趋势",
-      "error": "加载阵容趋势信息失败。",
-      "noData": "暂无阵容趋势信息。",
+      "title": "实时版本趋势",
+      "error": "版本趋势信息加载失败。",
+      "noData": "尚未有分析的版本趋势信息。",
       "noDataDescription": "请等待数据收集和分析完成。"
     },
     "features": {
       "tierlist": {
         "title": "推荐阵容",
-        "description": "查看当前版本最强势的阵容组合"
+        "description": "查看当前版本最强的阵容组合"
       },
       "stats": {
         "title": "详细统计",
-        "description": "深入分析装备和羁绊的胜率"
+        "description": "详细分析物品和特质的胜率"
       },
       "guides": {
         "title": "阵容攻略",
-        "description": "查看职业选手的阵容运营指南"
+        "description": "查看职业玩家的阵容运营指南"
       }
     }
   },
   "tierlist": {
     "title": "推荐阵容",
     "subtitle": "当前赛季最强阵容组合",
-    "tier": "梯队",
+    "tier": "评级",
     "winRate": "胜率",
-    "pickRate": "选择率",
+    "pickRate": "选取率",
     "avgPlacement": "平均排名",
-    "games": "对局",
-    "loading": "正在加载阵容列表...",
-    "noData": "暂无阵容列表数据",
+    "games": "游戏",
+    "loading": "正在加载评级表...",
+    "noData": "没有评级表数据",
     "lastUpdated": "最后更新"
   },
   "ranking": {
     "title": "排行榜",
-    "subtitle": "高段位玩家排名",
+    "subtitle": "顶级玩家排行",
     "rank": "排名",
     "summoner": "召唤师",
     "tier": "段位",
-    "lp": "胜点",
+    "lp": "LP",
     "winRate": "胜率",
-    "recentGames": "最近对局",
+    "recentGames": "最近游戏",
     "loading": "正在加载排行榜...",
-    "noData": "暂无排行榜数据"
+    "noData": "没有排行榜数据",
+    "rankGameRanking": "排位游戏排行榜",
+    "summonerColumn": "召唤师",
+    "tierColumn": "段位",
+    "lpColumn": "LP",
+    "winRateColumn": "胜率",
+    "totalGamesColumn": "总游戏数",
+    "winRateDisplay": "胜率"
   },
   "guides": {
     "title": "阵容攻略",
-    "subtitle": "职业选手指南",
+    "subtitle": "职业玩家指南",
     "author": "作者",
     "createdAt": "创建时间",
     "views": "浏览量",
@@ -123,66 +141,205 @@
     "easy": "简单",
     "medium": "中等",
     "hard": "困难",
-    "newGuide": "新建攻略",
+    "newGuide": "创建新攻略",
     "editGuide": "编辑攻略",
     "deleteGuide": "删除攻略",
     "loading": "正在加载攻略...",
-    "noGuides": "暂无攻略"
+    "noGuides": "没有攻略"
   },
   "summoner": {
-    "title": "召唤师查询",
+    "title": "召唤师搜索",
     "searchPlaceholder": "请输入召唤师名称",
-    "search": "查询",
-    "notFound": "未找到该召唤师",
+    "search": "搜索",
+    "notFound": "未找到召唤师",
     "loading": "正在加载召唤师信息...",
-    "matchHistory": "比赛记录",
-    "stats": "统计数据",
-    "rank": "段位",
-    "tier": "阶级",
-    "lp": "胜点",
+    "matchHistory": "对战记录",
+    "stats": "统计",
+    "rank": "排名",
+    "tier": "段位",
+    "lp": "LP",
     "winRate": "胜率",
-    "recentMatches": "最近比赛"
+    "recentMatches": "最近对战"
   },
   "deckBuilder": {
-    "title": "阵容模拟器",
-    "subtitle": "创建您自己的阵容组合",
+    "title": "阵容构建器",
+    "subtitle": "打造属于你的阵容组合",
     "createGuide": "创建攻略",
     "champions": "英雄",
-    "items": "装备",
-    "traits": "羁绊",
+    "items": "物品",
+    "traits": "特质",
     "cost": "费用",
     "selectChampion": "选择英雄",
-    "selectItem": "选择装备",
+    "selectItem": "选择物品",
     "saveDeck": "保存阵容",
     "loadDeck": "加载阵容",
     "clearDeck": "清空阵容",
     "deckName": "阵容名称",
     "deckDescription": "阵容描述",
-    "synergies": "羁绊组合",
+    "synergies": "羁绊",
     "unit": "单位",
     "details": "详细信息",
     "starLevel": "{{star}}星",
-    "equippedItems": "已装备的物品",
+    "equippedItems": "装备物品",
     "noUnitSelected": "未选择单位",
-    "searchByName": "按名称搜索..."
+    "searchByName": "按名称搜索...",
+    "traitsLabel": "特质",
+    "roleLabel": "角色",
+    "powerSnaxLabel": "强化符文",
+    "selectedPowerSnax": "已选择的强化符文",
+    "deckSummary": "阵容总结",
+    "origin": "种族",
+    "class": "职业",
+    "searchByDeckName": "按阵容名称搜索...",
+    "enterTip": "输入提示...",
+    "enterAugmentName": "输入强化符文名称...",
+    "loadingData": "数据加载中...",
+    "failedToLoadData": "数据加载失败。",
+    "placeChampionOnBoard": "⚔️ 请将英雄放置到棋盘上",
+    "activeSynergies": "激活的特质",
+    "inProgressSynergies": "进行中的特质",
+    "unitCount": "单位数量",
+    "activeSynergyCount": "激活的特质"
   },
   "aiChat": {
     "title": "AI问答",
-    "subtitle": "向AI提问TFT相关问题",
-    "inputPlaceholder": "请输入您的问题...",
+    "subtitle": "向AI询问TFT相关问题",
+    "inputPlaceholder": "请输入你的问题...",
     "send": "发送",
     "thinking": "AI思考中...",
-    "error": "AI回复出错",
+    "error": "AI回答时发生错误",
     "exampleQuestions": "示例问题",
     "examples": {
-      "meta": "当前版本最强势的阵容是什么？",
-      "items": "这套装备组合好吗？",
-      "positioning": "该如何站位？"
+      "meta": "当前版本最强的阵容是什么？",
+      "items": "这个物品组合好吗？",
+      "positioning": "应该如何站位？"
+    },
+    "challengerTitle": "向王者AI提问",
+    "challengerDescription": "你好！我是TFT王者专家。有什么可以帮助你的吗？我会分析你的问题，如果你提供游戏信息，我会尽我所能回答。基于TFTai.gg的实时王者统计数据，我可以为你提供最优策略。",
+    "generating": "回答生成中...",
+    "askQuestion": "提问",
+    "pleaseEnterQuestion": "请输入问题。",
+    "noResponse": "未收到回答。",
+    "failedToLoad": "回答加载失败。",
+    "sorryTryAgain": "抱歉，请重试。"
+  },
+  "roles": {
+    "tank": "坦克",
+    "fighter": "战士",
+    "assassin": "刺客",
+    "caster": "法师",
+    "specialist": "专家",
+    "marksman": "射手"
+  },
+  "items": {
+    "category": {
+      "item": "物品",
+      "exotech": "特质",
+      "trait": "特质"
     }
   },
   "errors": {
-    "networkError": "网络错误",
+    "networkError": "发生网络错误",
     "dataLoadError": "数据加载失败",
-    "unknownError": "未知错误"
+    "unknownError": "发生未知错误",
+    "dataLoadingUnknownError": "数据加载时发生未知错误",
+    "network": {
+      "title": "网络错误",
+      "message": "无法连接到服务器"
+    },
+    "notFound": {
+      "title": "数据未找到",
+      "message": "找不到请求的数据"
+    },
+    "timeout": {
+      "title": "请求超时",
+      "message": "服务器响应时间超时"
+    },
+    "validation": {
+      "title": "输入错误",
+      "message": "请检查输入信息"
+    },
+    "unauthorized": {
+      "title": "无权限",
+      "message": "没有访问权限"
+    },
+    "maintenance": {
+      "title": "服务维护",
+      "message": "当前服务正在维护中"
+    },
+    "apiError": "API错误",
+    "failedToFetchMatchHistory": "获取对战记录失败",
+    "failedToFetchRanking": "获取排行榜失败",
+    "failedToFetchStats": "获取统计数据失败",
+    "failedToInvalidateCache": "清除缓存失败",
+    "requestTimeout": "请求超时",
+    "unexpectedJsonResponse": "意外的JSON响应",
+    "summonerNotFound": "找不到召唤师信息。",
+    "errorOccurred": "发生错误",
+    "developerInfo": "开发者信息（详细错误）"
+  },
+  "api": {
+    "cache": {
+      "refreshCompleted": "缓存刷新完成。",
+      "refreshLimitOrInProgress": "缓存刷新频率限制或已在进行中。",
+      "tftDataCleared": "TFT数据缓存已清除。"
+    }
+  },
+  "profile": {
+    "winRate": "胜率",
+    "averagePlacement": "平均排名",
+    "playCount": "游戏次数"
+  },
+  "guides": {
+    "title": "推荐阵容攻略",
+    "subtitle": "基于最新攻略数据汇总的阵容攻略。",
+    "authorBy": "作者",
+    "authorAnonymous": "匿名",
+    "score": "分数",
+    "recommend": "推荐",
+    "view": "查看",
+    "viewGuide": "查看攻略",
+    "championFilter": "按英雄筛选",
+    "cost": "费用",
+    "sortRecommended": "推荐排序",
+    "sortScore": "分数排序",
+    "sortNewest": "最新排序",
+    "reset": "重置",
+    "includesChampion": "仅显示包含的阵容",
+    "totalGuides": "共有{count}个攻略。",
+    "noGuidesYet": "还没有编写的攻略。",
+    "createNewGuide": "尝试创建新攻略！",
+    "noMatchingGuides": "没有符合搜索条件的攻略。",
+    "tryDifferentSearch": "尝试不同的搜索词或筛选器。",
+    "loadingDetail": "正在加载攻略详情...",
+    "notFound": "找不到该攻略。",
+    "failedToLoad": "加载攻略失败。",
+    "confirmDelete": "确定要删除这个攻略吗？",
+    "deleteSuccess": "攻略已成功删除。",
+    "deleteFailed": "删除攻略失败。",
+    "levelDeckComposition": "等级{level}阵容构成",
+    "activeSynergies": "激活协同"
+  },
+  "deckBuilder": {
+    "itemsLoadingData": "正在加载物品数据...",
+    "synergyExplanation": "特质协同效应将在此显示",
+    "role": "角色"
+  },
+  "placeholders": {
+    "askQuestion": "请输入你的问题...",
+    "searchDeck": "按阵容名称搜索...",
+    "enterTip": "输入提示...",
+    "enterAugmentName": "输入强化符文名称..."
+  },
+  "pages": {
+    "set15Features": "第15赛季功能"
+  },
+  "tooltip": {
+    "mana": "法力",
+    "skillValues": "技能数值",
+    "recommendedItems": "推荐物品",
+    "noRecommendedItems": "没有推荐物品信息。",
+    "unknownAbility": "未知技能",
+    "noDescription": "没有描述"
   }
 }

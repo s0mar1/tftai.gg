@@ -1,6 +1,8 @@
 // 점수 계산 서비스 - 객관적인 수치 기반 덱 분석 및 채점
 import { analyzeDeckDifferences } from './matchAnalyzer';
 import { Unit, ActiveTrait } from '../types/index';
+import { getTFTDataWithLanguage } from './tftData';
+import logger from '../config/logger';
 
 interface PlayerDeck {
   units: Unit[];
@@ -192,7 +194,7 @@ function calculateDeckBalanceScore(playerDeck: PlayerDeck): number {
 /**
  * 아이템 효율성 점수 계산 (0-100점)
  */
-function calculateItemEfficiencyScore(playerDeck: PlayerDeck, primaryMatchDeck: SimilarityResult | null): number {
+async function calculateItemEfficiencyScore(playerDeck: PlayerDeck, primaryMatchDeck: SimilarityResult | null): Promise<number> {
     if (!playerDeck) return 0;
     
     let score = 50; // 기본 점수
@@ -208,8 +210,8 @@ function calculateItemEfficiencyScore(playerDeck: PlayerDeck, primaryMatchDeck: 
     }
     score += metaItemMatchScore;
     
-    // 3. 아이템 시너지 효율성
-    const itemSynergyScore = calculateItemSynergyScore(playerDeck);
+    // 3. 아이템 시너지 효율성 (비동기 처리)
+    const itemSynergyScore = await calculateItemSynergyScore(playerDeck);
     score += itemSynergyScore;
     
     return Math.min(100, Math.max(0, Math.round(score)));
@@ -332,31 +334,39 @@ function calculateMetaItemMatchScore(playerDeck: PlayerDeck, metaDeck: MetaDeck)
 /**
  * 아이템 시너지 점수
  */
-function calculateItemSynergyScore(playerDeck: PlayerDeck): number {
+async function calculateItemSynergyScore(playerDeck: PlayerDeck): Promise<number> {
     if (!playerDeck?.units) return 0;
     
     let synergyScore = 0;
     const totalUnits = playerDeck.units.length;
     
-    // 각 유닛의 아이템 적합성 평가
-    playerDeck.units.forEach(unit => {
-        const unitItems = (unit as any).items;
-        if (!unitItems || unitItems.length === 0) return;
-        
-        // 기본 아이템 장착 보너스
-        synergyScore += Math.min(unitItems.length, 3) * 1; // 최대 3개 아이템, 각 1점
-        
-        // 고비용 유닛에 아이템 집중도 보너스 (캐리 중심 덱)
-        const unitCost = getUnitCost(unit.character_id);
-        if (unitCost >= 4 && unitItems.length >= 2) {
-            synergyScore += 2; // 고비용 유닛 2+ 아이템 보너스
-        }
-        
-        // 아이템 조합 완성도 (3개 완성된 아이템)
-        if (unitItems.length === 3) {
-            synergyScore += 1; // 완성된 아이템 세트 보너스
-        }
-    });
+    // 각 유닛의 아이템 적합성 평가 (병렬 처리)
+    const unitScores = await Promise.all(
+        playerDeck.units.map(async (unit) => {
+            const unitItems = (unit as any).items;
+            if (!unitItems || unitItems.length === 0) return 0;
+            
+            let unitScore = 0;
+            
+            // 기본 아이템 장착 보너스
+            unitScore += Math.min(unitItems.length, 3) * 1; // 최대 3개 아이템, 각 1점
+            
+            // 고비용 유닛에 아이템 집중도 보너스 (캐리 중심 덱)
+            const unitCost = await getUnitCost(unit.character_id);
+            if (unitCost >= 4 && unitItems.length >= 2) {
+                unitScore += 2; // 고비용 유닛 2+ 아이템 보너스
+            }
+            
+            // 아이템 조합 완성도 (3개 완성된 아이템)
+            if (unitItems.length === 3) {
+                unitScore += 1; // 완성된 아이템 세트 보너스
+            }
+            
+            return unitScore;
+        })
+    );
+    
+    synergyScore = unitScores.reduce((sum, score) => sum + score, 0);
     
     // 전체 덱 크기 대비 정규화 (15점 만점)
     const normalizedScore = totalUnits > 0 ? (synergyScore / totalUnits) * 3 : 0;
@@ -364,29 +374,58 @@ function calculateItemSynergyScore(playerDeck: PlayerDeck): number {
 }
 
 /**
- * 유닛 코스트 추정 (간단한 룩업)
+ * 유닛 코스트 조회 (Set 15 TFT 데이터 서비스 연동)
  */
-function getUnitCost(characterId: string): number {
-    // 간단한 코스트 매핑 (실제로는 TFT 데이터에서 가져와야 함)
-    const highCostUnits = ['azir', 'diana', 'nasus', 'sivir', 'veigar', 'xerath']; // 5코스트 예시
-    const mediumHighCostUnits = ['ahri', 'akali', 'evelynn', 'garen', 'jinx', 'kayn']; // 4코스트 예시
-    
-    const unitName = characterId.toLowerCase();
-    if (highCostUnits.some(name => unitName.includes(name))) return 5;
-    if (mediumHighCostUnits.some(name => unitName.includes(name))) return 4;
-    return 3; // 기본값
+async function getUnitCost(characterId: string): Promise<number> {
+    try {
+        // TFT 데이터 서비스에서 Set 15 챔피언 데이터 가져오기
+        const tftData = await getTFTDataWithLanguage('en');
+        if (!tftData || !tftData.champions) {
+            logger.warn('TFT 데이터를 가져올 수 없어 기본값(3)을 반환합니다.');
+            return 3;
+        }
+
+        const unitName = characterId.toLowerCase();
+        
+        // 챔피언 목록에서 해당 유닛 찾기
+        const matchedChampion = tftData.champions.find(champ => {
+            const champApiName = champ.apiName?.toLowerCase() || '';
+            const champName = champ.name?.toLowerCase() || '';
+            
+            // API 이름이나 챔피언 이름에 유닛 이름이 포함되는지 확인
+            return champApiName.includes(unitName) || 
+                   unitName.includes(champApiName) ||
+                   champName.includes(unitName) ||
+                   unitName.includes(champName);
+        });
+
+        if (matchedChampion && matchedChampion.cost) {
+            logger.debug(`챔피언 ${characterId}의 코스트: ${matchedChampion.cost}`);
+            return matchedChampion.cost;
+        }
+
+        // 매칭되는 챔피언을 찾지 못한 경우 기본값
+        logger.warn(`챔피언 ${characterId}의 코스트를 찾지 못해 기본값(3)을 반환합니다.`);
+        return 3;
+        
+    } catch (error) {
+        logger.error(`유닛 코스트 조회 중 오류 발생 (${characterId}):`, error);
+        return 3; // 에러 시 기본값
+    }
 }
 
 /**
  * 메인 점수 계산 함수
  */
-export function calculateAllScores(playerDeck: PlayerDeck, analysisTargets: AnalysisTargets): ScoreResults {
+export async function calculateAllScores(playerDeck: PlayerDeck, analysisTargets: AnalysisTargets): Promise<ScoreResults> {
     const { primaryMatchDeck, alternativeDeck, similarities } = analysisTargets;
     
-    // 1. 기본 점수 계산
-    const metaFitScore = calculateMetaFitScore(playerDeck, primaryMatchDeck, similarities);
-    const deckCompletionScore = calculateDeckCompletionScore(playerDeck, primaryMatchDeck);
-    const itemEfficiencyScore = calculateItemEfficiencyScore(playerDeck, primaryMatchDeck);
+    // 1. 기본 점수 계산 (병렬 처리 최적화)
+    const [metaFitScore, deckCompletionScore, itemEfficiencyScore] = await Promise.all([
+        Promise.resolve(calculateMetaFitScore(playerDeck, primaryMatchDeck, similarities)),
+        Promise.resolve(calculateDeckCompletionScore(playerDeck, primaryMatchDeck)),
+        calculateItemEfficiencyScore(playerDeck, primaryMatchDeck) // async 함수
+    ]);
     
     // 2. 총점 계산 (가중평균)
     const totalScore = Math.round(

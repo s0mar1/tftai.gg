@@ -49,17 +49,21 @@ interface Tab {
 }
 
 const ItemPanel: React.FC<ItemPanelProps> = ({ mini = false }) => {
-  console.log('ItemPanel: 컴포넌트 렌더링 시작');
+  if (import.meta.env.DEV) {
+    console.log('ItemPanel: 컴포넌트 렌더링 시작');
+  }
   const tftDataResult = useTFTData();
   const { t } = useTranslation();
   
-  console.log('ItemPanel: useTFTData 결과:', {
-    tftDataResult: !!tftDataResult,
-    tftDataResultType: typeof tftDataResult,
-    loading: tftDataResult?.loading,
-    error: tftDataResult?.error,
-    itemsByCategory: tftDataResult?.itemsByCategory ? Object.keys(tftDataResult.itemsByCategory).length : 0
-  });
+  if (import.meta.env.DEV) {
+    console.log('ItemPanel: useTFTData 결과:', {
+      tftDataResult: !!tftDataResult,
+      tftDataResultType: typeof tftDataResult,
+      loading: tftDataResult?.loading,
+      error: tftDataResult?.error,
+      itemsByCategory: tftDataResult?.itemsByCategory ? Object.keys(tftDataResult.itemsByCategory).length : 0
+    });
+  }
   
   // 안전한 구조분해 할당
   const itemsByCategory = tftDataResult?.itemsByCategory || {};
@@ -67,17 +71,17 @@ const ItemPanel: React.FC<ItemPanelProps> = ({ mini = false }) => {
   const error = tftDataResult?.error || null;
   
   // 디버깅 정보 추가
-  console.log('ItemPanel 디버깅:', {
-    tftDataResult: !!tftDataResult,
-    itemsByCategory: !!itemsByCategory,
-    itemsByCategoryKeys: Object.keys(itemsByCategory || {}),
-    loading,
-    error,
-    itemsByCategoryEntries: Object.entries(itemsByCategory || {}).map(([key, items]) => ({ key, count: items?.length || 0 })),
-    tftDataResultKeys: tftDataResult ? Object.keys(tftDataResult) : null
-  });
-
-  const LABEL_TRIM = [' 아이템', '아이템'];
+  if (import.meta.env.DEV) {
+    console.log('ItemPanel 디버깅:', {
+      tftDataResult: !!tftDataResult,
+      itemsByCategory: !!itemsByCategory,
+      itemsByCategoryKeys: Object.keys(itemsByCategory || {}),
+      loading,
+      error,
+      itemsByCategoryEntries: Object.entries(itemsByCategory || {}).map(([key, items]) => ({ key, count: items?.length || 0 })),
+      tftDataResultKeys: tftDataResult ? Object.keys(tftDataResult) : null
+    });
+  }
 
   const tabs: Tab[] = useMemo(() => {
     if (!itemsByCategory) return [];
@@ -85,15 +89,19 @@ const ItemPanel: React.FC<ItemPanelProps> = ({ mini = false }) => {
       .filter(([, list]) => list?.length)
       .map(([id, list]) => {
         let label = id.replace(/\s*\(\d+\)\s*$/, '');
-        LABEL_TRIM.forEach(s => {
-          if (label.endsWith(s)) label = label.slice(0, -s.length).trim();
-        });
-        if (label.includes('엑소테크')) {
-          label = '특성';
+        
+        // 아이템 카테고리 라벨 정리
+        if (label.endsWith(t('items.category.item')) || label.endsWith(' ' + t('items.category.item'))) {
+          label = label.replace(new RegExp(`\\s*${t('items.category.item')}$`), '').trim();
         }
+        
+        if (label.includes('엑소테크')) {
+          label = t('items.category.exotech');
+        }
+        
         return { id, label, items: list };
       });
-  }, [itemsByCategory]);
+  }, [itemsByCategory, t]);
 
   const [active, setActive] = useState('');
   useEffect(() => {
@@ -105,7 +113,7 @@ const ItemPanel: React.FC<ItemPanelProps> = ({ mini = false }) => {
   
   // 데이터가 아직 로드되지 않았다면 기다림 (조건 완화)
   if (Object.keys(itemsByCategory).length === 0) {
-    return <p className="text-text-primary dark:text-dark-text-primary">아이템 데이터 로딩 중...</p>;
+    return <p className="text-text-primary dark:text-dark-text-primary">{t('deckBuilder.itemsLoadingData')}</p>;
   }
   
   if (!tabs.length) return <p className="text-text-primary dark:text-dark-text-primary">{t('common.noData')}</p>;

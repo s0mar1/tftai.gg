@@ -39,7 +39,6 @@ export class BatchQueryOptimizer {
   private batchTimers = new Map<string, NodeJS.Timeout>();
   private readonly BATCH_WINDOW_MS = 50; // 50ms 배치 윈도우
   private readonly MAX_BATCH_SIZE = 10; // 최대 배치 크기
-  private readonly MIN_BATCH_SIZE = 2; // 최소 배치 크기
   private batchExecutionHistory: BatchExecutionResult[] = [];
 
   /**
@@ -84,7 +83,11 @@ export class BatchQueryOptimizer {
     if (!this.isBatchable(operation, args)) {
       logger.debug(`🔄 [Batch] 즉시 실행: ${operation}`);
       const results = await executor([args]);
-      return results[0];
+      const result = results[0];
+      if (result === undefined) {
+        throw new Error(`Batch executor returned undefined for operation: ${operation}`);
+      }
+      return result;
     }
 
     const batchKey = this.generateBatchKey(operation, args);
@@ -162,6 +165,12 @@ export class BatchQueryOptimizer {
 
       for (let i = 0; i < batch.length; i++) {
         const request = batch[i];
+        
+        if (!request) {
+          cachedResults[i] = null;
+          continue;
+        }
+        
         const cached = await graphqlResponseCache.get<T>(request.operation, request.args);
         
         if (cached) {
@@ -187,6 +196,10 @@ export class BatchQueryOptimizer {
           const request = uncachedRequests[i];
           const result = results[i];
           const originalIndex = uncachedIndices[i];
+          
+          if (!request || originalIndex === undefined || result === undefined) {
+            continue;
+          }
           
           cachedResults[originalIndex] = result;
 
@@ -217,6 +230,10 @@ export class BatchQueryOptimizer {
       for (let i = 0; i < batch.length; i++) {
         const request = batch[i];
         const result = cachedResults[i];
+        
+        if (!request) {
+          continue;
+        }
         
         if (result !== null) {
           request.resolve(result);

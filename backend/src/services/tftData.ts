@@ -420,6 +420,17 @@ export const getTFTDataWithLanguage = async (language: string = 'ko'): Promise<T
               if (!finalAbility.icon && baseAbility.icon) {
                   finalAbility.icon = processImagePath(baseAbility.icon);
               }
+
+              // variables, manaStart, manaCost 등 추가 능력 필드 보존
+              if (baseAbility.variables) {
+                  finalAbility.variables = baseAbility.variables;
+              }
+              if (baseAbility.manaStart !== undefined) {
+                  finalAbility.manaStart = baseAbility.manaStart;
+              }
+              if (baseAbility.manaCost !== undefined) {
+                  finalAbility.manaCost = baseAbility.manaCost;
+              }
           }
           
           return {

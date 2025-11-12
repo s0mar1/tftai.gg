@@ -228,8 +228,8 @@ async function createApolloServer(httpServer: http.Server, wsServerCleanup: any)
     formatError: (formattedError, error) => {
       // 프로덕션에서는 민감한 정보 숨김
       if (config.isProduction) {
-        delete formattedError.locations;
-        delete formattedError.path;
+        const { locations, path, ...productionError } = formattedError;
+        formattedError = productionError as any;
         
         // 서버 에러만 로깅
         if (formattedError.extensions?.code === 'INTERNAL_SERVER_ERROR') {
@@ -267,14 +267,19 @@ async function createGraphQLContext({ req, res }: { req: any; res: any }): Promi
     startTime
   });
 
-  return {
+  const context: GraphQLContext = {
     req,
     res,
     dataLoaders,
     requestId,
-    startTime,
-    user: user || undefined
+    startTime
   };
+  
+  if (user) {
+    context.user = user;
+  }
+  
+  return context;
 }
 
 /**

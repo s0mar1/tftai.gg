@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "686b9a6624c640ed0395e782",
+    "title": "ㅣ",
+    "difficulty": "Easy",
+    "initialDeckLevel": 9,
+    "level_boards": [
+      {
+        "level": 8,
+        "board": "4:2:사일러스:1:;4:3:세라핀:1:",
+        "notes": "",
+        "_id": "686b9a6624c640ed0395e783"
+      },
+      {
+        "level": 9,
+        "board": "4:2:사일러스:1:;3:3:베인:1:",
+        "notes": "",
+        "_id": "686b9a6624c640ed0395e784"
+      }
+    ],
+    "play_tips": [],
+    "recommended_items": [],
+    "recommended_augments": [],
+    "createdAt": "2025-07-07T09:59:02.013Z",
+    "updatedAt": "2025-07-07T09:59:02.013Z",
+    "__v": 0
+  },
+  {
+    "_id": "686bc1673f01d30ab587e3f0",
+    "title": "냐",
+    "difficulty": "Hard",
+    "initialDeckLevel": 10,
+    "level_boards": [
+      {
+        "level": 10,
+        "board": "2:1:문도 박사:1:;3:0:문도 박사:1:;2:0:문도 박사:1:;2:2:문도 박사:1:;3:1:문도 박사:1:;4:0:문도 박사:1:;4:1:문도 박사:1:;4:2:문도 박사:1:",
+        "notes": "",
+        "_id": "686bc1673f01d30ab587e3f1"
+      }
+    ],
+    "play_tips": [
+      "sex"
+    ],
+    "recommended_items": [],
+    "recommended_augments": [],
+    "createdAt": "2025-07-07T12:45:27.150Z",
+    "updatedAt": "2025-07-07T12:45:27.150Z",
+    "__v": 0
+  }
+]

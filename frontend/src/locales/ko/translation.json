@@ -15,7 +15,18 @@
     "back": "뒤로",
     "next": "다음",
     "previous": "이전",
-    "close": "닫기"
+    "close": "닫기",
+    "retry": "다시 시도",
+    "retrying": "재시도 중...",
+    "send": "전송",
+    "sending": "전송중",
+    "games": "게임",
+    "openMenu": "메뉴 열기",
+    "closeMenu": "메뉴 닫기",
+    "toggleLightMode": "라이트 모드로 전환",
+    "toggleDarkMode": "다크 모드로 전환",
+    "selectLanguage": "언어 선택",
+    "copied": "복사됨!"
   },
   "nav": {
     "home": "홈",
@@ -111,7 +122,14 @@
     "winRate": "승률",
     "recentGames": "최근 게임",
     "loading": "랭킹을 불러오는 중...",
-    "noData": "랭킹 데이터가 없습니다"
+    "noData": "랭킹 데이터가 없습니다",
+    "rankGameRanking": "랭크게임 순위표",
+    "summonerColumn": "소환사",
+    "tierColumn": "티어",
+    "lpColumn": "LP",
+    "winRateColumn": "승률",
+    "totalGamesColumn": "총 게임 수",
+    "winRateDisplay": "승률"
   },
   "guides": {
     "title": "덱 공략",
@@ -143,29 +161,6 @@
     "winRate": "승률",
     "recentMatches": "최근 경기"
   },
-  "deckBuilder": {
-    "title": "덱 빌더",
-    "subtitle": "나만의 덱 조합을 만들어보세요",
-    "createGuide": "공략 작성",
-    "champions": "챔피언",
-    "items": "아이템",
-    "traits": "특성",
-    "cost": "코스트",
-    "selectChampion": "챔피언 선택",
-    "selectItem": "아이템 선택",
-    "saveDeck": "덱 저장",
-    "loadDeck": "덱 불러오기",
-    "clearDeck": "덱 초기화",
-    "deckName": "덱 이름",
-    "deckDescription": "덱 설명",
-    "synergies": "시너지",
-    "unit": "유닛",
-    "details": "세부 정보",
-    "starLevel": "{{star}}성",
-    "equippedItems": "장착 아이템",
-    "noUnitSelected": "선택된 유닛이 없습니다",
-    "searchByName": "이름으로 검색..."
-  },
   "aiChat": {
     "title": "AI 질문하기",
     "subtitle": "TFT 관련 궁금한 점을 AI에게 물어보세요",
@@ -178,11 +173,206 @@
       "meta": "현재 메타에서 가장 강한 덱은?",
       "items": "이 아이템 조합이 좋은가요?",
       "positioning": "어떻게 포지셔닝해야 하나요?"
+    },
+    "challengerTitle": "챌린저 AI에게 질문하기",
+    "challengerDescription": "안녕하세요! 롤토체스 챌린저 전문가입니다. 무엇을 도와드릴까요? 궁금한 점을 분석해 드리고 게임에 대한 정보를 주시면 최선을 다해 답변드리겠습니다. TFTai.gg의 실시간 챌린저 통계 데이터를 바탕으로 최적의 전략을 제시해 드릴 수 있습니다.",
+    "generating": "답변 생성중...",
+    "askQuestion": "질문하기",
+    "pleaseEnterQuestion": "질문을 입력해주세요.",
+    "noResponse": "답변을 받지 못했습니다.",
+    "failedToLoad": "답변을 불러오는데 실패했습니다.",
+    "sorryTryAgain": "죄송합니다. 다시 시도해주세요."
+  },
+  "roles": {
+    "tank": "탱커",
+    "fighter": "파이터",
+    "assassin": "어쌔신",
+    "caster": "캐스터",
+    "specialist": "스페셜리스트",
+    "marksman": "마크스맨"
+  },
+  "items": {
+    "category": {
+      "item": "아이템",
+      "exotech": "특성",
+      "trait": "특성"
     }
   },
   "errors": {
     "networkError": "네트워크 오류가 발생했습니다",
     "dataLoadError": "데이터를 불러오는데 실패했습니다",
-    "unknownError": "알 수 없는 오류가 발생했습니다"
+    "unknownError": "알 수 없는 오류가 발생했습니다",
+    "dataLoadingUnknownError": "데이터 로딩 중 알 수 없는 오류 발생",
+    "network": {
+      "title": "네트워크 오류",
+      "message": "서버에 연결할 수 없습니다"
+    },
+    "notFound": {
+      "title": "데이터를 찾을 수 없음",
+      "message": "요청한 데이터를 찾을 수 없습니다"
+    },
+    "timeout": {
+      "title": "요청 시간 초과",
+      "message": "서버 응답 시간이 초과되었습니다"
+    },
+    "validation": {
+      "title": "입력 오류",
+      "message": "입력한 정보를 확인해주세요"
+    },
+    "unauthorized": {
+      "title": "권한 없음",
+      "message": "접근 권한이 없습니다"
+    },
+    "maintenance": {
+      "title": "서비스 점검",
+      "message": "현재 서비스 점검 중입니다"
+    },
+    "apiError": "API Error",
+    "failedToFetchMatchHistory": "Failed to fetch match history",
+    "failedToFetchRanking": "Failed to fetch ranking",
+    "failedToFetchStats": "Failed to fetch stats",
+    "failedToInvalidateCache": "Failed to invalidate cache",
+    "requestTimeout": "Request timeout",
+    "unexpectedJsonResponse": "예상된 JSON 응답이 아닙니다",
+    "summonerNotFound": "소환사 정보를 찾을 수 없습니다.",
+    "errorOccurred": "오류가 발생했습니다",
+    "developerInfo": "개발자 정보 (상세 에러)"
+  },
+  "api": {
+    "cache": {
+      "refreshCompleted": "캐시 새로고침이 완료되었습니다.",
+      "refreshLimitOrInProgress": "캐시 새로고침 간격 제한 또는 이미 진행 중입니다.",
+      "tftDataCleared": "TFT 데이터 캐시가 클리어되었습니다."
+    }
+  },
+  "profile": {
+    "winRate": "승률",
+    "averagePlacement": "평균 순위",
+    "playCount": "플레이 수"
+  },
+  "guides": {
+    "title": "추천 덱 공략",
+    "subtitle": "최신 공략 데이터를 기반으로 집계된 덱 공략입니다.",
+    "authorBy": "작성자",
+    "authorAnonymous": "익명",
+    "score": "점수",
+    "recommend": "추천",
+    "view": "조회",
+    "viewGuide": "공략 보기",
+    "championFilter": "챔피언별 필터",
+    "cost": "코스트",
+    "sortRecommended": "추천순",
+    "sortScore": "점수순",
+    "sortNewest": "최신순",
+    "reset": "초기화",
+    "includesChampion": "포함 덱만 표시",
+    "totalGuides": "총 {count}개의 공략이 있습니다.",
+    "noGuidesYet": "아직 작성된 공략이 없습니다.",
+    "createNewGuide": "새로운 공략을 작성해 보세요!",
+    "noMatchingGuides": "검색 조건에 맞는 공략이 없습니다.",
+    "tryDifferentSearch": "다른 검색어나 필터를 시도해보세요.",
+    "loadingDetail": "공략 상세 정보를 불러오는 중...",
+    "notFound": "해당 공략을 찾을 수 없습니다.",
+    "failedToLoad": "공략을 불러오는 데 실패했습니다.",
+    "confirmDelete": "정말로 이 공략을 삭제하시겠습니까?",
+    "deleteSuccess": "공략이 성공적으로 삭제되었습니다.",
+    "deleteFailed": "공략 삭제에 실패했습니다.",
+    "levelDeckComposition": "레벨 {level} 덱 구성",
+    "activeSynergies": "활성 시너지"
+  },
+  "deckBuilder": {
+    "title": "팀 빌더",
+    "subtitle": "나만의 팀 조합을 만들어보세요",
+    "createGuide": "가이드 생성",
+    "champions": "챔피언",
+    "items": "아이템",
+    "traits": "특성",
+    "cost": "코스트",
+    "selectChampion": "챔피언 선택",
+    "selectItem": "아이템 선택",
+    "saveDeck": "팀 저장",
+    "loadDeck": "팀 불러오기",
+    "clearDeck": "팀 초기화",
+    "deckName": "팀 이름",
+    "deckDescription": "팀 설명",
+    "synergies": "시너지",
+    "unit": "유닛",
+    "details": "상세정보",
+    "starLevel": "{{star}}성",
+    "equippedItems": "장착된 아이템",
+    "noUnitSelected": "선택된 유닛이 없습니다.",
+    "searchByName": "이름으로 검색...",
+    "traitsLabel": "특성",
+    "roleLabel": "역할",
+    "powerSnaxLabel": "Power Snax",
+    "selectedPowerSnax": "선택된 Power Snax",
+    "deckSummary": "팀 요약",
+    "origin": "출신",
+    "class": "직업",
+    "searchByDeckName": "팀 이름으로 검색...",
+    "enterTip": "팁을 입력하세요...",
+    "enterAugmentName": "증강체 이름을 입력하세요...",
+    "loadingData": "데이터 로딩 중...",
+    "failedToLoadData": "데이터를 불러오는데 실패했습니다.",
+    "placeChampionOnBoard": "⚔️ 챔피언을 보드에 배치하세요",
+    "activeSynergies": "활성화된 시너지",
+    "inProgressSynergies": "진행중인 시너지",
+    "unitCount": "유닛 수",
+    "activeSynergyCount": "활성 시너지",
+    "itemsLoadingData": "아이템 데이터 로딩 중...",
+    "synergyExplanation": "특성 시너지가 여기에 표시됩니다",
+    "role": "역할"
+  },
+  "placeholders": {
+    "askQuestion": "질문을 입력하세요...",
+    "searchDeck": "덱 이름으로 검색...",
+    "enterTip": "팁을 입력하세요...",
+    "enterAugmentName": "증강체 이름을 입력하세요..."
+  },
+  "pages": {
+    "set15Features": "Set 15 Features"
+  },
+  "tooltip": {
+    "mana": "마나",
+    "skillValues": "스킬 수치",
+    "recommendedItems": "추천 아이템",
+    "noRecommendedItems": "추천 아이템 정보가 없습니다.",
+    "unknownAbility": "알 수 없는 스킬",
+    "noDescription": "설명이 없습니다"
+  },
+  "powerSnax": {
+    "title": "Power Snax",
+    "round": "라운드",
+    "goldenOx": "황금 소",
+    "goldenOxDesc": "전투 시작 시 골드 획득 및 특성 강화",
+    "combatMastery": "전투 숙련",
+    "combatMasteryDesc": "전투력 향상 파워업들",
+    "goldBoost": "골드 부스트",
+    "goldBoostDesc": "전투 승리 시 추가 골드 +2",
+    "traitEnhance": "특성 강화",
+    "traitEnhanceDesc": "모든 특성 레벨 +1",
+    "damageBoost": "공격력 증가",
+    "damageBoostDesc": "모든 유닛의 공격력 +20%",
+    "healthBoost": "체력 증가",
+    "healthBoostDesc": "모든 유닛의 체력 +25%",
+    "critMaster": "치명타 숙련",
+    "critMasterDesc": "치명타 확률 +15%, 치명타 피해 +30%",
+    "selected": "선택된 Power Snax",
+    "notSelected": "선택 안함",
+    "deselect": "선택 해제",
+    "type": {
+      "stats": "능력치",
+      "ability": "능력",
+      "trait": "특성",
+      "special": "특수"
+    },
+    "effects": {
+      "allActiveTraitsLevel": "모든 활성 특성 레벨 +1",
+      "victoryGold": "전투 승리 시 골드 +{{amount}}",
+      "damage": "공격력",
+      "health": "체력",
+      "critChance": "치명타 확률",
+      "critDamage": "치명타 피해"
+    }
   }
 }
