@@ -59,3 +59,9 @@ logs/
 
 # Windows shortcuts
 *.lnk
+
+# MongoDB 백업 파일 (대용량)
+mongodb-backups/
+*.json.backup
+data.json
+server.pid

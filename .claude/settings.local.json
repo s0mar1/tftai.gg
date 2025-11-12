@@ -63,7 +63,8 @@
       "WebFetch(domain:raw.communitydragon.org)",
       "Bash(git commit:*)",
       "Bash(git merge:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(.gitignore)"
     ],
     "deny": []
   }
